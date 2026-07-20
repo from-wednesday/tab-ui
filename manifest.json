@@ -1,6 +1,5 @@
 {
   "title": "My Reminder To\u2026",
-  "displayMode": "line",
   "tabs": [
     { "id": "water",   "label": "Water the plants",     "position": "left",   "bg": { "light": "#2f4d3a", "dark": "#8fbf9f" }, "url": "pages/water.html" },
     { "id": "invoice", "label": "Send the invoice",      "position": "right",  "bg": { "light": "#3a5f47", "dark": "#9ccaa9" }, "url": "pages/invoice.html" },
@@ -9,17 +8,17 @@
     { "id": "gift",    "label": "Buy a birthday gift",   "position": "right",  "bg": { "light": "#5c927a", "dark": "#c3e2cd" }, "url": "pages/gift.html" }
   ],
   "layout": {
-    "rowHeight": 96,
-    "minVisiblePx": 20,
-    "minOverlapPx": 22,
+    "collapsedRowH": 68,
+    "minVisiblePx": 18,
+    "minOverlapPx": 20,
     "staggerStepMs": 45,
-    "minWidthPct": 0.34,
-    "maxWidthPct": 0.62,
-    "stepInsetPx": 10,
-    "flapWidthPct": 0.4,
-    "flapHeightPct": 0.36,
+    "minWidthPct": 0.30,
+    "maxWidthPct": 0.58,
+    "flapWidthPx": 168,
+    "flapHeightPx": 40,
+    "shoulderReachPx": 10,
     "flapAngleDeg": 14,
-    "cornerRadiusPx": 11,
+    "cornerRadiusPx": 12,
     "concaveRadiusPx": 6
   }
 }
