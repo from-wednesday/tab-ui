@@ -203,7 +203,16 @@
     return (tab.bg && (tab.bg[theme]||tab.bg.light)) || '#3a5f47';
   }
 
-  /* ---------- layout ---------- */
+  /* ---------- layout ----------
+     Header (behind, above the open tab): each tab further back is TALLER
+     than the one in front of it, all sharing the same bottom edge (flush
+     against the open tab's top) -- so only a growing sliver of each shows
+     above the one in front.
+     Footer (in front, below the open tab): uniform height, simply stepped
+     downward, overlapping the open tab's bottom edge by a small fixed
+     amount so it reads as "in front of" it without covering its content
+     (the open tab always renders on top regardless).
+     The open tab takes whatever vertical space is left between the two. */
   function computeLayout(){
     const L=manifest.layout;
     const n=manifest.tabs.length;
@@ -212,30 +221,14 @@
     const titleOffset=46;
     const availW=vw-edgeMargin*2;
 
-    const headerCount=activeIndex;          // tabs BEHIND (before) active -> header
-    const footerCount=n-1-activeIndex;       // tabs IN FRONT (after) active -> footer
-    const deepest=Math.max(headerCount,footerCount,1);
-    const minContentWell=160; // never squeeze the open folder's body below this
-    const sideBudget=(vh-titleOffset-minContentWell)/2;
-    const idealOverlap=L.collapsedRowH-(sideBudget/deepest);
+    const headerCount=activeIndex;           // tabs BEHIND (before) active
+    const footerCount=n-1-activeIndex;        // tabs IN FRONT (after) active
 
-    const hardMaxOverlap=L.collapsedRowH-L.minVisiblePx;
-    const finalOverlap=clamp(idealOverlap, L.minOverlapPx, hardMaxOverlap);
-    const step=L.collapsedRowH-finalOverlap;
+    const headerSpan = headerCount>0 ? (L.collapsedBaseH + (headerCount-1)*L.headerGrowthPx) : 0;
+    const openTop = titleOffset + headerSpan;
 
-    const headerBlockH = headerCount>0 ? (headerCount-1)*step + L.collapsedRowH : 0;
-    const headerBottom = titleOffset + headerBlockH;
-
-    const footerBlockH = footerCount>0 ? (footerCount-1)*step + L.collapsedRowH : 0;
-    const footerTop = vh - footerBlockH;
-
-    // the open folder reaches up/down past the seam by a small FIXED
-    // amount (independent of the dynamic collapsed-row overlap, which can
-    // grow large) so it visually overlaps its neighbours' shoulders
-    // without ever covering enough to swallow their flap/label.
-    const reach = Math.min(L.shoulderReachPx, L.flapHeightPx - L.minVisiblePx);
-    const openTop = headerBottom - reach;
-    const openBottom = footerTop + reach;
+    const footerSpan = footerCount>0 ? ((footerCount-1)*L.footerStepPx + L.collapsedBaseH) : 0;
+    const openBottom = vh - footerSpan;
 
     const positions={left:0, center:.5, right:1};
     const flapAnchor=(pos,containerW)=>{
@@ -249,7 +242,7 @@
         return {
           tab,i,isOpen:true,
           x:edgeMargin, y:openTop,
-          width:openWidthFor(vw,edgeMargin), height:openBottom-openTop,
+          width:vw-edgeMargin*2, height:openBottom-openTop,
           zIndex:20000, delayMs:0,
         };
       }
@@ -259,24 +252,36 @@
       const anchorX=edgeMargin+anchorFrac*availW;
       const x=clamp(anchorX-width/2, edgeMargin, vw-edgeMargin-width);
 
-      let y;
+      let y,height;
       if(i<activeIndex){
-        y=titleOffset + i*step;
+        // header: the growing-height formula determines only WHERE the
+        // top edge sits (creating the peeking sliver above the tab in
+        // front of it). The shape itself keeps going all the way to the
+        // bottom of the page -- it should appear to run behind the open
+        // tab and the whole footer stack, not stop just behind its
+        // nearest neighbour. Because it's narrower and lower z than
+        // everything in front, none of that extra length is ever seen;
+        // it just guarantees there's never a gap behind what is seen.
+        const k=activeIndex-i;
+        const peekHeight=L.collapsedBaseH+(k-1)*L.headerGrowthPx;
+        y=(openTop+L.reachPx)-peekHeight;
+        height=vh-y;
       }else{
+        // footer: uniform height, stepped downward from the open tab's
+        // bottom edge, nearest tab reaching slightly into it.
         const j=i-(activeIndex+1);
-        y=footerTop + j*step;
+        height=L.collapsedBaseH;
+        y=(openBottom-L.reachPx) + j*L.footerStepPx;
       }
 
       const distFromSource=Math.abs(i-prevIndex);
       const delayMs=Math.min(distFromSource,8)*L.staggerStepMs;
 
-      return {tab,i,isOpen:false,x,y,width,height:L.collapsedRowH,zIndex:i,delayMs};
+      return {tab,i,isOpen:false,x,y,width,height,zIndex:i,delayMs};
     });
 
     return {layout, flapAnchor};
   }
-
-  function openWidthFor(vw,edgeMargin){ return vw - edgeMargin*2; }
 
   /* ---------- render ---------- */
   let tabEls=[];

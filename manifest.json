@@ -8,15 +8,15 @@
     { "id": "gift",    "label": "Buy a birthday gift",   "position": "right",  "bg": { "light": "#5c927a", "dark": "#c3e2cd" }, "url": "pages/gift.html" }
   ],
   "layout": {
-    "collapsedRowH": 68,
-    "minVisiblePx": 18,
-    "minOverlapPx": 20,
+    "collapsedBaseH": 60,
+    "headerGrowthPx": 30,
+    "footerStepPx": 34,
+    "reachPx": 14,
     "staggerStepMs": 45,
     "minWidthPct": 0.30,
     "maxWidthPct": 0.58,
     "flapWidthPx": 168,
     "flapHeightPx": 40,
-    "shoulderReachPx": 10,
     "flapAngleDeg": 14,
     "cornerRadiusPx": 12,
     "concaveRadiusPx": 6
