@@ -85,13 +85,13 @@
   .tab .tab-stroke{ transition:stroke var(--dur) var(--ease); }
   .tab h2{
     position:absolute;
-    top:0; left:0;
-    height:100%;
+    left:0; right:0;
     margin:0;
     display:flex;
     align-items:center;
-    padding-left:20px;
-    padding-right:28px;
+    justify-content:center;
+    text-align:center;
+    padding:0 14px;
     font-size:.92rem;
     font-weight:500;
     letter-spacing:.01em;
@@ -134,10 +134,11 @@
 
   function roundedPolygonPath(points, radius){
     const d=[]; const n=points.length;
+    const radii = Array.isArray(radius) ? radius : points.map(()=>radius);
     for(let i=0;i<n;i++){
       const prev=points[(i-1+n)%n], curr=points[i], next=points[(i+1)%n];
       const toPrev=sub(prev,curr), toNext=sub(next,curr);
-      const r=Math.min(radius, len(toPrev)/2, len(toNext)/2);
+      const r=Math.min(radii[i], len(toPrev)/2, len(toNext)/2);
       const p1=add(curr,scale(normalize(toPrev),r));
       const p2=add(curr,scale(normalize(toNext),r));
       d.push(i===0?`M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)}`:`L ${p1.x.toFixed(2)} ${p1.y.toFixed(2)}`);
@@ -147,16 +148,29 @@
     return d.join(' ');
   }
 
-  /* tab "flap" shape: base full width, top narrower by the lean, all four
-     corners rounded. This is the reusable folder-tab silhouette. */
-  function tabPath(w,h,leanPx,radius){
+  /* Classic folder silhouette: a rounded-rect body with a trapezoid tab
+     flap protruding from the centre of its top edge, merged into ONE
+     outline. w,h = full tab bounding box. flapWidthPct/flapHeightPct size
+     the flap relative to the body. Outer corners (body + flap top) use
+     cornerR; the two concave joints where the flap meets the body use the
+     smaller concaveR so they read as a soft fillet, not a self-intersect. */
+  function folderPath(w,h,flapWidthPct,flapHeightPct,leanPx,cornerR,concaveR){
+    const flapW=w*flapWidthPct;
+    const flapH=h*flapHeightPct;
+    const fx0=(w-flapW)/2, fx1=fx0+flapW;
+
     const pts=[
-      {x:0,y:h},         // bottom-left
-      {x:leanPx,y:0},    // top-left
-      {x:w-leanPx,y:0},  // top-right
-      {x:w,y:h},         // bottom-right
+      {x:0,           y:h},   // body bottom-left
+      {x:0,           y:flapH}, // body top-left
+      {x:fx0,         y:flapH}, // concave: flap base, left
+      {x:fx0+leanPx,  y:0},   // flap top-left
+      {x:fx1-leanPx,  y:0},   // flap top-right
+      {x:fx1,         y:flapH}, // concave: flap base, right
+      {x:w,           y:flapH}, // body top-right
+      {x:w,           y:h},   // body bottom-right
     ];
-    return roundedPolygonPath(pts,radius);
+    const radii=[cornerR,cornerR,concaveR,cornerR,cornerR,concaveR,cornerR,cornerR];
+    return roundedPolygonPath(pts,radii);
   }
 
   /* ---------- state ---------- */
@@ -279,10 +293,14 @@
       el.style.transform=`translate(${x}px, ${y}px)`;
       el.classList.toggle('is-active', i===activeIndex);
 
-      const leanPx=L.rowHeight*Math.tan(L.flapAngleDeg*Math.PI/180);
-      const d=tabPath(width, L.rowHeight, leanPx, L.cornerRadiusPx);
+      const flapH=L.rowHeight*L.flapHeightPct;
+      const leanPx=flapH*Math.tan(L.flapAngleDeg*Math.PI/180);
+      const d=folderPath(width, L.rowHeight, L.flapWidthPct, L.flapHeightPct, leanPx, L.cornerRadiusPx, L.concaveRadiusPx);
       path.setAttribute('d',d);
       path.setAttribute('class', line?'tab-stroke':'tab-fill');
+
+      h2.style.top=flapH+'px';
+      h2.style.height=(L.rowHeight-flapH)+'px';
 
       const bg=resolveBg(tab);
       if(line){
