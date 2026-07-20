@@ -13,12 +13,9 @@
     "footerStepPx": 34,
     "reachPx": 14,
     "staggerStepMs": 45,
-    "minWidthPct": 0.30,
-    "maxWidthPct": 0.58,
     "flapWidthPx": 168,
     "flapHeightPx": 40,
     "flapAngleDeg": 14,
-    "cornerRadiusPx": 12,
-    "concaveRadiusPx": 6
+    "cornerRadiusPx": 20
   }
 }

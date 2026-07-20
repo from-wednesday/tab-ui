@@ -217,9 +217,8 @@
     const L=manifest.layout;
     const n=manifest.tabs.length;
     const vw=shell.clientWidth, vh=shell.clientHeight;
-    const edgeMargin=18;
+    const baseMargin=32; // pulled in further from the edge to leave room for the larger corner radius
     const titleOffset=46;
-    const availW=vw-edgeMargin*2;
 
     const headerCount=activeIndex;           // tabs BEHIND (before) active
     const footerCount=n-1-activeIndex;        // tabs IN FRONT (after) active
@@ -238,34 +237,33 @@
     };
 
     const layout=manifest.tabs.map((tab,i)=>{
+      // Width is static -- every tab spans the full screen width minus a
+      // small margin. The margin grows by 1px per layer as you step back
+      // from front (i=n-1) to back (i=0), so tabs nest very slightly
+      // rather than dramatically narrowing. This is independent of
+      // header/footer/open state.
+      const stepsFromFront = (n-1) - i;
+      const margin = baseMargin + stepsFromFront;
+      const width = vw - margin*2;
+      const x = margin;
+
+      // z-index is a fixed property of each tab's permanent stack
+      // position -- it never changes when a different tab is opened.
+      const zIndex = i;
+
       if(i===activeIndex){
-        return {
-          tab,i,isOpen:true,
-          x:edgeMargin, y:openTop,
-          width:vw-edgeMargin*2, height:openBottom-openTop,
-          zIndex:20000, delayMs:0,
-        };
+        return { tab,i,isOpen:true, x, y:openTop, width, height:openBottom-openTop, zIndex, delayMs:0 };
       }
-      const t = n>1 ? i/(n-1) : 1;
-      const width = availW*lerp(L.minWidthPct,L.maxWidthPct,t);
-      const anchorFrac=positions[tab.position] ?? .5;
-      const anchorX=edgeMargin+anchorFrac*availW;
-      const x=clamp(anchorX-width/2, edgeMargin, vw-edgeMargin-width);
 
       let y,height;
       if(i<activeIndex){
-        // header: the growing-height formula determines only WHERE the
-        // top edge sits (creating the peeking sliver above the tab in
-        // front of it). The shape itself keeps going all the way to the
-        // bottom of the page -- it should appear to run behind the open
-        // tab and the whole footer stack, not stop just behind its
-        // nearest neighbour. Because it's narrower and lower z than
-        // everything in front, none of that extra length is ever seen;
-        // it just guarantees there's never a gap behind what is seen.
+        // header: further back = taller, all sharing the same bottom edge
+        // (reaching slightly into the open tab's top, which always renders
+        // above it regardless) so only a growing sliver peeks above the
+        // tab immediately in front of it.
         const k=activeIndex-i;
-        const peekHeight=L.collapsedBaseH+(k-1)*L.headerGrowthPx;
-        y=(openTop+L.reachPx)-peekHeight;
-        height=vh-y;
+        height=L.collapsedBaseH+(k-1)*L.headerGrowthPx;
+        y=(openTop+L.reachPx)-height;
       }else{
         // footer: uniform height, stepped downward from the open tab's
         // bottom edge, nearest tab reaching slightly into it.
@@ -277,7 +275,7 @@
       const distFromSource=Math.abs(i-prevIndex);
       const delayMs=Math.min(distFromSource,8)*L.staggerStepMs;
 
-      return {tab,i,isOpen:false,x,y,width,height,zIndex:i,delayMs};
+      return {tab,i,isOpen:false,x,y,width,height,zIndex,delayMs};
     });
 
     return {layout, flapAnchor};
@@ -327,7 +325,7 @@
 
       const flapX=flapAnchor(tab.position, width);
       const leanPx=L.flapHeightPx*Math.tan(L.flapAngleDeg*Math.PI/180);
-      const d=folderPath(width, height, flapX, L.flapWidthPx, L.flapHeightPx, leanPx, L.cornerRadiusPx, L.concaveRadiusPx);
+      const d=folderPath(width, height, flapX, L.flapWidthPx, L.flapHeightPx, leanPx, L.cornerRadiusPx, L.cornerRadiusPx);
       path.setAttribute('d',d);
 
       const bg=resolveBg(tab);
@@ -337,6 +335,9 @@
       path.setAttribute('stroke-linejoin','round');
       path.style.filter='url(#handDrawn)';
 
+      h2.style.left=flapX+'px';
+      h2.style.width=L.flapWidthPx+'px';
+      h2.style.right='auto';
       h2.style.color= theme==='dark' ? '#1b211c' : '#fbfaf6';
 
       if(isOpen){
