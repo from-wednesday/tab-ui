@@ -1,6 +1,6 @@
 {
   "title": "My Reminder To\u2026",
-  "displayMode": "fill",
+  "displayMode": "line",
   "tabs": [
     { "id": "water",   "label": "Water the plants",     "position": "left",   "bg": { "light": "#2f4d3a", "dark": "#8fbf9f" }, "url": "pages/water.html" },
     { "id": "invoice", "label": "Send the invoice",      "position": "right",  "bg": { "light": "#3a5f47", "dark": "#9ccaa9" }, "url": "pages/invoice.html" },
