@@ -6,9 +6,9 @@
 <title>Tab Stack</title>
 <style>
   :root{
-    --page-bg-light:#fff9ef;
+    --page-bg-light:#f4f1ea;
     --page-bg-dark:#1b211c;
-    --ink-light:#333300;
+    --ink-light:#24352b;
     --ink-dark:#dce8e0;
     --dur:420ms;
     --ease:cubic-bezier(.4,0,.2,1);
@@ -227,13 +227,15 @@
     const openTop = titleOffset + headerSpan;
 
     const footerSpan = footerCount>0 ? ((footerCount-1)*L.footerStepPx + L.collapsedBaseH) : 0;
-    const openBottom = vh - footerSpan;
+    const openBottomSeam = vh - footerSpan; // where the footer stack's front edge sits
+    const openBottomActual = openBottomSeam + L.reachPx; // the open tab (and its iframe) extends past the seam, hidden behind the footer tab that eclipses it
 
     const positions={left:0, center:.5, right:1};
     const flapAnchor=(pos,containerW)=>{
       const frac=positions[pos] ?? .5;
       const x=frac*containerW - L.flapWidthPx/2;
-      return clamp(x, 6, containerW - L.flapWidthPx - 6);
+      const edgeClearance=L.cornerRadiusPx+8; // keep the flap clear of the tab's own edge so its corner radius isn't clipped
+      return clamp(x, edgeClearance, containerW - L.flapWidthPx - edgeClearance);
     };
 
     const layout=manifest.tabs.map((tab,i)=>{
@@ -252,7 +254,7 @@
       const zIndex = i;
 
       if(i===activeIndex){
-        return { tab,i,isOpen:true, x, y:openTop, width, height:openBottom-openTop, zIndex, delayMs:0 };
+        return { tab,i,isOpen:true, x, y:openTop, width, height:openBottomActual-openTop, zIndex, delayMs:0 };
       }
 
       let y,height;
@@ -265,11 +267,13 @@
         height=L.collapsedBaseH+(k-1)*L.headerGrowthPx;
         y=(openTop+L.reachPx)-height;
       }else{
-        // footer: uniform height, stepped downward from the open tab's
-        // bottom edge, nearest tab reaching slightly into it.
+        // footer: uniform height, stepped downward starting exactly at the
+        // seam -- it's the OPEN tab that reaches down behind this one, not
+        // the other way round, so the open tab's content is never covered
+        // by a gap, only by this eclipsing tab itself.
         const j=i-(activeIndex+1);
         height=L.collapsedBaseH;
-        y=(openBottom-L.reachPx) + j*L.footerStepPx;
+        y=openBottomSeam + j*L.footerStepPx;
       }
 
       const distFromSource=Math.abs(i-prevIndex);
@@ -330,7 +334,7 @@
 
       const bg=resolveBg(tab);
       path.setAttribute('fill',bg);
-      path.setAttribute('stroke',darken(bg,0.16));
+      path.setAttribute('stroke',darken(bg,0.32));
       path.setAttribute('stroke-width','1.6');
       path.setAttribute('stroke-linejoin','round');
       path.style.filter='url(#handDrawn)';
@@ -338,7 +342,7 @@
       h2.style.left=flapX+'px';
       h2.style.width=L.flapWidthPx+'px';
       h2.style.right='auto';
-      h2.style.color= theme==='dark' ? '#fdf7df' : '#fdf7df';
+      h2.style.color= theme==='dark' ? '#1b211c' : '#fbfaf6';
 
       if(isOpen){
         const fhX=x, fhW=width;
@@ -348,6 +352,7 @@
         frameHost.style.width=fhW+'px';
         frameHost.style.height=fhH+'px';
         frameHost.style.borderRadius=L.cornerRadiusPx+'px';
+        frameHost.style.zIndex=zIndex;
       }
     });
   }
