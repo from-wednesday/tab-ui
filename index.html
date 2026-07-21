@@ -248,12 +248,16 @@
     // rest and mid-animation.
     const BASELINE_H = vh;
 
-    const positions={left:0, center:.5, right:1};
-    const flapAnchor=(pos,containerW)=>{
-      const frac=positions[pos] ?? .5;
-      const x=frac*containerW - L.flapWidthPx/2;
+    // Each tab's flap sits flapStepPx to the right of the previous tab's
+    // flap (by sequence order), wrapping back to the leftmost slot once it
+    // would run out of room. This is a fixed property of each tab's index
+    // -- like width and z-index, it doesn't change with active state.
+    const flapCascadeX=(i,containerW)=>{
       const edgeClearance=L.cornerRadiusPx+8; // keep the flap clear of the tab's own edge so its corner radius isn't clipped
-      return clamp(x, edgeClearance, containerW - L.flapWidthPx - edgeClearance);
+      const usableW=containerW - L.flapWidthPx - edgeClearance*2;
+      const slots=Math.max(1, Math.floor(usableW / L.flapStepPx) + 1);
+      const slot=i % slots;
+      return edgeClearance + slot*L.flapStepPx;
     };
 
     const layout=manifest.tabs.map((tab,i)=>{
@@ -300,7 +304,7 @@
       return {tab,i,isOpen:false,x,y,width,height:BASELINE_H,zIndex,delayMs};
     });
 
-    return {layout, flapAnchor};
+    return {layout, flapCascadeX};
   }
 
   /* ---------- render ---------- */
@@ -331,7 +335,7 @@
 
   function paint(){
     const L=manifest.layout;
-    const {layout,flapAnchor}=computeLayout();
+    const {layout,flapCascadeX}=computeLayout();
 
     stackTitle.textContent=manifest.title||'';
 
@@ -345,7 +349,7 @@
       el.style.transform=`translate(${x}px, ${y}px)`;
       el.classList.toggle('is-active', isOpen);
 
-      const flapX=flapAnchor(tab.position, width);
+      const flapX=flapCascadeX(i, width);
       const leanPx=L.flapHeightPx*Math.tan(L.flapAngleDeg*Math.PI/180);
       const d=folderPath(width, height, flapX, L.flapWidthPx, L.flapHeightPx, leanPx, L.cornerRadiusPx, L.cornerRadiusPx);
       path.setAttribute('d',d);
