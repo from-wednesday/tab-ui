@@ -330,7 +330,7 @@
 
       const bg=resolveBg(tab);
       path.setAttribute('fill',bg);
-      path.setAttribute('stroke',darken(bg,0.32));
+      path.setAttribute('stroke',darken(bg,0.16));
       path.setAttribute('stroke-width','1.6');
       path.setAttribute('stroke-linejoin','round');
       path.style.filter='url(#handDrawn)';
@@ -338,7 +338,7 @@
       h2.style.left=flapX+'px';
       h2.style.width=L.flapWidthPx+'px';
       h2.style.right='auto';
-      h2.style.color= theme==='dark' ? '#fdf7df' : '#fbfaf6';
+      h2.style.color= theme==='dark' ? '#fdf7df' : '#fdf7df';
 
       if(isOpen){
         const fhX=x, fhW=width;
