@@ -83,28 +83,29 @@
     height:100%;
     overflow:visible;
     filter:drop-shadow(3px 5px 6px rgba(0,0,0,.26));
+    pointer-events:none;
   }
   .tab path{ transition:fill var(--dur) var(--ease), stroke var(--dur) var(--ease); }
   .tab h2{
     position:absolute;
     top:0; left:0; right:0;
-    height:var(--flap-h);
+    min-height:var(--flap-h);
     margin:0;
     display:flex;
     align-items:center;
     justify-content:center;
     text-align:center;
-    padding:0 10px;
+    padding:6px 10px;
     font-size:.86rem;
     font-weight:500;
     letter-spacing:.01em;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+    white-space:normal;
+    line-height:1.2;
+    overflow:visible;
     pointer-events:none;
     transition:color var(--dur) var(--ease);
   }
-  .tab.is-active h2{ font-weight:700; font-size:.92rem; }
+
 </style>
 </head>
 <body>
@@ -353,6 +354,7 @@
       const leanPx=L.flapHeightPx*Math.tan(L.flapAngleDeg*Math.PI/180);
       const d=folderPath(width, height, flapX, L.flapWidthPx, L.flapHeightPx, leanPx, L.cornerRadiusPx, L.cornerRadiusPx);
       path.setAttribute('d',d);
+      el.style.clipPath=`path("${d}")`;
 
       const bg=resolveBg();
       path.setAttribute('fill',bg);

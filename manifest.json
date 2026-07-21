@@ -1,6 +1,6 @@
 {
   "title": "My Reminder To\u2026",
-  "colors": { "light": "#D9C48C", "dark": "#A9825C" },
+  "colors": { "light": "#EDE0B4", "dark": "#A9825C" },
   "tabs": [
     { "id": "water",   "label": "Water the plants",      "url": "pages/water.html" },
     { "id": "invoice", "label": "Send the invoice",       "url": "pages/invoice.html" },
@@ -10,8 +10,8 @@
   ],
   "layout": {
     "collapsedBaseH": 60,
-    "headerGrowthPx": 30,
-    "footerStepPx": 34,
+    "headerGrowthPx": 46,
+    "footerStepPx": 46,
     "staggerStepMs": 45,
     "flapWidthPx": 252,
     "flapStepPx": 220,
