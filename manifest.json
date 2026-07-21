@@ -1,17 +1,17 @@
 {
   "title": "My Reminder To\u2026",
+  "colors": { "light": "#D9C48C", "dark": "#A9825C" },
   "tabs": [
-    { "id": "water",   "label": "Water the plants",     "position": "left",   "bg": { "light": "#fdf7df", "dark": "#8fbf9f" }, "url": "pages/water.html" },
-    { "id": "invoice", "label": "Send the invoice",      "position": "right",  "bg": { "light": "#fdf7df", "dark": "#9ccaa9" }, "url": "pages/invoice.html" },
-    { "id": "call",    "label": "Call the dentist",      "position": "center", "bg": { "light": "#fdf7df", "dark": "#a9d4b6" }, "url": "pages/call.html" },
-    { "id": "return",  "label": "Return the library book","position": "left",  "bg": { "light": "#fdf7df", "dark": "#b6dcc2" }, "url": "pages/return.html" },
-    { "id": "gift",    "label": "Buy a birthday gift",   "position": "right",  "bg": { "light": "#fdf7df", "dark": "#c3e2cd" }, "url": "pages/gift.html" }
+    { "id": "water",   "label": "Water the plants",      "position": "left",   "url": "pages/water.html" },
+    { "id": "invoice", "label": "Send the invoice",       "position": "right",  "url": "pages/invoice.html" },
+    { "id": "call",    "label": "Call the dentist",       "position": "center", "url": "pages/call.html" },
+    { "id": "return",  "label": "Return the library book","position": "left",   "url": "pages/return.html" },
+    { "id": "gift",    "label": "Buy a birthday gift",    "position": "right",  "url": "pages/gift.html" }
   ],
   "layout": {
     "collapsedBaseH": 60,
     "headerGrowthPx": 30,
     "footerStepPx": 34,
-    "reachPx": 14,
     "staggerStepMs": 45,
     "flapWidthPx": 168,
     "flapHeightPx": 40,

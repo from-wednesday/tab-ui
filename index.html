@@ -17,12 +17,11 @@
   html,body{height:100%;margin:0;}
   body{
     background:var(--page-bg);
-    color:var(--ink);
     font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
     overflow:hidden;
   }
-  body[data-theme="light"]{ --page-bg:var(--page-bg-light); --ink:var(--ink-light); }
-  body[data-theme="dark"]{ --page-bg:var(--page-bg-dark); --ink:var(--ink-dark); }
+  body[data-theme="light"]{ --page-bg:var(--page-bg-light); }
+  body[data-theme="dark"]{ --page-bg:var(--page-bg-dark); }
 
   .shell{
     position:relative;
@@ -40,7 +39,6 @@
     font-weight:600;
     letter-spacing:.14em;
     text-transform:uppercase;
-    color:var(--ink);
     opacity:.72;
     z-index:20000;
     pointer-events:none;
@@ -199,8 +197,8 @@
   const lerp=(a,b,t)=>a+(b-a)*t;
   const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
 
-  function resolveBg(tab){
-    return (tab.bg && (tab.bg[theme]||tab.bg.light)) || '#3a5f47';
+  function resolveBg(){
+    return manifest.colors[theme] || manifest.colors.light;
   }
 
   /* ---------- layout ----------
@@ -228,7 +226,16 @@
 
     const footerSpan = footerCount>0 ? ((footerCount-1)*L.footerStepPx + L.collapsedBaseH) : 0;
     const openBottomSeam = vh - footerSpan; // where the footer stack's front edge sits
-    const openBottomActual = openBottomSeam + L.reachPx; // the open tab (and its iframe) extends past the seam, hidden behind the footer tab that eclipses it
+
+    // The folder shape isn't solid all the way to its own top -- only the
+    // flap is; the BODY's solid fill only starts flapHeightPx down (that's
+    // the notch the flap sits in). So a neighbour has to overlap past that
+    // point, not just past the bounding-box edge, or there's a sliver where
+    // neither shape's solid fill covers -- a visible gap. One consistent
+    // "bridge" amount, enough to clear the flap notch plus a small margin,
+    // used symmetrically at both seams.
+    const bridgePx = L.flapHeightPx + 6;
+    const openBottomActual = openBottomSeam + bridgePx; // the open tab (and its iframe) extends past the seam, hidden behind the footer tab that eclipses it
 
     const positions={left:0, center:.5, right:1};
     const flapAnchor=(pos,containerW)=>{
@@ -259,13 +266,12 @@
 
       let y,height;
       if(i<activeIndex){
-        // header: further back = taller, all sharing the same bottom edge
-        // (reaching slightly into the open tab's top, which always renders
-        // above it regardless) so only a growing sliver peeks above the
-        // tab immediately in front of it.
+        // header: further back = taller, all sharing the same bottom edge,
+        // which reaches past the open tab's own body-start line (not just
+        // its top edge) so there's no sliver of neither-shape's-fill.
         const k=activeIndex-i;
         height=L.collapsedBaseH+(k-1)*L.headerGrowthPx;
-        y=(openTop+L.reachPx)-height;
+        y=(openTop+bridgePx)-height;
       }else{
         // footer: uniform height, stepped downward starting exactly at the
         // seam -- it's the OPEN tab that reaches down behind this one, not
@@ -332,7 +338,7 @@
       const d=folderPath(width, height, flapX, L.flapWidthPx, L.flapHeightPx, leanPx, L.cornerRadiusPx, L.cornerRadiusPx);
       path.setAttribute('d',d);
 
-      const bg=resolveBg(tab);
+      const bg=resolveBg();
       path.setAttribute('fill',bg);
       path.setAttribute('stroke',darken(bg,0.32));
       path.setAttribute('stroke-width','1.6');
@@ -342,7 +348,6 @@
       h2.style.left=flapX+'px';
       h2.style.width=L.flapWidthPx+'px';
       h2.style.right='auto';
-      h2.style.color= theme==='dark' ? '#1b211c' : '#fbfaf6';
 
       if(isOpen){
         const fhX=x, fhW=width;
