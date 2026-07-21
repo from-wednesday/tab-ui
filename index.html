@@ -229,13 +229,24 @@
 
     // The folder shape isn't solid all the way to its own top -- only the
     // flap is; the BODY's solid fill only starts flapHeightPx down (that's
-    // the notch the flap sits in). So a neighbour has to overlap past that
+    // the notch the flap sits in). A neighbour has to overlap past that
     // point, not just past the bounding-box edge, or there's a sliver where
-    // neither shape's solid fill covers -- a visible gap. One consistent
-    // "bridge" amount, enough to clear the flap notch plus a small margin,
-    // used symmetrically at both seams.
+    // neither shape's solid fill covers -- a visible gap.
     const bridgePx = L.flapHeightPx + 6;
-    const openBottomActual = openBottomSeam + bridgePx; // the open tab (and its iframe) extends past the seam, hidden behind the footer tab that eclipses it
+    const frameHostBottom = openBottomSeam + bridgePx; // how far the SCROLLABLE content area extends past the seam -- kept modest, unlike the shape height below
+
+    // Every tab -- open or collapsed -- renders at the SAME constant
+    // height, tall enough to reach well past the bottom of the viewport
+    // from any valid top position. Only its Y position (translateY)
+    // differs between tabs and changes when switching active tab. This is
+    // deliberate: height can't be smoothly morphed (the SVG path shape
+    // would distort mid-transition since its 'd' attribute snaps instantly
+    // while width/height CSS-transition independently), so making height
+    // constant means there is nothing to animate except a plain
+    // translateY -- which also means every shape's body always extends
+    // far past any seam, so a gap is impossible by construction, both at
+    // rest and mid-animation.
+    const BASELINE_H = vh;
 
     const positions={left:0, center:.5, right:1};
     const flapAnchor=(pos,containerW)=>{
@@ -261,31 +272,32 @@
       const zIndex = i;
 
       if(i===activeIndex){
-        return { tab,i,isOpen:true, x, y:openTop, width, height:openBottomActual-openTop, zIndex, delayMs:0 };
+        return { tab,i,isOpen:true, x, y:openTop, width, height:BASELINE_H, frameHostH:frameHostBottom-openTop, zIndex, delayMs:0 };
       }
 
-      let y,height;
+      // Only the Y position (where the visible peeking sliver starts)
+      // differs between collapsed tabs; the peek-height formulas below are
+      // used purely to compute that Y, not the actual rendered height.
+      let y;
       if(i<activeIndex){
-        // header: further back = taller, all sharing the same bottom edge,
-        // which reaches past the open tab's own body-start line (not just
-        // its top edge) so there's no sliver of neither-shape's-fill.
+        // header: further back = starts higher up, all sharing the same
+        // reference bottom line (which reaches past the open tab's own
+        // body-start, not just its top edge, so there's no gap sliver).
         const k=activeIndex-i;
-        height=L.collapsedBaseH+(k-1)*L.headerGrowthPx;
-        y=(openTop+bridgePx)-height;
+        const peekHeight=L.collapsedBaseH+(k-1)*L.headerGrowthPx;
+        y=(openTop+bridgePx)-peekHeight;
       }else{
-        // footer: uniform height, stepped downward starting exactly at the
-        // seam -- it's the OPEN tab that reaches down behind this one, not
-        // the other way round, so the open tab's content is never covered
-        // by a gap, only by this eclipsing tab itself.
+        // footer: uniform peek spacing, stepped downward starting exactly
+        // at the seam -- it's the OPEN tab that reaches down behind this
+        // one (see frameHostBottom above), not the other way round.
         const j=i-(activeIndex+1);
-        height=L.collapsedBaseH;
         y=openBottomSeam + j*L.footerStepPx;
       }
 
       const distFromSource=Math.abs(i-prevIndex);
       const delayMs=Math.min(distFromSource,8)*L.staggerStepMs;
 
-      return {tab,i,isOpen:false,x,y,width,height,zIndex,delayMs};
+      return {tab,i,isOpen:false,x,y,width,height:BASELINE_H,zIndex,delayMs};
     });
 
     return {layout, flapAnchor};
@@ -323,7 +335,7 @@
 
     stackTitle.textContent=manifest.title||'';
 
-    layout.forEach(({tab,i,isOpen,x,y,width,height,zIndex,delayMs})=>{
+    layout.forEach(({tab,i,isOpen,x,y,width,height,frameHostH,zIndex,delayMs})=>{
       const {el,path,h2}=tabEls[i];
       el.style.setProperty('--row-h', height+'px');
       el.style.setProperty('--flap-h', L.flapHeightPx+'px');
@@ -351,7 +363,7 @@
 
       if(isOpen){
         const fhX=x, fhW=width;
-        const fhY=y+L.flapHeightPx, fhH=height-L.flapHeightPx;
+        const fhY=y+L.flapHeightPx, fhH=frameHostH-L.flapHeightPx;
         frameHost.style.left=fhX+'px';
         frameHost.style.top=fhY+'px';
         frameHost.style.width=fhW+'px';
