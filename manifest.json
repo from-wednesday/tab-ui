@@ -9,9 +9,7 @@
     { "id": "gift",    "label": "Buy a birthday gift",    "url": "pages/gift.html" }
   ],
   "layout": {
-    "collapsedBaseH": 60,
-    "headerGrowthPx": 46,
-    "footerStepPx": 46,
+    "peekStepPx": 28,
     "staggerStepMs": 45,
     "flapWidthPx": 252,
     "flapStepPx": 220,

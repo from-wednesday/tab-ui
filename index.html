@@ -222,19 +222,22 @@
     const headerCount=activeIndex;           // tabs BEHIND (before) active
     const footerCount=n-1-activeIndex;        // tabs IN FRONT (after) active
 
-    const headerSpan = headerCount>0 ? (L.collapsedBaseH + (headerCount-1)*L.headerGrowthPx) : 0;
+    // One consistent step governs every seam in the stack -- open-to-
+    // nearest-header, header-to-header, open-to-nearest-footer, and
+    // footer-to-footer. Previously the open-tab seams used a different
+    // formula (based on flapHeightPx) than collapsed-to-collapsed seams,
+    // which produced a visibly smaller, unreadable sliver for whichever
+    // header tab sat nearest the open one. Aimed close to flapHeightPx so
+    // the cut lands just below each label's text rather than mid-letter.
+    const peekStepPx = L.peekStepPx;
+
+    const headerSpan = headerCount*peekStepPx;
     const openTop = titleOffset + headerSpan;
 
-    const footerSpan = footerCount>0 ? ((footerCount-1)*L.footerStepPx + L.collapsedBaseH) : 0;
+    const footerSpan = footerCount*peekStepPx;
     const openBottomSeam = vh - footerSpan; // where the footer stack's front edge sits
 
-    // The folder shape isn't solid all the way to its own top -- only the
-    // flap is; the BODY's solid fill only starts flapHeightPx down (that's
-    // the notch the flap sits in). A neighbour has to overlap past that
-    // point, not just past the bounding-box edge, or there's a sliver where
-    // neither shape's solid fill covers -- a visible gap.
-    const bridgePx = L.flapHeightPx + 6;
-    const frameHostBottom = openBottomSeam + bridgePx; // how far the SCROLLABLE content area extends past the seam -- kept modest, unlike the shape height below
+    const frameHostBottom = openBottomSeam + peekStepPx; // how far the SCROLLABLE content area extends past the seam, so scrolled content is present behind the eclipsing footer tab
 
     // Every tab -- open or collapsed -- renders at the SAME constant
     // height, tall enough to reach well past the bottom of the viewport
@@ -281,22 +284,20 @@
       }
 
       // Only the Y position (where the visible peeking sliver starts)
-      // differs between collapsed tabs; the peek-height formulas below are
-      // used purely to compute that Y, not the actual rendered height.
+      // differs between collapsed tabs -- one uniform step, front to back.
       let y;
       if(i<activeIndex){
-        // header: further back = starts higher up, all sharing the same
-        // reference bottom line (which reaches past the open tab's own
-        // body-start, not just its top edge, so there's no gap sliver).
+        // header: further back = starts higher up, each one exactly
+        // peekStepPx above the one in front of it (openTop counts as the
+        // "front" reference for the nearest header tab too).
         const k=activeIndex-i;
-        const peekHeight=L.collapsedBaseH+(k-1)*L.headerGrowthPx;
-        y=(openTop+bridgePx)-peekHeight;
+        y=openTop - k*peekStepPx;
       }else{
         // footer: uniform peek spacing, stepped downward starting exactly
         // at the seam -- it's the OPEN tab that reaches down behind this
         // one (see frameHostBottom above), not the other way round.
         const j=i-(activeIndex+1);
-        y=openBottomSeam + j*L.footerStepPx;
+        y=openBottomSeam + j*peekStepPx;
       }
 
       const distFromSource=Math.abs(i-prevIndex);
