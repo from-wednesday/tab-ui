@@ -2,11 +2,12 @@
   "title": "My Reminder To\u2026",
   "colors": { "light": "#EDE0B4", "dark": "#A9825C" },
   "tabs": [
-    { "id": "water",   "label": "Water the plants",      "url": "pages/water.html" },
-    { "id": "invoice", "label": "Send the invoice",       "url": "pages/invoice.html" },
-    { "id": "call",    "label": "Call the dentist",       "url": "pages/call.html" },
-    { "id": "return",  "label": "Return the library book","url": "pages/return.html" },
-    { "id": "gift",    "label": "Buy a birthday gift",    "url": "pages/gift.html" }
+    { "id": "water",   "label": "Water the plants",       "url": "pages/water.html" },
+    { "id": "invoice", "label": "Send the invoice",        "url": "pages/invoice.html" },
+    { "id": "call",    "label": "Call the dentist",        "url": "pages/call.html" },
+    { "id": "keys",    "label": "define keys",             "url": "pages/define_the_keys.html" },
+    { "id": "return",  "label": "Return the library book", "url": "pages/return.html" },
+    { "id": "gift",    "label": "Buy a birthday gift",     "url": "pages/gift.html" }
   ],
   "layout": {
     "peekStepPx": 28,
