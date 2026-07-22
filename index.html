@@ -83,7 +83,6 @@
     width:100%;
     height:100%;
     overflow:visible;
-    filter:drop-shadow(3px -4px 5px rgba(0,0,0,.22));
     pointer-events:none;
   }
   .tab path{ transition:fill var(--dur) var(--ease), stroke var(--dur) var(--ease); }
@@ -127,6 +126,16 @@
         <stop offset="0%" stop-color="#ffffff" stop-opacity=".9"/>
         <stop offset="40%" stop-color="#ffffff" stop-opacity="0"/>
       </linearGradient>
+      <!-- Tab elevation shadows — three tiers; backmost tab uses none -->
+      <filter id="ts-lo" x="-15%" y="-30%" width="130%" height="160%" color-interpolation-filters="sRGB">
+        <feDropShadow dx="1" dy="-2" stdDeviation="3.5" flood-color="black" flood-opacity="0.07"/>
+      </filter>
+      <filter id="ts-mid" x="-15%" y="-30%" width="130%" height="160%" color-interpolation-filters="sRGB">
+        <feDropShadow dx="1" dy="-2" stdDeviation="4" flood-color="black" flood-opacity="0.10"/>
+      </filter>
+      <filter id="ts-hi" x="-15%" y="-30%" width="130%" height="160%" color-interpolation-filters="sRGB">
+        <feDropShadow dx="2" dy="-3" stdDeviation="5" flood-color="black" flood-opacity="0.13"/>
+      </filter>
     </defs>
   </svg>
 </div>
@@ -334,12 +343,15 @@
 
       const ns='http://www.w3.org/2000/svg';
       const svg=document.createElementNS(ns,'svg');
+      const shadowPath=document.createElementNS(ns,'path');
+      shadowPath.setAttribute('stroke','none');
       const path=document.createElementNS(ns,'path');
       const highlight=document.createElementNS(ns,'path');
       highlight.setAttribute('fill','none');
       highlight.setAttribute('stroke','url(#edgeHighlight)');
       highlight.setAttribute('stroke-width','1.6');
       highlight.setAttribute('stroke-linejoin','round');
+      svg.appendChild(shadowPath); // renders behind main path
       svg.appendChild(path);
       svg.appendChild(highlight);
       el.appendChild(svg);
@@ -349,7 +361,7 @@
       el.appendChild(h2);
 
       tabLayer.appendChild(el);
-      return {el,svg,path,highlight,h2};
+      return {el,svg,path,highlight,h2,shadowPath};
     });
   }
 
@@ -361,7 +373,7 @@
     stackTitle.textContent=manifest.title||'';
 
     layout.forEach(({tab,i,isOpen,x,y,width,height,frameHostH,zIndex,delayMs})=>{
-      const {el,path,highlight,h2}=tabEls[i];
+      const {el,path,highlight,h2,shadowPath}=tabEls[i];
       el.style.setProperty('--row-h', height+'px');
       el.style.setProperty('--flap-h', L.flapHeightPx+'px');
       el.style.transitionDelay=delayMs+'ms';
@@ -382,6 +394,18 @@
       path.setAttribute('stroke-width','1.6');
       path.setAttribute('stroke-linejoin','round');
       path.style.filter='url(#handDrawn)';
+
+      // Shadow: backmost tab (i===0) gets none; others scale lo → hi
+      shadowPath.setAttribute('d',d);
+      shadowPath.setAttribute('fill',bg);
+      const tabCount=manifest.tabs.length;
+      if(i===0){
+        shadowPath.style.display='none';
+      } else {
+        shadowPath.style.display='';
+        const sid = i===tabCount-1 ? 'ts-hi' : i<tabCount/2 ? 'ts-lo' : 'ts-mid';
+        shadowPath.setAttribute('filter',`url(#${sid})`);
+      }
 
       h2.style.left=flapX+'px';
       h2.style.width=L.flapWidthPx+'px';
