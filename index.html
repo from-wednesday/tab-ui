@@ -72,8 +72,9 @@
       transform var(--dur) var(--ease),
       width var(--dur) var(--ease),
       height var(--dur) var(--ease);
-    transition-delay:var(--delay,0ms);
     will-change:transform;
+    -webkit-backface-visibility:hidden;
+    backface-visibility:hidden;
     cursor:pointer;
   }
   .tab.is-active{ cursor:default; }
@@ -82,7 +83,7 @@
     width:100%;
     height:100%;
     overflow:visible;
-    filter:drop-shadow(3px 5px 6px rgba(0,0,0,.26));
+    filter:drop-shadow(3px -4px 5px rgba(0,0,0,.22));
     pointer-events:none;
   }
   .tab path{ transition:fill var(--dur) var(--ease), stroke var(--dur) var(--ease); }
@@ -122,6 +123,10 @@
         <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise"/>
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.1"/>
       </filter>
+      <linearGradient id="edgeHighlight" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity=".55"/>
+        <stop offset="45%" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
     </defs>
   </svg>
 </div>
@@ -234,8 +239,15 @@
     const headerSpan = headerCount*peekStepPx;
     const openTop = titleOffset + headerSpan;
 
+    // The frontmost footer tab has nothing in front of it, so unlike every
+    // other seam (which only needs peekStepPx of clearance, since the next
+    // tab's coverage trims the rest) it needs its FULL flap height plus a
+    // little breathing room, or its bottom edge gets clipped by the
+    // viewport itself.
+    const bottomMarginPx = (L.flapHeightPx - peekStepPx) + 12;
+
     const footerSpan = footerCount*peekStepPx;
-    const openBottomSeam = vh - footerSpan; // where the footer stack's front edge sits
+    const openBottomSeam = (vh - bottomMarginPx) - footerSpan; // where the footer stack's front edge sits
 
     const frameHostBottom = openBottomSeam + peekStepPx; // how far the SCROLLABLE content area extends past the seam, so scrolled content is present behind the eclipsing footer tab
 
@@ -322,7 +334,13 @@
       const ns='http://www.w3.org/2000/svg';
       const svg=document.createElementNS(ns,'svg');
       const path=document.createElementNS(ns,'path');
+      const highlight=document.createElementNS(ns,'path');
+      highlight.setAttribute('fill','none');
+      highlight.setAttribute('stroke','url(#edgeHighlight)');
+      highlight.setAttribute('stroke-width','1.4');
+      highlight.setAttribute('stroke-linejoin','round');
       svg.appendChild(path);
+      svg.appendChild(highlight);
       el.appendChild(svg);
 
       const h2=document.createElement('h2');
@@ -331,7 +349,7 @@
 
       el.addEventListener('click',()=>setActive(i));
       tabLayer.appendChild(el);
-      return {el,svg,path,h2};
+      return {el,svg,path,highlight,h2};
     });
   }
 
@@ -342,19 +360,20 @@
     stackTitle.textContent=manifest.title||'';
 
     layout.forEach(({tab,i,isOpen,x,y,width,height,frameHostH,zIndex,delayMs})=>{
-      const {el,path,h2}=tabEls[i];
+      const {el,path,highlight,h2}=tabEls[i];
       el.style.setProperty('--row-h', height+'px');
       el.style.setProperty('--flap-h', L.flapHeightPx+'px');
-      el.style.setProperty('--delay', delayMs+'ms');
+      el.style.transitionDelay=delayMs+'ms';
       el.style.width=width+'px';
       el.style.zIndex=zIndex;
-      el.style.transform=`translate(${x}px, ${y}px)`;
+      el.style.transform=`translate(${x}px, ${y}px) translateZ(0)`;
       el.classList.toggle('is-active', isOpen);
 
       const flapX=flapCascadeX(i, width);
       const leanPx=L.flapHeightPx*Math.tan(L.flapAngleDeg*Math.PI/180);
       const d=folderPath(width, height, flapX, L.flapWidthPx, L.flapHeightPx, leanPx, L.cornerRadiusPx, L.cornerRadiusPx);
       path.setAttribute('d',d);
+      highlight.setAttribute('d',d);
       el.style.clipPath=`path("${d}")`;
 
       const bg=resolveBg();
