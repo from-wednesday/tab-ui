@@ -83,7 +83,6 @@
     width:100%;
     height:100%;
     overflow:visible;
-    filter:drop-shadow(1px -2px 4px rgba(0,0,0,.10));
     pointer-events:none;
   }
   .tab path{ transition:fill var(--dur) var(--ease), stroke var(--dur) var(--ease); }
@@ -334,12 +333,19 @@
 
       const ns='http://www.w3.org/2000/svg';
       const svg=document.createElementNS(ns,'svg');
+      const defs=document.createElementNS(ns,'defs');
+      const strokeGradient=document.createElementNS(ns,'linearGradient');
+      const gradientId='tabStroke-'+i;
+      strokeGradient.setAttribute('id',gradientId);
+      strokeGradient.setAttribute('gradientUnits','userSpaceOnUse');
+      const stops=[0,1,2,3].map(()=>document.createElementNS(ns,'stop'));
+      stops.forEach(stop=>strokeGradient.appendChild(stop));
+      defs.appendChild(strokeGradient);
+      svg.appendChild(defs);
       const path=document.createElementNS(ns,'path');
       const highlight=document.createElementNS(ns,'path');
       highlight.setAttribute('fill','none');
-      highlight.setAttribute('stroke','url(#edgeHighlight)');
-      highlight.setAttribute('stroke-width','1.6');
-      highlight.setAttribute('stroke-linejoin','round');
+      highlight.setAttribute('stroke','none');
       svg.appendChild(path);
       svg.appendChild(highlight);
       el.appendChild(svg);
@@ -349,7 +355,7 @@
       el.appendChild(h2);
 
       tabLayer.appendChild(el);
-      return {el,svg,path,highlight,h2};
+      return {el,svg,path,highlight,h2,strokeGradient,stops,gradientId};
     });
   }
 
@@ -361,7 +367,7 @@
     stackTitle.textContent=manifest.title||'';
 
     layout.forEach(({tab,i,isOpen,x,y,width,height,frameHostH,zIndex,delayMs})=>{
-      const {el,path,highlight,h2}=tabEls[i];
+      const {el,svg,path,highlight,h2,strokeGradient,stops,gradientId}=tabEls[i];
       el.style.setProperty('--row-h', height+'px');
       el.style.setProperty('--flap-h', L.flapHeightPx+'px');
       el.style.transitionDelay=delayMs+'ms';
@@ -377,11 +383,36 @@
       highlight.setAttribute('d',d);
 
       const bg=resolveBg();
+      const edgeDark=darken(bg,0.40);
+      document.body.style.color=edgeDark;
+      stackTitle.style.color=edgeDark;
+      h2.style.color=edgeDark;
+
+      const cornerTransitionStart=Math.max(0, flapX + L.flapWidthPx - L.cornerRadiusPx*1.5);
+      const cornerTransitionEnd=Math.min(width, flapX + L.flapWidthPx + L.cornerRadiusPx*0.75);
+      strokeGradient.setAttribute('x1','0');
+      strokeGradient.setAttribute('y1','0');
+      strokeGradient.setAttribute('x2',width);
+      strokeGradient.setAttribute('y2','0');
+      stops[0].setAttribute('offset','0');
+      stops[0].setAttribute('stop-color','#ffffff');
+      stops[0].setAttribute('stop-opacity','0.9');
+      stops[1].setAttribute('offset',cornerTransitionStart);
+      stops[1].setAttribute('stop-color','#ffffff');
+      stops[1].setAttribute('stop-opacity','0.9');
+      stops[2].setAttribute('offset',cornerTransitionEnd);
+      stops[2].setAttribute('stop-color',edgeDark);
+      stops[2].setAttribute('stop-opacity','1');
+      stops[3].setAttribute('offset',width);
+      stops[3].setAttribute('stop-color',edgeDark);
+      stops[3].setAttribute('stop-opacity','1');
+
       path.setAttribute('fill',bg);
-      path.setAttribute('stroke',darken(bg,0.40));
+      path.setAttribute('stroke',`url(#${gradientId})`);
       path.setAttribute('stroke-width','1.6');
       path.setAttribute('stroke-linejoin','round');
       path.style.filter='url(#handDrawn)';
+      svg.style.filter=i===0?'none':'drop-shadow(1px -2px 4px rgba(0,0,0,.10))';
 
       h2.style.left=flapX+'px';
       h2.style.width=L.flapWidthPx+'px';
@@ -410,25 +441,56 @@
 
   /* ---------- iframe height sync (same-origin) ---------- */
   let ro=null;
-  function resizeFrame(){
+  function applyFrameTextColour(){
     try{
       const doc=iframe.contentWindow.document;
-      const contentHeight=doc.documentElement.scrollHeight;
+      const edgeDark=darken(resolveBg(),0.40);
+      doc.documentElement.style.color=edgeDark;
+      if(doc.body) doc.body.style.color=edgeDark;
+    }catch(e){ /* ignore during navigation */ }
+  }
+  function measureFrameContent(){
+    const doc=iframe.contentWindow.document;
+    const body=doc.body;
+    const html=doc.documentElement;
+    return Math.ceil(Math.max(
+      body ? body.scrollHeight : 0,
+      body ? body.offsetHeight : 0,
+      html ? html.scrollHeight : 0,
+      html ? html.offsetHeight : 0
+    ));
+  }
+  function resizeFrame(){
+    try{
+      const contentHeight=measureFrameContent();
       iframe.style.height=contentHeight+'px';
       const hostHeight=frameHost.clientHeight;
-      frameHost.style.overflowY=contentHeight>hostHeight?'auto':'hidden';
+      const needsScroll=contentHeight>hostHeight+1;
+      frameHost.style.overflowY=needsScroll?'auto':'hidden';
+      if(!needsScroll) frameHost.scrollTop=0;
+      applyFrameTextColour();
     }catch(e){ /* ignore during navigation */ }
   }
   function loadActiveFrame(){
     const tab=manifest.tabs[activeIndex];
+    if(ro){ ro.disconnect(); ro=null; }
     frameHost.scrollTop=0;
-    iframe.src=tab.url;
+    frameHost.style.overflowY='hidden';
+    iframe.removeAttribute('src');
+    iframe.style.height='0px';
     iframe.onload=()=>{
       resizeFrame();
-      if(ro) ro.disconnect();
+      requestAnimationFrame(()=>{
+        resizeFrame();
+        requestAnimationFrame(resizeFrame);
+      });
       ro=new ResizeObserver(resizeFrame);
-      try{ ro.observe(iframe.contentWindow.document.body); }catch(e){}
+      try{
+        ro.observe(iframe.contentWindow.document.body);
+        ro.observe(iframe.contentWindow.document.documentElement);
+      }catch(e){}
     };
+    iframe.src=tab.url;
   }
 
   /* ---------- click hit-testing (plain JS, no clip-path dependency) ----------
