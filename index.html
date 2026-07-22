@@ -29,6 +29,7 @@
     width:100vw;
     overflow:hidden;
   }
+  #frameHost{ cursor:auto; }
 
   .stack-title{
     position:absolute;
@@ -75,6 +76,7 @@
     will-change:transform;
     -webkit-backface-visibility:hidden;
     backface-visibility:hidden;
+    pointer-events:none;
   }
   .tab svg{
     display:block;
@@ -85,14 +87,6 @@
     pointer-events:none;
   }
   .tab path{ transition:fill var(--dur) var(--ease), stroke var(--dur) var(--ease); }
-  .hit-layer{
-    position:absolute;
-    top:0; left:0;
-    width:100%;
-    height:100%;
-    cursor:pointer;
-  }
-  .tab.is-active .hit-layer{ cursor:default; }
   .tab h2{
     position:absolute;
     top:0; left:0; right:0;
@@ -255,7 +249,7 @@
     const footerSpan = footerCount*peekStepPx;
     const openBottomSeam = (vh - bottomMarginPx) - footerSpan; // where the footer stack's front edge sits
 
-    const frameHostBottom = openBottomSeam + peekStepPx; // how far the SCROLLABLE content area extends past the seam, so scrolled content is present behind the eclipsing footer tab
+    const frameHostBottom = openBottomSeam + L.flapHeightPx + 6; // how far the SCROLLABLE content area extends past the seam -- must reach past where the footer tab's own notch ends and its solid body begins, or content stops short of where it visually should
 
     // Every tab -- open or collapsed -- renders at the SAME constant
     // height, tall enough to reach well past the bottom of the viewport
@@ -329,6 +323,7 @@
 
   /* ---------- render ---------- */
   let tabEls=[];
+  let lastLayout=[]; // cached per-tab geometry from the last paint(), used for click hit-testing
 
   function buildTabEls(){
     tabLayer.innerHTML='';
@@ -353,30 +348,20 @@
       h2.textContent=tab.label;
       el.appendChild(h2);
 
-      // Separate, invisible hit-testing layer, clipped to the exact folder
-      // silhouette. Kept apart from the visual SVG (which has the
-      // drop-shadow filter) because clip-path on an element also clips
-      // anything that filter bleeds past its own edge -- a shadow needs to
-      // paint outside the shape, so the two can't live on the same
-      // clipped box.
-      const hitLayer=document.createElement('div');
-      hitLayer.className='hit-layer';
-      hitLayer.addEventListener('click',()=>setActive(i));
-      el.appendChild(hitLayer);
-
       tabLayer.appendChild(el);
-      return {el,svg,path,highlight,h2,hitLayer};
+      return {el,svg,path,highlight,h2};
     });
   }
 
   function paint(){
     const L=manifest.layout;
     const {layout,flapCascadeX}=computeLayout();
+    lastLayout=layout.map(({tab,i,x,y,width,zIndex})=>({i,x,y,width,flapX:flapCascadeX(i,width),zIndex}));
 
     stackTitle.textContent=manifest.title||'';
 
     layout.forEach(({tab,i,isOpen,x,y,width,height,frameHostH,zIndex,delayMs})=>{
-      const {el,path,highlight,h2,hitLayer}=tabEls[i];
+      const {el,path,highlight,h2}=tabEls[i];
       el.style.setProperty('--row-h', height+'px');
       el.style.setProperty('--flap-h', L.flapHeightPx+'px');
       el.style.transitionDelay=delayMs+'ms';
@@ -390,7 +375,6 @@
       const d=folderPath(width, height, flapX, L.flapWidthPx, L.flapHeightPx, leanPx, L.cornerRadiusPx, L.cornerRadiusPx);
       path.setAttribute('d',d);
       highlight.setAttribute('d',d);
-      hitLayer.style.clipPath=`path("${d}")`;
 
       const bg=resolveBg();
       path.setAttribute('fill',bg);
@@ -434,6 +418,7 @@
   }
   function loadActiveFrame(){
     const tab=manifest.tabs[activeIndex];
+    frameHost.scrollTop=0;
     iframe.src=tab.url;
     iframe.onload=()=>{
       resizeFrame();
@@ -443,12 +428,61 @@
     };
   }
 
+  /* ---------- click hit-testing (plain JS, no clip-path dependency) ----------
+     Each tab's DOM element covers its full bounding box, but the shape
+     itself has a notch above the flap (transparent except within the
+     flap's own x-range). Testing against the box alone would let a tab
+     capture clicks meant for whatever's peeking out behind it in that
+     notch. Since .tab elements have pointer-events:none, clicks pass
+     straight through to #shell, where this handler figures out which
+     tab (if any) was actually hit, checking highest z-index first. */
+  function tabAtPoint(px,py){
+    const L=manifest.layout;
+    const sorted=[...lastLayout].sort((a,b)=>b.zIndex-a.zIndex);
+    for(const t of sorted){
+      const lx=px-t.x, ly=py-t.y;
+      if(lx<0||lx>t.width||ly<0) continue; // outside this tab's box entirely
+      if(ly<L.flapHeightPx){
+        if(lx>=t.flapX && lx<=t.flapX+L.flapWidthPx) return t.i; // inside the flap
+        // else: inside the notch (transparent) -- not a hit on this tab
+      }else{
+        return t.i; // below the flap -- solid full width
+      }
+    }
+    return null;
+  }
+
+  shell.addEventListener('click',(e)=>{
+    if(!manifest) return;
+    const rect=shell.getBoundingClientRect();
+    const i=tabAtPoint(e.clientX-rect.left, e.clientY-rect.top);
+    if(i!==null) setActive(i);
+  });
+
+  shell.addEventListener('mousemove',(e)=>{
+    if(!manifest) return;
+    const rect=shell.getBoundingClientRect();
+    const i=tabAtPoint(e.clientX-rect.left, e.clientY-rect.top);
+    shell.style.cursor=(i!==null && i!==activeIndex) ? 'pointer' : 'default';
+  });
+
   /* ---------- boot ---------- */
   fetch('manifest.json').then(r=>r.json()).then(m=>{
     manifest=m;
     buildTabEls();
     paint();
     loadActiveFrame();
+  }).catch(err=>{
+    shell.innerHTML=`<div style="padding:24px;font-family:system-ui,sans-serif;color:#a33;">
+      <strong>Failed to load the tab stack.</strong><br>${(err&&err.message)||err}
+    </div>`;
+  });
+
+  window.addEventListener('error', (e)=>{
+    if(shell.querySelector('.tab')) return; // already rendered something, don't clobber it
+    shell.innerHTML=`<div style="padding:24px;font-family:system-ui,sans-serif;color:#a33;">
+      <strong>Script error:</strong><br>${e.message} (${e.filename}:${e.lineno})
+    </div>`;
   });
 
   window.addEventListener('resize',()=>{ if(manifest) paint(); });
