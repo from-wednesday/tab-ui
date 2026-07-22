@@ -75,9 +75,7 @@
     will-change:transform;
     -webkit-backface-visibility:hidden;
     backface-visibility:hidden;
-    cursor:pointer;
   }
-  .tab.is-active{ cursor:default; }
   .tab svg{
     display:block;
     width:100%;
@@ -87,6 +85,14 @@
     pointer-events:none;
   }
   .tab path{ transition:fill var(--dur) var(--ease), stroke var(--dur) var(--ease); }
+  .hit-layer{
+    position:absolute;
+    top:0; left:0;
+    width:100%;
+    height:100%;
+    cursor:pointer;
+  }
+  .tab.is-active .hit-layer{ cursor:default; }
   .tab h2{
     position:absolute;
     top:0; left:0; right:0;
@@ -124,8 +130,8 @@
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.1"/>
       </filter>
       <linearGradient id="edgeHighlight" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#ffffff" stop-opacity=".55"/>
-        <stop offset="45%" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="0%" stop-color="#ffffff" stop-opacity=".9"/>
+        <stop offset="40%" stop-color="#ffffff" stop-opacity="0"/>
       </linearGradient>
     </defs>
   </svg>
@@ -337,7 +343,7 @@
       const highlight=document.createElementNS(ns,'path');
       highlight.setAttribute('fill','none');
       highlight.setAttribute('stroke','url(#edgeHighlight)');
-      highlight.setAttribute('stroke-width','1.4');
+      highlight.setAttribute('stroke-width','1.6');
       highlight.setAttribute('stroke-linejoin','round');
       svg.appendChild(path);
       svg.appendChild(highlight);
@@ -347,9 +353,19 @@
       h2.textContent=tab.label;
       el.appendChild(h2);
 
-      el.addEventListener('click',()=>setActive(i));
+      // Separate, invisible hit-testing layer, clipped to the exact folder
+      // silhouette. Kept apart from the visual SVG (which has the
+      // drop-shadow filter) because clip-path on an element also clips
+      // anything that filter bleeds past its own edge -- a shadow needs to
+      // paint outside the shape, so the two can't live on the same
+      // clipped box.
+      const hitLayer=document.createElement('div');
+      hitLayer.className='hit-layer';
+      hitLayer.addEventListener('click',()=>setActive(i));
+      el.appendChild(hitLayer);
+
       tabLayer.appendChild(el);
-      return {el,svg,path,highlight,h2};
+      return {el,svg,path,highlight,h2,hitLayer};
     });
   }
 
@@ -360,7 +376,7 @@
     stackTitle.textContent=manifest.title||'';
 
     layout.forEach(({tab,i,isOpen,x,y,width,height,frameHostH,zIndex,delayMs})=>{
-      const {el,path,highlight,h2}=tabEls[i];
+      const {el,path,highlight,h2,hitLayer}=tabEls[i];
       el.style.setProperty('--row-h', height+'px');
       el.style.setProperty('--flap-h', L.flapHeightPx+'px');
       el.style.transitionDelay=delayMs+'ms';
@@ -374,7 +390,7 @@
       const d=folderPath(width, height, flapX, L.flapWidthPx, L.flapHeightPx, leanPx, L.cornerRadiusPx, L.cornerRadiusPx);
       path.setAttribute('d',d);
       highlight.setAttribute('d',d);
-      el.style.clipPath=`path("${d}")`;
+      hitLayer.style.clipPath=`path("${d}")`;
 
       const bg=resolveBg();
       path.setAttribute('fill',bg);
