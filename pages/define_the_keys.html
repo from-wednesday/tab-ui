@@ -327,6 +327,190 @@
     border-radius: 3px;
   }
 
+
+
+  /* Folder UI skin overrides
+     This page is intended to sit inside the manilla folder iframe.
+     Text colour is left to inherit from the hosting index.html script.
+     Coloured objects use translucent ink so the folder paper shows through. */
+  :root {
+    --ink: currentColor;
+    --ink-mid: currentColor;
+    --ink-soft: currentColor;
+    --rule: rgba(0,0,0,.16);
+    --rule-strong: rgba(0,0,0,.24);
+    --surface: rgba(255,255,255,.18);
+    --surface-2: rgba(255,255,255,.26);
+    --accent: currentColor;
+    --mac: currentColor;
+    --mac-bg: rgba(26,92,56,.16);
+    --pc: currentColor;
+    --pc-bg: rgba(139,96,0,.18);
+    --both-bg: rgba(255,255,255,.22);
+    --chip-bg: rgba(255,255,255,.30);
+    --chip-border: rgba(0,0,0,.18);
+    --chip-shadow: rgba(0,0,0,.16);
+    --ext-bg: rgba(122,40,88,.13);
+    --ext-border: rgba(122,40,88,.24);
+    --ext-ink: currentColor;
+    --syn-bg: rgba(74,48,128,.13);
+    --syn-border: rgba(74,48,128,.24);
+    --syn-ink: currentColor;
+    --warn-bg: rgba(240,144,32,.16);
+    --warn-border: rgba(122,64,16,.24);
+    --warn-ink: currentColor;
+    --info-bg: rgba(30,58,95,.13);
+    --info-border: rgba(30,58,95,.24);
+    --info-ink: currentColor;
+  }
+
+  html,
+  body {
+    background: transparent;
+  }
+
+  body {
+    color: inherit;
+    padding: 34px 30px 84px;
+  }
+
+  .page {
+    gap: 46px;
+  }
+
+  .page-header,
+  section > h2,
+  td,
+  thead tr {
+    border-color: rgba(0,0,0,.16);
+    border-color: color-mix(in srgb, currentColor 22%, transparent);
+  }
+
+  .page-header h1,
+  .page-header p,
+  .page-header .eyebrow,
+  section > h2,
+  section > h3,
+  p,
+  th,
+  td,
+  .callout,
+  .callout strong,
+  .tok,
+  .syn,
+  .badge,
+  .chip,
+  .chip-ext,
+  .null-val,
+  .note,
+  code,
+  .bp-col h4,
+  .code-block,
+  .code-block .c-key,
+  .code-block .c-val,
+  .code-block .c-note,
+  .code-block .c-null {
+    color: inherit;
+  }
+
+  .page-header .eyebrow,
+  section > h2,
+  section > h3,
+  th,
+  .note,
+  .code-block .c-note {
+    opacity: .68;
+  }
+
+  .table-wrap,
+  .bp-col {
+    background: rgba(255,255,255,.18);
+    background: color-mix(in srgb, white 18%, transparent);
+    border-color: rgba(0,0,0,.16);
+    border-color: color-mix(in srgb, currentColor 18%, transparent);
+  }
+
+  thead tr,
+  tr:hover td {
+    background: rgba(255,255,255,.22);
+    background: color-mix(in srgb, white 22%, transparent);
+  }
+
+  .callout.warn,
+  .callout.info {
+    color: inherit;
+  }
+
+  .callout.warn {
+    background: rgba(240,144,32,.16);
+    border-color: rgba(122,64,16,.24);
+  }
+
+  .callout.info {
+    background: rgba(30,58,95,.13);
+    border-color: rgba(30,58,95,.24);
+  }
+
+  .code-block {
+    background: rgba(26,32,48,.18);
+    border: 1px solid rgba(0,0,0,.18);
+    border-color: color-mix(in srgb, currentColor 20%, transparent);
+  }
+
+  .code-block .c-key,
+  .code-block .c-val,
+  .code-block .c-null {
+    opacity: .88;
+  }
+
+  .tok,
+  .tok.mac,
+  .tok.pc {
+    background: rgba(30,58,95,.20);
+    border: 1px solid rgba(30,58,95,.22);
+  }
+
+  .syn {
+    background: rgba(74,48,128,.13);
+    border-color: rgba(74,48,128,.24);
+  }
+
+  .badge.mac,
+  .badge.pc,
+  .badge.both,
+  .badge.ext,
+  .chip,
+  .chip-ext,
+  .null-val,
+  code {
+    color: inherit;
+  }
+
+  .badge.mac { background: rgba(26,92,56,.16); }
+  .badge.pc { background: rgba(139,96,0,.18); }
+  .badge.both { background: rgba(30,58,95,.13); }
+  .badge.ext { background: rgba(122,40,88,.13); border-color: rgba(122,40,88,.24); }
+
+  .chip {
+    background: rgba(255,255,255,.30);
+    background: color-mix(in srgb, white 30%, transparent);
+    border-color: rgba(0,0,0,.18);
+    border-color: color-mix(in srgb, currentColor 20%, transparent);
+    box-shadow: 0 1.5px 0 rgba(0,0,0,.12);
+    box-shadow: 0 1.5px 0 color-mix(in srgb, currentColor 16%, transparent);
+  }
+
+  .chip-ext {
+    background: rgba(122,40,88,.13);
+    border-color: rgba(122,40,88,.24);
+  }
+
+  .null-val,
+  code {
+    background: rgba(255,255,255,.26);
+    background: color-mix(in srgb, white 26%, transparent);
+  }
+
 </style>
 </head>
 <body>
