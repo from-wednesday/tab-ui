@@ -12,7 +12,7 @@
     --ink-dark:#dce8e0;
     --dur:420ms;
     --press-dur:90ms;
-    --ease:cubic-bezier(.18,.9,.24,1.08);
+    --ease:cubic-bezier(.22,1,.36,1);
   }
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;}
@@ -166,8 +166,8 @@
   let transitioningFrom=null;
   let transitionTimer=null;
   const pressOffsetPx=4;
-  const cascadeStepMs=120;
-  const transitionMs=420;
+  const cascadeStepMs=35;
+  const transitionMs=560;
   const pressMs=90;
   const parallaxPx=18;
   const theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light';
