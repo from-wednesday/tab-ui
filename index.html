@@ -166,9 +166,10 @@
   let transitioningFrom=null;
   let transitionTimer=null;
   const pressOffsetPx=4;
-  const cascadeStepMs=55;
+  const cascadeStepMs=120;
   const transitionMs=420;
   const pressMs=90;
+  const parallaxPx=12;
   const theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light';
   document.body.dataset.theme=theme;
   const shell=document.getElementById('shell');
@@ -352,17 +353,45 @@
     lastLayout=layout.map(({tab,i,x,y,width,zIndex})=>({i,x,y,width,flapX:flapCascadeX(i,width),zIndex}));
     return maxDelay + transitionMs;
   }
+  function primeParallaxStart(previousLayout){
+    const previousByIndex=new Map(previousLayout.map(t=>[t.i,t]));
+    const L=manifest.layout;
+    const {layout}=computeLayout();
+    layout.forEach(({i,x,y,width,height})=>{
+      const item=tabEls[i];
+      const old=previousByIndex.get(i);
+      if(!item || !old) return;
+      const dy=y-old.y;
+      const travel=Math.abs(dy);
+      const dir=dy===0 ? 0 : dy/Math.abs(dy);
+      const depth=Math.min(1.8, 1 + travel/Math.max(1,L.peekStepPx)*0.08);
+      const kick=dir===0 ? 0 : -dir*parallaxPx*depth;
+      item.el.style.transition='none';
+      item.el.style.setProperty('--row-h', height+'px');
+      item.el.style.setProperty('--flap-h', L.flapHeightPx+'px');
+      item.el.style.setProperty('--tab-dur', transitionMs+'ms');
+      item.el.style.setProperty('--tab-delay','0ms');
+      item.el.style.width=width+'px';
+      item.el.style.transform=`translate(${x}px, ${old.y+kick}px) translateZ(0)`;
+    });
+    tabLayer.offsetHeight;
+    tabEls.forEach(item=>{ item.el.style.transition=''; });
+  }
   function setActive(i){
     if(i===activeIndex) return;
     if(transitionTimer) clearTimeout(transitionTimer);
+    const previousLayout=lastLayout.map(t=>({...t}));
     prevIndex=activeIndex;
     transitioningFrom=activeIndex;
     activeIndex=i;
-    const totalMs=paint({mode:'switch'});
-    transitionTimer=setTimeout(()=>{
-      transitioningFrom=null;
-      paint();
-    },totalMs+80);
+    primeParallaxStart(previousLayout);
+    requestAnimationFrame(()=>{
+      const totalMs=paint({mode:'switch'});
+      transitionTimer=setTimeout(()=>{
+        transitioningFrom=null;
+        paint();
+      },totalMs+80);
+    });
   }
   function applyFrameTextColour(i){
     try{
