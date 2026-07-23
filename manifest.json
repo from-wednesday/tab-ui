@@ -28,7 +28,7 @@
       "url": "pages/call.html",
       "colors": {
         "light": "#FF9D9D",
-        "dark": "#7a7d82"
+        "dark": "#659287"
       }
     },
     {
@@ -38,7 +38,7 @@
       "url": "pages/define_the_keys.html",
       "colors": {
         "light": "#FFC5AA",
-        "dark": "#686b70"
+        "dark": "#88BDA4"
       }
     },
     {
@@ -48,7 +48,7 @@
       "url": "pages/return.html",
       "colors": {
         "light": "#EEF8CD",
-        "dark": "#808388"
+        "dark": "#B1D3B9"
       }
     },
     {
@@ -58,7 +58,7 @@
       "url": "pages/gift.html",
       "colors": {
         "light": "#BBF1D2",
-        "dark": "#606368"
+        "dark": "#E6F2DD"
       }
     }
   ],
