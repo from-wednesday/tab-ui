@@ -1,5 +1,5 @@
 {
-  "title": "My Reminder To…",
+  "title": "from-wednesday",
   "colors": {
     "light": "#EDE0B4",
     "dark": "#6f7277"
@@ -31,7 +31,7 @@
       "label": "Call the dentist",
       "url": "pages/call.html",
       "colors": {
-        "light": "#E4CE97",
+        "light": "#FF9D9D",
         "dark": "#7a7d82"
       }
     },
@@ -41,7 +41,7 @@
       "label": "define keys",
       "url": "pages/define_the_keys.html",
       "colors": {
-        "light": "#F0E4C1",
+        "light": "#FFC5AA",
         "dark": "#686b70"
       }
     },
@@ -51,7 +51,7 @@
       "label": "Return the library book",
       "url": "pages/return.html",
       "colors": {
-        "light": "#DDC487",
+        "light": "#EEF8CD",
         "dark": "#808388"
       }
     },
@@ -61,7 +61,7 @@
       "label": "Buy a birthday gift",
       "url": "pages/gift.html",
       "colors": {
-        "light": "#F3E8CA",
+        "light": "#BBF1D2",
         "dark": "#606368"
       }
     }
