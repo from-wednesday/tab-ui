@@ -22,7 +22,6 @@
   }
   body[data-theme="light"]{ --page-bg:var(--page-bg-light); }
   body[data-theme="dark"]{ --page-bg:var(--page-bg-dark); }
-
   .shell{
     position:relative;
     height:100vh;
@@ -30,7 +29,6 @@
     overflow:hidden;
   }
   #frameHost{ cursor:auto; }
-
   .stack-title{
     position:absolute;
     top:18px;
@@ -44,7 +42,6 @@
     z-index:20000;
     pointer-events:none;
   }
-
   #frameHost{
     position:absolute;
     overflow-y:auto;
@@ -57,14 +54,12 @@
   }
   #frameHost::-webkit-scrollbar{ width:9px; }
   #frameHost::-webkit-scrollbar-thumb{ background:rgba(120,120,120,.35); border-radius:6px; }
-
   iframe{
     width:100%;
     border:0;
     display:block;
     background:transparent;
   }
-
   .tab{
     position:absolute;
     top:0; left:0;
@@ -105,7 +100,6 @@
     pointer-events:none;
     transition:color var(--dur) var(--ease);
   }
-
 </style>
 </head>
 <body>
@@ -115,31 +109,22 @@
   <div id="frameHost">
     <iframe id="contentFrame" title="Tab content"></iframe>
   </div>
-
   <svg width="0" height="0" style="position:absolute">
     <defs>
       <filter id="handDrawn" x="-30%" y="-30%" width="160%" height="160%">
         <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise"/>
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.1"/>
       </filter>
-      <linearGradient id="edgeHighlight" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#ffffff" stop-opacity=".9"/>
-        <stop offset="40%" stop-color="#ffffff" stop-opacity="0"/>
-      </linearGradient>
     </defs>
   </svg>
 </div>
-
 <script>
 (function(){
-
-  /* ---------- vector helpers ---------- */
   const sub=(a,b)=>({x:a.x-b.x,y:a.y-b.y});
   const add=(a,b)=>({x:a.x+b.x,y:a.y+b.y});
   const scale=(a,s)=>({x:a.x*s,y:a.y*s});
   const len=(a)=>Math.hypot(a.x,a.y);
   const normalize=(a)=>{ const l=len(a)||1; return {x:a.x/l,y:a.y/l}; };
-
   function roundedPolygonPath(points, radius){
     const d=[]; const n=points.length;
     const radii = Array.isArray(radius) ? radius : points.map(()=>radius);
@@ -155,219 +140,116 @@
     d.push('Z');
     return d.join(' ');
   }
-
-  /* Classic folder silhouette: a rounded-rect body with a trapezoid tab
-     flap protruding from its top edge, merged into ONE outline.
-     flapW/flapH are FIXED pixel sizes (same physical tab size whether the
-     folder is collapsed or fully open) rather than proportional, so the
-     tab reads as one consistent object regardless of body size. flapX is
-     the left edge of the flap in local coordinates (drives left/center/
-     right placement). */
   function folderPath(w,h,flapX,flapW,flapH,leanPx,cornerR,concaveR){
     const fx0=flapX, fx1=flapX+flapW;
     const pts=[
-      {x:0,           y:h},     // body bottom-left
-      {x:0,           y:flapH}, // body top-left
-      {x:fx0,         y:flapH}, // concave: flap base, left
-      {x:fx0+leanPx,  y:0},     // flap top-left
-      {x:fx1-leanPx,  y:0},     // flap top-right
-      {x:fx1,         y:flapH}, // concave: flap base, right
-      {x:w,           y:flapH}, // body top-right
-      {x:w,           y:h},     // body bottom-right
+      {x:0,           y:h},
+      {x:0,           y:flapH},
+      {x:fx0,         y:flapH},
+      {x:fx0+leanPx,  y:0},
+      {x:fx1-leanPx,  y:0},
+      {x:fx1,         y:flapH},
+      {x:w,           y:flapH},
+      {x:w,           y:h},
     ];
     const radii=[cornerR,cornerR,concaveR,cornerR,cornerR,concaveR,cornerR,cornerR];
     return roundedPolygonPath(pts,radii);
   }
-
   function darken(hex, amt){
     const n = hex.replace('#','');
     const r = parseInt(n.substring(0,2),16), g = parseInt(n.substring(2,4),16), b = parseInt(n.substring(4,6),16);
     const f = (c)=>Math.max(0,Math.round(c*(1-amt)));
     return `rgb(${f(r)},${f(g)},${f(b)})`;
   }
-
-  /* ---------- state ---------- */
   let manifest=null;
   let activeIndex=0;
   let prevIndex=0;
   const theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light';
   document.body.dataset.theme=theme;
-
   const shell=document.getElementById('shell');
   const tabLayer=document.getElementById('tabLayer');
   const frameHost=document.getElementById('frameHost');
   const iframe=document.getElementById('contentFrame');
   const stackTitle=document.getElementById('stackTitle');
-
-  const lerp=(a,b,t)=>a+(b-a)*t;
-  const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
-
   function resolveBg(){
     return manifest.colors[theme] || manifest.colors.light;
   }
-
-  /* ---------- layout ----------
-     Header (behind, above the open tab): each tab further back is TALLER
-     than the one in front of it, all sharing the same bottom edge (flush
-     against the open tab's top) -- so only a growing sliver of each shows
-     above the one in front.
-     Footer (in front, below the open tab): uniform height, simply stepped
-     downward, overlapping the open tab's bottom edge by a small fixed
-     amount so it reads as "in front of" it without covering its content
-     (the open tab always renders on top regardless).
-     The open tab takes whatever vertical space is left between the two. */
+  function resolvePageBg(){
+    return getComputedStyle(document.body).backgroundColor;
+  }
   function computeLayout(){
     const L=manifest.layout;
     const n=manifest.tabs.length;
     const vw=shell.clientWidth, vh=shell.clientHeight;
-    const baseMargin=32; // pulled in further from the edge to leave room for the larger corner radius
+    const baseMargin=32;
     const titleOffset=18;
-
-    const headerCount=activeIndex;           // tabs BEHIND (before) active
-    const footerCount=n-1-activeIndex;        // tabs IN FRONT (after) active
-
-    // One consistent step governs every seam in the stack -- open-to-
-    // nearest-header, header-to-header, open-to-nearest-footer, and
-    // footer-to-footer. Previously the open-tab seams used a different
-    // formula (based on flapHeightPx) than collapsed-to-collapsed seams,
-    // which produced a visibly smaller, unreadable sliver for whichever
-    // header tab sat nearest the open one. Aimed close to flapHeightPx so
-    // the cut lands just below each label's text rather than mid-letter.
+    const headerCount=activeIndex;
+    const footerCount=n-1-activeIndex;
     const peekStepPx = L.peekStepPx;
-
     const headerSpan = headerCount*peekStepPx;
     const openTop = titleOffset + headerSpan;
-
-    // The frontmost footer tab has nothing in front of it, so unlike every
-    // other seam (which only needs peekStepPx of clearance, since the next
-    // tab's coverage trims the rest) it needs its FULL flap height plus a
-    // little breathing room, or its bottom edge gets clipped by the
-    // viewport itself.
     const bottomMarginPx = (L.flapHeightPx - peekStepPx) + 12;
-
     const footerSpan = footerCount*peekStepPx;
-    const openBottomSeam = (vh - bottomMarginPx) - footerSpan; // where the footer stack's front edge sits
-
-    const frameHostBottom = openBottomSeam + L.flapHeightPx + 6; // how far the SCROLLABLE content area extends past the seam -- must reach past where the footer tab's own notch ends and its solid body begins, or content stops short of where it visually should
-
-    // Every tab -- open or collapsed -- renders at the SAME constant
-    // height, tall enough to reach well past the bottom of the viewport
-    // from any valid top position. Only its Y position (translateY)
-    // differs between tabs and changes when switching active tab. This is
-    // deliberate: height can't be smoothly morphed (the SVG path shape
-    // would distort mid-transition since its 'd' attribute snaps instantly
-    // while width/height CSS-transition independently), so making height
-    // constant means there is nothing to animate except a plain
-    // translateY -- which also means every shape's body always extends
-    // far past any seam, so a gap is impossible by construction, both at
-    // rest and mid-animation.
+    const openBottomSeam = (vh - bottomMarginPx) - footerSpan;
+    const frameHostBottom = openBottomSeam + L.flapHeightPx + 6;
     const BASELINE_H = vh;
-
-    // Each tab's flap sits flapStepPx to the right of the previous tab's
-    // flap (by sequence order), wrapping back to the leftmost slot once it
-    // would run out of room. This is a fixed property of each tab's index
-    // -- like width and z-index, it doesn't change with active state.
     const flapCascadeX=(i,containerW)=>{
-      const edgeClearance=L.cornerRadiusPx+8; // keep the flap clear of the tab's own edge so its corner radius isn't clipped
+      const edgeClearance=L.cornerRadiusPx+8;
       const usableW=containerW - L.flapWidthPx - edgeClearance*2;
       const slots=Math.max(1, Math.floor(usableW / L.flapStepPx) + 1);
       const slot=(i + 1) % slots;
       return edgeClearance + slot*L.flapStepPx;
     };
-
     const layout=manifest.tabs.map((tab,i)=>{
-      // Width is static -- every tab spans the full screen width minus a
-      // small margin. The margin grows by 1px per layer as you step back
-      // from front (i=n-1) to back (i=0), so tabs nest very slightly
-      // rather than dramatically narrowing. This is independent of
-      // header/footer/open state.
       const stepsFromFront = (n-1) - i;
       const margin = baseMargin + stepsFromFront;
       const width = vw - margin*2;
       const x = margin;
-
-      // z-index is a fixed property of each tab's permanent stack
-      // position -- it never changes when a different tab is opened.
       const zIndex = i;
-
       if(i===activeIndex){
         return { tab,i,isOpen:true, x, y:openTop, width, height:BASELINE_H, frameHostH:frameHostBottom-openTop, zIndex, delayMs:0 };
       }
-
-      // Only the Y position (where the visible peeking sliver starts)
-      // differs between collapsed tabs -- one uniform step, front to back.
       let y;
       if(i<activeIndex){
-        // header: further back = starts higher up, each one exactly
-        // peekStepPx above the one in front of it (openTop counts as the
-        // "front" reference for the nearest header tab too).
         const k=activeIndex-i;
         y=openTop - k*peekStepPx;
       }else{
-        // footer: uniform peek spacing, stepped downward starting exactly
-        // at the seam -- it's the OPEN tab that reaches down behind this
-        // one (see frameHostBottom above), not the other way round.
         const j=i-(activeIndex+1);
         y=openBottomSeam + j*peekStepPx;
       }
-
       const distFromSource=Math.abs(i-prevIndex);
       const delayMs=Math.min(distFromSource,8)*L.staggerStepMs;
-
       return {tab,i,isOpen:false,x,y,width,height:BASELINE_H,zIndex,delayMs};
     });
-
     return {layout, flapCascadeX};
   }
-
-  /* ---------- render ---------- */
   let tabEls=[];
-  let lastLayout=[]; // cached per-tab geometry from the last paint(), used for click hit-testing
-
+  let lastLayout=[];
   function buildTabEls(){
     tabLayer.innerHTML='';
     tabEls=manifest.tabs.map((tab,i)=>{
       const el=document.createElement('div');
       el.className='tab';
       el.dataset.index=i;
-
       const ns='http://www.w3.org/2000/svg';
       const svg=document.createElementNS(ns,'svg');
-      const defs=document.createElementNS(ns,'defs');
-      const strokeGradient=document.createElementNS(ns,'linearGradient');
-      const gradientId='tabStroke-'+i;
-      strokeGradient.setAttribute('id',gradientId);
-      strokeGradient.setAttribute('gradientUnits','userSpaceOnUse');
-      const stops=[0,1,2,3].map(()=>document.createElementNS(ns,'stop'));
-      stops.forEach(stop=>strokeGradient.appendChild(stop));
-      defs.appendChild(strokeGradient);
-      svg.appendChild(defs);
       const path=document.createElementNS(ns,'path');
-      const highlight=document.createElementNS(ns,'path');
-      highlight.setAttribute('fill','none');
-      highlight.setAttribute('stroke','none');
       svg.appendChild(path);
-      svg.appendChild(highlight);
       el.appendChild(svg);
-
       const h2=document.createElement('h2');
       h2.textContent=tab.label;
       el.appendChild(h2);
-
       tabLayer.appendChild(el);
-      return {el,svg,path,highlight,h2,strokeGradient,stops,gradientId};
+      return {el,svg,path,h2};
     });
   }
-
   function paint(){
     const L=manifest.layout;
     const {layout,flapCascadeX}=computeLayout();
     lastLayout=layout.map(({tab,i,x,y,width,zIndex})=>({i,x,y,width,flapX:flapCascadeX(i,width),zIndex}));
-
     stackTitle.textContent=manifest.title||'';
-
     layout.forEach(({tab,i,isOpen,x,y,width,height,frameHostH,zIndex,delayMs})=>{
-      const {el,svg,path,highlight,h2,strokeGradient,stops,gradientId}=tabEls[i];
+      const {el,svg,path,h2}=tabEls[i];
       el.style.setProperty('--row-h', height+'px');
       el.style.setProperty('--flap-h', L.flapHeightPx+'px');
       el.style.transitionDelay=delayMs+'ms';
@@ -375,49 +257,25 @@
       el.style.zIndex=zIndex;
       el.style.transform=`translate(${x}px, ${y}px) translateZ(0)`;
       el.classList.toggle('is-active', isOpen);
-
       const flapX=flapCascadeX(i, width);
       const leanPx=L.flapHeightPx*Math.tan(L.flapAngleDeg*Math.PI/180);
       const d=folderPath(width, height, flapX, L.flapWidthPx, L.flapHeightPx, leanPx, L.cornerRadiusPx, L.cornerRadiusPx);
+      const tabBg=resolveBg();
+      const pageBg=resolvePageBg();
+      const textColour=darken(tabBg,0.80);
+      document.body.style.color=textColour;
+      stackTitle.style.color=textColour;
+      h2.style.color=textColour;
       path.setAttribute('d',d);
-      highlight.setAttribute('d',d);
-
-      const bg=resolveBg();
-      const edgeDark=darken(bg,0.40);
-      document.body.style.color=edgeDark;
-      stackTitle.style.color=edgeDark;
-      h2.style.color=edgeDark;
-
-      const cornerTransitionStart=Math.max(0, flapX + L.flapWidthPx - L.cornerRadiusPx*1.5);
-      const cornerTransitionEnd=Math.min(width, flapX + L.flapWidthPx + L.cornerRadiusPx*0.75);
-      strokeGradient.setAttribute('x1','0');
-      strokeGradient.setAttribute('y1','0');
-      strokeGradient.setAttribute('x2',width);
-      strokeGradient.setAttribute('y2','0');
-      stops[0].setAttribute('offset','0');
-      stops[0].setAttribute('stop-color','#ffffff');
-      stops[0].setAttribute('stop-opacity','0.9');
-      stops[1].setAttribute('offset',cornerTransitionStart);
-      stops[1].setAttribute('stop-color','#ffffff');
-      stops[1].setAttribute('stop-opacity','0.9');
-      stops[2].setAttribute('offset',cornerTransitionEnd);
-      stops[2].setAttribute('stop-color',edgeDark);
-      stops[2].setAttribute('stop-opacity','1');
-      stops[3].setAttribute('offset',width);
-      stops[3].setAttribute('stop-color',edgeDark);
-      stops[3].setAttribute('stop-opacity','1');
-
-      path.setAttribute('fill',bg);
-      path.setAttribute('stroke',`url(#${gradientId})`);
+      path.setAttribute('fill',tabBg);
+      path.setAttribute('stroke',pageBg);
       path.setAttribute('stroke-width','1.6');
       path.setAttribute('stroke-linejoin','round');
       path.style.filter='url(#handDrawn)';
-      svg.style.filter=i===0?'none':'drop-shadow(1px -2px 4px rgba(0,0,0,.10))';
-
+      svg.style.filter=i===0?'drop-shadow(1px -1px 2px rgba(0,0,0,.10))':'drop-shadow(1px -2px 4px rgba(0,0,0,.10))';
       h2.style.left=flapX+'px';
       h2.style.width=L.flapWidthPx+'px';
       h2.style.right='auto';
-
       if(isOpen){
         const fhX=x, fhW=width;
         const fhY=y+L.flapHeightPx, fhH=frameHostH-L.flapHeightPx;
@@ -430,7 +288,6 @@
       }
     });
   }
-
   function setActive(i){
     if(i===activeIndex) return;
     prevIndex=activeIndex;
@@ -438,16 +295,14 @@
     paint();
     loadActiveFrame();
   }
-
-  /* ---------- iframe height sync (same-origin) ---------- */
   let ro=null;
   function applyFrameTextColour(){
     try{
       const doc=iframe.contentWindow.document;
-      const edgeDark=darken(resolveBg(),0.40);
-      doc.documentElement.style.color=edgeDark;
-      if(doc.body) doc.body.style.color=edgeDark;
-    }catch(e){ /* ignore during navigation */ }
+      const textColour=darken(resolveBg(),0.80);
+      doc.documentElement.style.color=textColour;
+      if(doc.body) doc.body.style.color=textColour;
+    }catch(e){ }
   }
   function measureFrameContent(){
     const doc=iframe.contentWindow.document;
@@ -469,7 +324,7 @@
       frameHost.style.overflowY=needsScroll?'auto':'hidden';
       if(!needsScroll) frameHost.scrollTop=0;
       applyFrameTextColour();
-    }catch(e){ /* ignore during navigation */ }
+    }catch(e){ }
   }
   function loadActiveFrame(){
     const tab=manifest.tabs[activeIndex];
@@ -492,46 +347,32 @@
     };
     iframe.src=tab.url;
   }
-
-  /* ---------- click hit-testing (plain JS, no clip-path dependency) ----------
-     Each tab's DOM element covers its full bounding box, but the shape
-     itself has a notch above the flap (transparent except within the
-     flap's own x-range). Testing against the box alone would let a tab
-     capture clicks meant for whatever's peeking out behind it in that
-     notch. Since .tab elements have pointer-events:none, clicks pass
-     straight through to #shell, where this handler figures out which
-     tab (if any) was actually hit, checking highest z-index first. */
   function tabAtPoint(px,py){
     const L=manifest.layout;
     const sorted=[...lastLayout].sort((a,b)=>b.zIndex-a.zIndex);
     for(const t of sorted){
       const lx=px-t.x, ly=py-t.y;
-      if(lx<0||lx>t.width||ly<0) continue; // outside this tab's box entirely
+      if(lx<0||lx>t.width||ly<0) continue;
       if(ly<L.flapHeightPx){
-        if(lx>=t.flapX && lx<=t.flapX+L.flapWidthPx) return t.i; // inside the flap
-        // else: inside the notch (transparent) -- not a hit on this tab
+        if(lx>=t.flapX && lx<=t.flapX+L.flapWidthPx) return t.i;
       }else{
-        return t.i; // below the flap -- solid full width
+        return t.i;
       }
     }
     return null;
   }
-
   shell.addEventListener('click',(e)=>{
     if(!manifest) return;
     const rect=shell.getBoundingClientRect();
     const i=tabAtPoint(e.clientX-rect.left, e.clientY-rect.top);
     if(i!==null) setActive(i);
   });
-
   shell.addEventListener('mousemove',(e)=>{
     if(!manifest) return;
     const rect=shell.getBoundingClientRect();
     const i=tabAtPoint(e.clientX-rect.left, e.clientY-rect.top);
     shell.style.cursor=(i!==null && i!==activeIndex) ? 'pointer' : 'default';
   });
-
-  /* ---------- boot ---------- */
   fetch('manifest.json').then(r=>r.json()).then(m=>{
     manifest=m;
     buildTabEls();
@@ -542,16 +383,13 @@
       <strong>Failed to load the tab stack.</strong><br>${(err&&err.message)||err}
     </div>`;
   });
-
   window.addEventListener('error', (e)=>{
-    if(shell.querySelector('.tab')) return; // already rendered something, don't clobber it
+    if(shell.querySelector('.tab')) return;
     shell.innerHTML=`<div style="padding:24px;font-family:system-ui,sans-serif;color:#a33;">
       <strong>Script error:</strong><br>${e.message} (${e.filename}:${e.lineno})
     </div>`;
   });
-
   window.addEventListener('resize',()=>{ if(manifest) paint(); });
-
 })();
 </script>
 </body>
