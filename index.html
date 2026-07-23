@@ -11,7 +11,8 @@
     --ink-light:#24352b;
     --ink-dark:#dce8e0;
     --dur:420ms;
-    --ease:cubic-bezier(.4,0,.2,1);
+    --press-dur:90ms;
+    --ease:cubic-bezier(.18,.9,.24,1.08);
   }
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;}
@@ -28,7 +29,6 @@
     width:100vw;
     overflow:hidden;
   }
-  #frameHost{ cursor:auto; }
   .stack-title{
     position:absolute;
     top:18px;
@@ -42,34 +42,14 @@
     z-index:20000;
     pointer-events:none;
   }
-  #frameHost{
-    position:absolute;
-    overflow-y:auto;
-    overflow-x:hidden;
-    opacity:1;
-    background:transparent;
-    transition:
-      top var(--frame-dur,var(--dur)) var(--ease), left var(--frame-dur,var(--dur)) var(--ease),
-      width var(--frame-dur,var(--dur)) var(--ease), height var(--frame-dur,var(--dur)) var(--ease),
-      opacity 180ms ease;
-    -webkit-overflow-scrolling:touch;
-  }
-  #frameHost::-webkit-scrollbar{ width:9px; }
-  #frameHost::-webkit-scrollbar-thumb{ background:rgba(120,120,120,.35); border-radius:6px; }
-  iframe{
-    width:100%;
-    border:0;
-    display:block;
-    background:transparent;
-  }
   .tab{
     position:absolute;
     top:0; left:0;
     height:var(--row-h);
     transition:
-      transform var(--tab-dur,var(--dur)) var(--ease),
-      width var(--tab-dur,var(--dur)) var(--ease),
-      height var(--tab-dur,var(--dur)) var(--ease);
+      transform var(--tab-dur,var(--dur)) var(--ease) var(--tab-delay,0ms),
+      width var(--tab-dur,var(--dur)) var(--ease) var(--tab-delay,0ms),
+      height var(--tab-dur,var(--dur)) var(--ease) var(--tab-delay,0ms);
     will-change:transform;
     -webkit-backface-visibility:hidden;
     backface-visibility:hidden;
@@ -106,15 +86,35 @@
     pointer-events:none;
     transition:color var(--dur) var(--ease);
   }
+  .frameHost{
+    position:absolute;
+    left:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    background:transparent;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 140ms ease;
+    -webkit-overflow-scrolling:touch;
+  }
+  .frameHost.is-visible{
+    opacity:1;
+    pointer-events:auto;
+  }
+  .frameHost::-webkit-scrollbar{ width:9px; }
+  .frameHost::-webkit-scrollbar-thumb{ background:rgba(120,120,120,.35); border-radius:6px; }
+  iframe{
+    width:100%;
+    border:0;
+    display:block;
+    background:transparent;
+  }
 </style>
 </head>
 <body>
 <div class="shell" id="shell">
   <h1 class="stack-title" id="stackTitle"></h1>
   <div id="tabLayer"></div>
-  <div id="frameHost">
-    <iframe id="contentFrame" title="Tab content"></iframe>
-  </div>
 </div>
 <script>
 (function(){
@@ -163,17 +163,16 @@
   let activeIndex=0;
   let prevIndex=0;
   let pressedIndex=null;
-  let revealTimer=null;
-  const baseTabDurationMs=420;
-  const perStepDurationMs=200;
-  const pressDurationMs=90;
+  let transitioningFrom=null;
+  let transitionTimer=null;
   const pressOffsetPx=4;
+  const cascadeStepMs=55;
+  const transitionMs=420;
+  const pressMs=90;
   const theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light';
   document.body.dataset.theme=theme;
   const shell=document.getElementById('shell');
   const tabLayer=document.getElementById('tabLayer');
-  const frameHost=document.getElementById('frameHost');
-  const iframe=document.getElementById('contentFrame');
   const stackTitle=document.getElementById('stackTitle');
   function resolveBg(){
     return manifest.colors[theme] || manifest.colors.light;
@@ -211,7 +210,7 @@
       const x = margin;
       const zIndex = i;
       if(i===activeIndex){
-        return { tab,i,isOpen:true, x, y:openTop, width, height:BASELINE_H, frameHostH:frameHostBottom-openTop, zIndex };
+        return {tab,i,isOpen:true,x,y:openTop,width,height:BASELINE_H,frameHostH:frameHostBottom-openTop,zIndex};
       }
       let y;
       if(i<activeIndex){
@@ -227,11 +226,14 @@
   }
   let tabEls=[];
   let lastLayout=[];
+  function shouldShowPane(i){
+    return i===activeIndex || i===transitioningFrom;
+  }
   function startPress(i,e,path){
     if(!manifest || i===activeIndex) return;
     pressedIndex=i;
     try{ path.setPointerCapture(e.pointerId); }catch(err){}
-    paint();
+    paint({mode:'press'});
   }
   function finishPress(i,activate){
     if(pressedIndex!==i) return;
@@ -280,31 +282,42 @@
       const h2=document.createElement('h2');
       h2.textContent=tab.label;
       el.appendChild(h2);
+      const frameHost=document.createElement('div');
+      frameHost.className='frameHost';
+      const iframe=document.createElement('iframe');
+      iframe.title=tab.label+' content';
+      frameHost.appendChild(iframe);
+      el.appendChild(frameHost);
       tabLayer.appendChild(el);
-      return {el,svg,path,h2};
+      return {el,svg,path,h2,frameHost,iframe,ro:null,loaded:false,lastPaneH:null};
     });
   }
-  function durationForTab(i,y,L,oldLayoutByIndex){
-    if(i===pressedIndex) return pressDurationMs;
-    const old=oldLayoutByIndex.get(i);
-    if(!old) return baseTabDurationMs;
-    const travel=Math.abs(y-old.y);
-    if(travel<1) return baseTabDurationMs;
-    const step=Math.max(0,Math.round(travel/Math.max(1,L.peekStepPx))-1);
-    return baseTabDurationMs + Math.min(step,8)*perStepDurationMs;
+  function cascadeDelayFor(i, mode){
+    if(mode==='press') return 0;
+    if(i===activeIndex) return 0;
+    return Math.min(Math.abs(i-activeIndex),8)*cascadeStepMs;
   }
-  function paint(){
+  function paneHeightFor(i, frameHostH, L){
+    if(i===activeIndex && frameHostH){
+      const h=frameHostH-L.flapHeightPx;
+      tabEls[i].lastPaneH=h;
+      return h;
+    }
+    return tabEls[i].lastPaneH || Math.max(0, shell.clientHeight-L.flapHeightPx);
+  }
+  function paint(opts={}){
+    const mode=opts.mode || 'normal';
     const L=manifest.layout;
-    const oldLayoutByIndex=new Map(lastLayout.map(t=>[t.i,t]));
     const {layout,flapCascadeX}=computeLayout();
-    let maxDuration=baseTabDurationMs;
+    let maxDelay=0;
     stackTitle.textContent=manifest.title||'';
     layout.forEach(({tab,i,isOpen,x,y,width,height,frameHostH,zIndex})=>{
-      const {el,svg,path,h2}=tabEls[i];
+      const {el,svg,path,h2,frameHost}=tabEls[i];
       const pressDy=(i===pressedIndex && i!==activeIndex) ? (i<activeIndex ? -pressOffsetPx : pressOffsetPx) : 0;
-      const durationMs=durationForTab(i,y,L,oldLayoutByIndex);
-      maxDuration=Math.max(maxDuration,durationMs);
-      el.style.setProperty('--tab-dur', durationMs+'ms');
+      const delay=cascadeDelayFor(i,mode);
+      maxDelay=Math.max(maxDelay,delay);
+      el.style.setProperty('--tab-delay', delay+'ms');
+      el.style.setProperty('--tab-dur', (mode==='press' && i===pressedIndex ? pressMs : transitionMs)+'ms');
       el.style.setProperty('--row-h', height+'px');
       el.style.setProperty('--flap-h', L.flapHeightPx+'px');
       el.style.width=width+'px';
@@ -329,50 +342,39 @@
       h2.style.left=flapX+'px';
       h2.style.width=L.flapWidthPx+'px';
       h2.style.right='auto';
-      if(isOpen){
-        const fhX=x, fhW=width;
-        const fhY=y+L.flapHeightPx, fhH=frameHostH-L.flapHeightPx;
-        frameHost.style.setProperty('--frame-dur', durationMs+'ms');
-        frameHost.style.left=fhX+'px';
-        frameHost.style.top=fhY+'px';
-        frameHost.style.width=fhW+'px';
-        frameHost.style.height=fhH+'px';
-        frameHost.style.borderRadius=L.cornerRadiusPx+'px';
-        frameHost.style.zIndex=zIndex;
-      }
+      frameHost.style.top=L.flapHeightPx+'px';
+      frameHost.style.width='100%';
+      frameHost.style.height=paneHeightFor(i,frameHostH,L)+'px';
+      frameHost.style.borderRadius=L.cornerRadiusPx+'px';
+      frameHost.classList.toggle('is-visible', shouldShowPane(i));
+      if(shouldShowPane(i)) loadFrame(i);
     });
     lastLayout=layout.map(({tab,i,x,y,width,zIndex})=>({i,x,y,width,flapX:flapCascadeX(i,width),zIndex}));
-    return maxDuration;
-  }
-  function revealFrameAfter(waitMs){
-    if(revealTimer) clearTimeout(revealTimer);
-    frameHost.style.opacity='0';
-    revealTimer=setTimeout(()=>{
-      frameHost.style.opacity='1';
-      resizeFrame();
-    },Math.max(180,Math.round(waitMs*0.9)));
+    return maxDelay + transitionMs;
   }
   function setActive(i){
     if(i===activeIndex) return;
-    if(revealTimer) clearTimeout(revealTimer);
+    if(transitionTimer) clearTimeout(transitionTimer);
     prevIndex=activeIndex;
-    frameHost.style.opacity='0';
+    transitioningFrom=activeIndex;
     activeIndex=i;
-    const maxDuration=paint();
-    loadActiveFrame();
-    revealFrameAfter(maxDuration);
+    const totalMs=paint({mode:'switch'});
+    transitionTimer=setTimeout(()=>{
+      transitioningFrom=null;
+      paint();
+    },totalMs+80);
   }
-  let ro=null;
-  function applyFrameTextColour(){
+  function applyFrameTextColour(i){
     try{
-      const doc=iframe.contentWindow.document;
+      const item=tabEls[i];
+      const doc=item.iframe.contentWindow.document;
       const textColour=darken(resolveBg(),0.80);
       doc.documentElement.style.color=textColour;
       if(doc.body) doc.body.style.color=textColour;
     }catch(e){ }
   }
-  function measureFrameContent(){
-    const doc=iframe.contentWindow.document;
+  function measureFrameContent(i){
+    const doc=tabEls[i].iframe.contentWindow.document;
     const body=doc.body;
     const html=doc.documentElement;
     return Math.ceil(Math.max(
@@ -382,37 +384,40 @@
       html ? html.offsetHeight : 0
     ));
   }
-  function resizeFrame(){
+  function resizeFrame(i){
     try{
-      const contentHeight=measureFrameContent();
-      iframe.style.height=contentHeight+'px';
-      const hostHeight=frameHost.clientHeight;
+      const item=tabEls[i];
+      const contentHeight=measureFrameContent(i);
+      item.iframe.style.height=contentHeight+'px';
+      const hostHeight=item.frameHost.clientHeight;
       const needsScroll=contentHeight>hostHeight+1;
-      frameHost.style.overflowY=needsScroll?'auto':'hidden';
-      if(!needsScroll) frameHost.scrollTop=0;
-      applyFrameTextColour();
+      item.frameHost.style.overflowY=needsScroll?'auto':'hidden';
+      if(!needsScroll) item.frameHost.scrollTop=0;
+      applyFrameTextColour(i);
     }catch(e){ }
   }
-  function loadActiveFrame(){
-    const tab=manifest.tabs[activeIndex];
-    if(ro){ ro.disconnect(); ro=null; }
-    frameHost.scrollTop=0;
-    frameHost.style.overflowY='hidden';
-    iframe.removeAttribute('src');
-    iframe.style.height='0px';
-    iframe.onload=()=>{
-      resizeFrame();
+  function loadFrame(i){
+    const item=tabEls[i];
+    if(item.loaded) return;
+    const tab=manifest.tabs[i];
+    item.loaded=true;
+    item.frameHost.scrollTop=0;
+    item.frameHost.style.overflowY='hidden';
+    item.iframe.style.height='0px';
+    item.iframe.onload=()=>{
+      resizeFrame(i);
       requestAnimationFrame(()=>{
-        resizeFrame();
-        requestAnimationFrame(resizeFrame);
+        resizeFrame(i);
+        requestAnimationFrame(()=>resizeFrame(i));
       });
-      ro=new ResizeObserver(resizeFrame);
+      if(item.ro) item.ro.disconnect();
+      item.ro=new ResizeObserver(()=>resizeFrame(i));
       try{
-        ro.observe(iframe.contentWindow.document.body);
-        ro.observe(iframe.contentWindow.document.documentElement);
+        item.ro.observe(item.iframe.contentWindow.document.body);
+        item.ro.observe(item.iframe.contentWindow.document.documentElement);
       }catch(e){}
     };
-    iframe.src=tab.url;
+    item.iframe.src=tab.url;
   }
   function tabAtPoint(px,py){
     const L=manifest.layout;
@@ -444,8 +449,6 @@
     manifest=m;
     buildTabEls();
     paint();
-    frameHost.style.opacity='1';
-    loadActiveFrame();
   }).catch(err=>{
     shell.innerHTML=`<div style="padding:24px;font-family:system-ui,sans-serif;color:#a33;">
       <strong>Failed to load the tab stack.</strong><br>${(err&&err.message)||err}
