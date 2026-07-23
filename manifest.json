@@ -16,8 +16,7 @@
     },
     {
       "objectId": 2,
-      "id": "TIPS & TICKS",
-      "label": "Send the invoice",
+      "label": "TIPS & TICKS",
       "url": "pages/invoice.html",
       "colors": {
         "light": "#e4d5a8",
@@ -26,8 +25,7 @@
     },
     {
       "objectId": 3,
-      "id": "Json SCHEMA",
-      "label": "Call the dentist",
+      "label": "Json SCHEMA",
       "url": "pages/call.html",
       "colors": {
         "light": "#ede0b4",
@@ -36,8 +34,7 @@
     },
     {
       "objectId": 4,
-      "id": "DEFINING KEYS",
-      "label": "define keys",
+      "label": "DEFINING KEYS",
       "url": "pages/define_the_keys.html",
       "colors": {
         "light": "#f6eec9",
@@ -46,8 +43,7 @@
     },
     {
       "objectId": 5,
-      "id": "THE MANIFEST",
-      "label": "Return the library book",
+      "label": "APP MANIFEST",
       "url": "pages/return.html",
       "colors": {
         "light": "#EEF8CD",
@@ -56,8 +52,7 @@
     },
     {
       "objectId": 6,
-      "id": "SUPPORT",
-      "label": "Buy a birthday gift",
+      "label": "SUPPORT",
       "url": "pages/gift.html",
       "colors": {
         "light": "#BBF1D2",
