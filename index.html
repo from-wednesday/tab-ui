@@ -42,6 +42,13 @@
     z-index:20000;
     pointer-events:none;
   }
+  .shell.is-narrow .stack-title{
+    top:14px;
+    left:0;
+    width:100%;
+    padding:0 16px;
+    text-align:center;
+  }
   .tab{
     position:absolute;
     top:0; left:0;
@@ -181,12 +188,22 @@
   function resolvePageBg(){
     return getComputedStyle(document.body).backgroundColor;
   }
+  function isNarrowLayout(vw,L){
+    const baseMargin=32;
+    const edgeClearance=L.cornerRadiusPx+8;
+    const normalW=vw-baseMargin*2;
+    const usableW=normalW-L.flapWidthPx-edgeClearance*2;
+    const normalSlots=Math.max(1,Math.floor(usableW/L.flapStepPx)+1);
+    return normalSlots<2;
+  }
   function computeLayout(){
     const L=manifest.layout;
     const n=manifest.tabs.length;
     const vw=shell.clientWidth, vh=shell.clientHeight;
-    const baseMargin=32;
-    const titleOffset=18;
+    const narrow=isNarrowLayout(vw,L);
+    shell.classList.toggle('is-narrow', narrow);
+    const baseMargin=narrow?0:32;
+    const titleOffset=narrow?56:18;
     const headerCount=activeIndex;
     const footerCount=n-1-activeIndex;
     const peekStepPx = L.peekStepPx;
@@ -199,31 +216,34 @@
     const BASELINE_H = vh;
     const flapCascadeX=(i,containerW)=>{
       const edgeClearance=L.cornerRadiusPx+8;
-      const usableW=containerW - L.flapWidthPx - edgeClearance*2;
-      const slots=Math.max(1, Math.floor(usableW / L.flapStepPx) + 1);
-      const slot=(i + 1) % slots;
-      return edgeClearance + slot*L.flapStepPx;
+      if(narrow){
+        return i%2===0 ? Math.max(edgeClearance, containerW-edgeClearance-L.flapWidthPx) : edgeClearance;
+      }
+      const usableW=containerW-L.flapWidthPx-edgeClearance*2;
+      const slots=Math.max(1,Math.floor(usableW/L.flapStepPx)+1);
+      const slot=(i+1)%slots;
+      return edgeClearance+slot*L.flapStepPx;
     };
     const layout=manifest.tabs.map((tab,i)=>{
-      const stepsFromFront = (n-1) - i;
-      const margin = baseMargin + stepsFromFront;
-      const width = vw - margin*2;
-      const x = margin;
-      const zIndex = i;
+      const stepsFromFront=(n-1)-i;
+      const margin=narrow?0:baseMargin+stepsFromFront;
+      const width=vw-margin*2;
+      const x=margin;
+      const zIndex=i;
       if(i===activeIndex){
-        return {tab,i,isOpen:true,x,y:openTop,width,height:BASELINE_H,frameHostH:frameHostBottom-openTop,zIndex};
+        return {tab,i,isOpen:true,x,y:openTop,width,height:BASELINE_H,frameHostH:frameHostBottom-openTop,zIndex,narrow};
       }
       let y;
       if(i<activeIndex){
         const k=activeIndex-i;
-        y=openTop - k*peekStepPx;
+        y=openTop-k*peekStepPx;
       }else{
         const j=i-(activeIndex+1);
-        y=openBottomSeam + j*peekStepPx;
+        y=openBottomSeam+j*peekStepPx;
       }
-      return {tab,i,isOpen:false,x,y,width,height:BASELINE_H,zIndex};
+      return {tab,i,isOpen:false,x,y,width,height:BASELINE_H,zIndex,narrow};
     });
-    return {layout, flapCascadeX};
+    return {layout,flapCascadeX,narrow};
   }
   let tabEls=[];
   let lastLayout=[];
@@ -293,19 +313,19 @@
       return {el,svg,path,h2,frameHost,iframe,ro:null,loaded:false,lastPaneH:null};
     });
   }
-  function cascadeDelayFor(i, mode){
+  function cascadeDelayFor(i,mode){
     if(mode==='press') return 0;
-    const source = transitioningFrom ?? activeIndex;
+    const source=transitioningFrom??activeIndex;
     if(i===source) return 0;
     return Math.min(Math.abs(i-source),8)*cascadeStepMs;
   }
-  function paneHeightFor(i, frameHostH, L){
+  function paneHeightFor(i,frameHostH,L){
     if(i===activeIndex && frameHostH){
       const h=frameHostH-L.flapHeightPx;
       tabEls[i].lastPaneH=h;
       return h;
     }
-    return tabEls[i].lastPaneH || Math.max(0, shell.clientHeight-L.flapHeightPx);
+    return tabEls[i].lastPaneH || Math.max(0,shell.clientHeight-L.flapHeightPx);
   }
   function pressOffsetForTab(i){
     if(pressedIndex===null || pressedIndex===activeIndex) return 0;
@@ -315,7 +335,7 @@
     return i===pressedIndex ? pressOffsetPx : 0;
   }
   function paint(opts={}){
-    const mode=opts.mode || 'normal';
+    const mode=opts.mode||'normal';
     const L=manifest.layout;
     const {layout,flapCascadeX}=computeLayout();
     let maxDelay=0;
@@ -325,17 +345,17 @@
       const pressDy=pressOffsetForTab(i);
       const delay=cascadeDelayFor(i,mode);
       maxDelay=Math.max(maxDelay,delay);
-      el.style.setProperty('--tab-delay', delay+'ms');
-      el.style.setProperty('--tab-dur', (mode==='press' && (i===pressedIndex || pressDy!==0) ? pressMs : transitionMs)+'ms');
-      el.style.setProperty('--row-h', height+'px');
-      el.style.setProperty('--flap-h', L.flapHeightPx+'px');
+      el.style.setProperty('--tab-delay',delay+'ms');
+      el.style.setProperty('--tab-dur',(mode==='press' && (i===pressedIndex || pressDy!==0) ? pressMs : transitionMs)+'ms');
+      el.style.setProperty('--row-h',height+'px');
+      el.style.setProperty('--flap-h',L.flapHeightPx+'px');
       el.style.width=width+'px';
       el.style.zIndex=zIndex;
       el.style.transform=`translate(${x}px, ${y+pressDy}px) translateZ(0)`;
-      el.classList.toggle('is-active', isOpen);
-      const flapX=flapCascadeX(i, width);
+      el.classList.toggle('is-active',isOpen);
+      const flapX=flapCascadeX(i,width);
       const leanPx=L.flapHeightPx*Math.tan(L.flapAngleDeg*Math.PI/180);
-      const d=folderPath(width, height, flapX, L.flapWidthPx, L.flapHeightPx, leanPx, L.cornerRadiusPx, L.cornerRadiusPx);
+      const d=folderPath(width,height,flapX,L.flapWidthPx,L.flapHeightPx,leanPx,L.cornerRadiusPx,L.cornerRadiusPx);
       const tabBg=resolveBg();
       const pageBg=resolvePageBg();
       const textColour=darken(tabBg,0.80);
@@ -355,11 +375,11 @@
       frameHost.style.width='100%';
       frameHost.style.height=paneHeightFor(i,frameHostH,L)+'px';
       frameHost.style.borderRadius=L.cornerRadiusPx+'px';
-      frameHost.classList.toggle('is-visible', shouldShowPane(i));
+      frameHost.classList.toggle('is-visible',shouldShowPane(i));
       if(shouldShowPane(i)) loadFrame(i);
     });
     lastLayout=layout.map(({tab,i,x,y,width,zIndex})=>({i,x,y,width,flapX:flapCascadeX(i,width),zIndex}));
-    return maxDelay + transitionMs;
+    return maxDelay+transitionMs;
   }
   function primeParallaxStart(previousLayout){
     const previousByIndex=new Map(previousLayout.map(t=>[t.i,t]));
@@ -371,13 +391,13 @@
       if(!item || !old) return;
       const dy=y-old.y;
       const travel=Math.abs(dy);
-      const dir=dy===0 ? 0 : dy/Math.abs(dy);
-      const depth=Math.min(1.8, 1 + travel/Math.max(1,L.peekStepPx)*0.08);
-      const kick=dir===0 ? 0 : -dir*parallaxPx*depth;
+      const dir=dy===0?0:dy/Math.abs(dy);
+      const depth=Math.min(1.8,1+travel/Math.max(1,L.peekStepPx)*0.08);
+      const kick=dir===0?0:-dir*parallaxPx*depth;
       item.el.style.transition='none';
-      item.el.style.setProperty('--row-h', height+'px');
-      item.el.style.setProperty('--flap-h', L.flapHeightPx+'px');
-      item.el.style.setProperty('--tab-dur', transitionMs+'ms');
+      item.el.style.setProperty('--row-h',height+'px');
+      item.el.style.setProperty('--flap-h',L.flapHeightPx+'px');
+      item.el.style.setProperty('--tab-dur',transitionMs+'ms');
       item.el.style.setProperty('--tab-delay','0ms');
       item.el.style.width=width+'px';
       item.el.style.transform=`translate(${x}px, ${old.y+kick}px) translateZ(0)`;
@@ -415,10 +435,10 @@
     const body=doc.body;
     const html=doc.documentElement;
     return Math.ceil(Math.max(
-      body ? body.scrollHeight : 0,
-      body ? body.offsetHeight : 0,
-      html ? html.scrollHeight : 0,
-      html ? html.offsetHeight : 0
+      body?body.scrollHeight:0,
+      body?body.offsetHeight:0,
+      html?html.scrollHeight:0,
+      html?html.offsetHeight:0
     ));
   }
   function resizeFrame(i){
@@ -473,14 +493,14 @@
   shell.addEventListener('click',(e)=>{
     if(!manifest) return;
     const rect=shell.getBoundingClientRect();
-    const i=tabAtPoint(e.clientX-rect.left, e.clientY-rect.top);
+    const i=tabAtPoint(e.clientX-rect.left,e.clientY-rect.top);
     if(i!==null) setActive(i);
   });
   shell.addEventListener('mousemove',(e)=>{
     if(!manifest) return;
     const rect=shell.getBoundingClientRect();
-    const i=tabAtPoint(e.clientX-rect.left, e.clientY-rect.top);
-    shell.style.cursor=(i!==null && i!==activeIndex) ? 'pointer' : 'default';
+    const i=tabAtPoint(e.clientX-rect.left,e.clientY-rect.top);
+    shell.style.cursor=(i!==null && i!==activeIndex)?'pointer':'default';
   });
   fetch('manifest.json').then(r=>r.json()).then(m=>{
     manifest=m;
@@ -491,7 +511,7 @@
       <strong>Failed to load the tab stack.</strong><br>${(err&&err.message)||err}
     </div>`;
   });
-  window.addEventListener('error', (e)=>{
+  window.addEventListener('error',(e)=>{
     if(shell.querySelector('.tab')) return;
     shell.innerHTML=`<div style="padding:24px;font-family:system-ui,sans-serif;color:#a33;">
       <strong>Script error:</strong><br>${e.message} (${e.filename}:${e.lineno})
