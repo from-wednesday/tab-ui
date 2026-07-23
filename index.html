@@ -169,7 +169,7 @@
   const cascadeStepMs=120;
   const transitionMs=420;
   const pressMs=90;
-  const parallaxPx=12;
+  const parallaxPx=18;
   const theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light';
   document.body.dataset.theme=theme;
   const shell=document.getElementById('shell');
@@ -295,8 +295,9 @@
   }
   function cascadeDelayFor(i, mode){
     if(mode==='press') return 0;
-    if(i===activeIndex) return 0;
-    return Math.min(Math.abs(i-activeIndex),8)*cascadeStepMs;
+    const source = transitioningFrom ?? activeIndex;
+    if(i===source) return 0;
+    return Math.min(Math.abs(i-source),8)*cascadeStepMs;
   }
   function paneHeightFor(i, frameHostH, L){
     if(i===activeIndex && frameHostH){
