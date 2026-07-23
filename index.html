@@ -109,14 +109,6 @@
   <div id="frameHost">
     <iframe id="contentFrame" title="Tab content"></iframe>
   </div>
-  <svg width="0" height="0" style="position:absolute">
-    <defs>
-      <filter id="handDrawn" x="-30%" y="-30%" width="160%" height="160%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise"/>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.1"/>
-      </filter>
-    </defs>
-  </svg>
 </div>
 <script>
 (function(){
@@ -271,7 +263,6 @@
       path.setAttribute('stroke',pageBg);
       path.setAttribute('stroke-width','1.6');
       path.setAttribute('stroke-linejoin','round');
-      path.style.filter='url(#handDrawn)';
       svg.style.filter=i===0?'drop-shadow(1px -1px 2px rgba(0,0,0,.055))':'drop-shadow(1px -2px 4px rgba(0,0,0,.10))';
       h2.style.left=flapX+'px';
       h2.style.width=L.flapWidthPx+'px';
