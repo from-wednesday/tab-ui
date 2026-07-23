@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tab Stack</title>
 <style>
   :root{
@@ -26,6 +26,7 @@
   .shell{
     position:relative;
     height:100vh;
+    height:100dvh;
     width:100vw;
     overflow:hidden;
   }
@@ -43,7 +44,7 @@
     pointer-events:none;
   }
   .shell.is-narrow .stack-title{
-    top:14px;
+    top:calc(14px + env(safe-area-inset-top, 0px));
     left:0;
     width:100%;
     padding:0 16px;
@@ -177,6 +178,8 @@
   const transitionMs=560;
   const pressMs=90;
   const parallaxPx=18;
+  const minPeekStepPx=18;
+  const tabStackMaxShare=0.34;
   const theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light';
   document.body.dataset.theme=theme;
   const shell=document.getElementById('shell');
@@ -188,6 +191,12 @@
   function resolvePageBg(){
     return getComputedStyle(document.body).backgroundColor;
   }
+  function currentViewportHeight(){
+    if(window.visualViewport && window.visualViewport.height){
+      return Math.round(window.visualViewport.height);
+    }
+    return shell.clientHeight;
+  }
   function isNarrowLayout(vw,L){
     const baseMargin=32;
     const edgeClearance=L.cornerRadiusPx+8;
@@ -196,17 +205,26 @@
     const normalSlots=Math.max(1,Math.floor(usableW/L.flapStepPx)+1);
     return normalSlots<2;
   }
+  function effectivePeekStep(vh,n,narrow,L){
+    let peek=L.peekStepPx;
+    if(narrow || vh<720){
+      const maxStackPx=Math.max(L.flapHeightPx*1.8, vh*tabStackMaxShare);
+      const maxPeek=Math.floor(maxStackPx/Math.max(1,n-1));
+      peek=Math.max(minPeekStepPx,Math.min(L.peekStepPx,maxPeek));
+    }
+    return peek;
+  }
   function computeLayout(){
     const L=manifest.layout;
     const n=manifest.tabs.length;
-    const vw=shell.clientWidth, vh=shell.clientHeight;
+    const vw=shell.clientWidth, vh=currentViewportHeight();
     const narrow=isNarrowLayout(vw,L);
     shell.classList.toggle('is-narrow', narrow);
     const baseMargin=narrow?0:32;
-    const titleOffset=narrow?56:18;
+    const titleOffset=narrow ? 56 : 18;
     const headerCount=activeIndex;
     const footerCount=n-1-activeIndex;
-    const peekStepPx = L.peekStepPx;
+    const peekStepPx = effectivePeekStep(vh,n,narrow,L);
     const headerSpan = headerCount*peekStepPx;
     const openTop = titleOffset + headerSpan;
     const bottomMarginPx = (L.flapHeightPx - peekStepPx) + 12;
@@ -325,7 +343,7 @@
       tabEls[i].lastPaneH=h;
       return h;
     }
-    return tabEls[i].lastPaneH || Math.max(0,shell.clientHeight-L.flapHeightPx);
+    return tabEls[i].lastPaneH || Math.max(0,currentViewportHeight()-L.flapHeightPx);
   }
   function pressOffsetForTab(i){
     if(pressedIndex===null || pressedIndex===activeIndex) return 0;
@@ -517,7 +535,14 @@
       <strong>Script error:</strong><br>${e.message} (${e.filename}:${e.lineno})
     </div>`;
   });
-  window.addEventListener('resize',()=>{ if(manifest) paint(); });
+  function queuePaint(){
+    if(manifest) requestAnimationFrame(()=>paint());
+  }
+  window.addEventListener('resize',queuePaint);
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',queuePaint);
+    window.visualViewport.addEventListener('scroll',queuePaint);
+  }
 })();
 </script>
 </body>
