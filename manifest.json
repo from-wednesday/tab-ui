@@ -9,11 +9,7 @@
       "objectId": 1,
       "id": "water",
       "label": "Water the plants",
-      "url": "pages/water.html",
-      "colors": {
-        "light": "#EDE0B4",
-        "dark": "#6f7277"
-      }
+      "url": "pages/water.html"
     },
     {
       "objectId": 2,
@@ -21,7 +17,7 @@
       "label": "Send the invoice",
       "url": "pages/invoice.html",
       "colors": {
-        "light": "#E8D5A3",
+        "light": "#CFECF3",
         "dark": "#74777c"
       }
     },
