@@ -9,7 +9,11 @@
       "objectId": 1,
       "id": "water",
       "label": "Water the plants",
-      "url": "pages/water.html"
+      "url": "pages/water.html",
+        "colors": {
+        "light": "#d9c99d",
+        "dark": "#74777c"
+      }
     },
     {
       "objectId": 2,
@@ -17,7 +21,7 @@
       "label": "Send the invoice",
       "url": "pages/invoice.html",
       "colors": {
-        "light": "#CFECF3",
+        "light": "#e4d5a8",
         "dark": "#74777c"
       }
     },
@@ -27,7 +31,7 @@
       "label": "Call the dentist",
       "url": "pages/call.html",
       "colors": {
-        "light": "#FF9D9D",
+        "light": "#ede0b4",
         "dark": "#659287"
       }
     },
@@ -37,7 +41,7 @@
       "label": "define keys",
       "url": "pages/define_the_keys.html",
       "colors": {
-        "light": "#FFC5AA",
+        "light": "#f6eec9",
         "dark": "#88BDA4"
       }
     },
