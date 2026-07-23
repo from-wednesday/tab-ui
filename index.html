@@ -131,6 +131,30 @@
   const scale=(a,s)=>({x:a.x*s,y:a.y*s});
   const len=(a)=>Math.hypot(a.x,a.y);
   const normalize=(a)=>{ const l=len(a)||1; return {x:a.x/l,y:a.y/l}; };
+
+  function cfgNumber(section,key,fallback){
+    const v=manifest && manifest[section] ? manifest[section][key] : undefined;
+    return Number.isFinite(Number(v)) ? Number(v) : fallback;
+  }
+  function cfgBool(section,key,fallback){
+    const v=manifest && manifest[section] ? manifest[section][key] : undefined;
+    return typeof v==='boolean' ? v : fallback;
+  }
+  function nestedCfg(section,group,key,fallback){
+    const obj=manifest && manifest[section] && manifest[section][group] ? manifest[section][group] : null;
+    return obj && obj[key] !== undefined ? obj[key] : fallback;
+  }
+  function animNumber(key,fallback){ return cfgNumber('animation',key,fallback); }
+  function responsiveNumber(key,fallback){ return cfgNumber('responsive',key,fallback); }
+  function responsiveBool(key,fallback){ return cfgBool('responsive',key,fallback); }
+  function narrowSetting(key,fallback){ return nestedCfg('responsive','narrowMode',key,fallback); }
+  function animationEasing(){ return (manifest.animation && manifest.animation.easing) || 'cubic-bezier(.22,1,.36,1)'; }
+  function applyManifestRuntimeSettings(){
+    document.documentElement.style.setProperty('--ease', animationEasing());
+    document.documentElement.style.setProperty('--dur', animNumber('transitionMs',560)+'ms');
+    document.documentElement.style.setProperty('--press-dur', animNumber('pressMs',90)+'ms');
+  }
+
   function roundedPolygonPath(points, radius){
     const d=[]; const n=points.length;
     const radii = Array.isArray(radius) ? radius : points.map(()=>radius);
@@ -173,31 +197,35 @@
   let pressedIndex=null;
   let transitioningFrom=null;
   let transitionTimer=null;
-  const pressOffsetPx=4;
-  const cascadeStepMs=35;
-  const transitionMs=560;
-  const pressMs=90;
-  const parallaxPx=18;
-  const minPeekStepPx=18;
-  const tabStackMaxShare=0.34;
   const theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light';
   document.body.dataset.theme=theme;
   const shell=document.getElementById('shell');
   const tabLayer=document.getElementById('tabLayer');
   const stackTitle=document.getElementById('stackTitle');
+
   function resolveBg(){
     return manifest.colors[theme] || manifest.colors.light;
+  }
+  function resolveTabBg(tab){
+    if(tab && tab.colors){
+      return tab.colors[theme] || tab.colors.light || tab.colors.dark || resolveBg();
+    }
+    return resolveBg();
   }
   function resolvePageBg(){
     return getComputedStyle(document.body).backgroundColor;
   }
+  function useVisualViewport(){
+    return responsiveBool('useVisualViewport', responsiveBool('useDynamicViewport', true));
+  }
   function currentViewportHeight(){
-    if(window.visualViewport && window.visualViewport.height){
+    if(useVisualViewport() && window.visualViewport && window.visualViewport.height){
       return Math.round(window.visualViewport.height);
     }
     return shell.clientHeight;
   }
   function isNarrowLayout(vw,L){
+    if(narrowSetting('enabled',true) === false) return false;
     const baseMargin=32;
     const edgeClearance=L.cornerRadiusPx+8;
     const normalW=vw-baseMargin*2;
@@ -207,10 +235,13 @@
   }
   function effectivePeekStep(vh,n,narrow,L){
     let peek=L.peekStepPx;
-    if(narrow || vh<720){
-      const maxStackPx=Math.max(L.flapHeightPx*1.8, vh*tabStackMaxShare);
+    const compactAt=responsiveNumber('compactAtViewportHeightPx',720);
+    if(narrow || vh<compactAt){
+      const maxShare=responsiveNumber('tabStackMaxViewportShare',0.34);
+      const minPeek=responsiveNumber('minPeekStepPx',18);
+      const maxStackPx=Math.max(L.flapHeightPx*1.8, vh*maxShare);
       const maxPeek=Math.floor(maxStackPx/Math.max(1,n-1));
-      peek=Math.max(minPeekStepPx,Math.min(L.peekStepPx,maxPeek));
+      peek=Math.max(minPeek,Math.min(L.peekStepPx,maxPeek));
     }
     return peek;
   }
@@ -219,9 +250,13 @@
     const n=manifest.tabs.length;
     const vw=shell.clientWidth, vh=currentViewportHeight();
     const narrow=isNarrowLayout(vw,L);
-    shell.classList.toggle('is-narrow', narrow);
-    const baseMargin=narrow?0:32;
-    const titleOffset=narrow ? 56 : 18;
+    const titleRow=narrow && narrowSetting('titleRow',true);
+    const fullWidthTabs=narrow && narrowSetting('fullWidthTabs',true);
+    const alternateFlaps=narrow && narrowSetting('alternateFlaps',true);
+    const firstFlapSide=narrowSetting('firstFlapSide','right');
+    shell.classList.toggle('is-narrow', titleRow);
+    const baseMargin=32;
+    const titleOffset=titleRow ? 56 : 18;
     const headerCount=activeIndex;
     const footerCount=n-1-activeIndex;
     const peekStepPx = effectivePeekStep(vh,n,narrow,L);
@@ -234,8 +269,10 @@
     const BASELINE_H = vh;
     const flapCascadeX=(i,containerW)=>{
       const edgeClearance=L.cornerRadiusPx+8;
-      if(narrow){
-        return i%2===0 ? Math.max(edgeClearance, containerW-edgeClearance-L.flapWidthPx) : edgeClearance;
+      if(alternateFlaps){
+        const evenRight = firstFlapSide !== 'left';
+        const rightSide = (i%2===0) ? evenRight : !evenRight;
+        return rightSide ? Math.max(edgeClearance, containerW-edgeClearance-L.flapWidthPx) : edgeClearance;
       }
       const usableW=containerW-L.flapWidthPx-edgeClearance*2;
       const slots=Math.max(1,Math.floor(usableW/L.flapStepPx)+1);
@@ -244,7 +281,7 @@
     };
     const layout=manifest.tabs.map((tab,i)=>{
       const stepsFromFront=(n-1)-i;
-      const margin=narrow?0:baseMargin+stepsFromFront;
+      const margin=fullWidthTabs ? 0 : baseMargin+stepsFromFront;
       const width=vw-margin*2;
       const x=margin;
       const zIndex=i;
@@ -289,6 +326,7 @@
       const el=document.createElement('div');
       el.className='tab';
       el.dataset.index=i;
+      el.dataset.objectId=tab.objectId || (i+1);
       const ns='http://www.w3.org/2000/svg';
       const svg=document.createElementNS(ns,'svg');
       const path=document.createElementNS(ns,'path');
@@ -335,7 +373,7 @@
     if(mode==='press') return 0;
     const source=transitioningFrom??activeIndex;
     if(i===source) return 0;
-    return Math.min(Math.abs(i-source),8)*cascadeStepMs;
+    return Math.min(Math.abs(i-source),8)*animNumber('cascadeStepMs',35);
   }
   function paneHeightFor(i,frameHostH,L){
     if(i===activeIndex && frameHostH){
@@ -347,6 +385,7 @@
   }
   function pressOffsetForTab(i){
     if(pressedIndex===null || pressedIndex===activeIndex) return 0;
+    const pressOffsetPx=animNumber('pressOffsetPx',4);
     if(pressedIndex<activeIndex){
       return (i>pressedIndex && i<=activeIndex) ? -pressOffsetPx : 0;
     }
@@ -356,6 +395,8 @@
     const mode=opts.mode||'normal';
     const L=manifest.layout;
     const {layout,flapCascadeX}=computeLayout();
+    const transitionMs=animNumber('transitionMs',560);
+    const pressMs=animNumber('pressMs',90);
     let maxDelay=0;
     stackTitle.textContent=manifest.title||'';
     layout.forEach(({tab,i,isOpen,x,y,width,height,frameHostH,zIndex})=>{
@@ -374,11 +415,11 @@
       const flapX=flapCascadeX(i,width);
       const leanPx=L.flapHeightPx*Math.tan(L.flapAngleDeg*Math.PI/180);
       const d=folderPath(width,height,flapX,L.flapWidthPx,L.flapHeightPx,leanPx,L.cornerRadiusPx,L.cornerRadiusPx);
-      const tabBg=resolveBg();
+      const tabBg=resolveTabBg(tab);
       const pageBg=resolvePageBg();
       const textColour=darken(tabBg,0.80);
-      document.body.style.color=textColour;
-      stackTitle.style.color=textColour;
+      document.body.style.color=darken(resolveTabBg(manifest.tabs[activeIndex]),0.80);
+      stackTitle.style.color=document.body.style.color;
       h2.style.color=textColour;
       path.setAttribute('d',d);
       path.setAttribute('fill',tabBg);
@@ -403,6 +444,8 @@
     const previousByIndex=new Map(previousLayout.map(t=>[t.i,t]));
     const L=manifest.layout;
     const {layout}=computeLayout();
+    const transitionMs=animNumber('transitionMs',560);
+    const parallaxPx=animNumber('parallaxPx',18);
     layout.forEach(({i,x,y,width,height})=>{
       const item=tabEls[i];
       const old=previousByIndex.get(i);
@@ -443,7 +486,7 @@
     try{
       const item=tabEls[i];
       const doc=item.iframe.contentWindow.document;
-      const textColour=darken(resolveBg(),0.80);
+      const textColour=darken(resolveTabBg(manifest.tabs[i]),0.80);
       doc.documentElement.style.color=textColour;
       if(doc.body) doc.body.style.color=textColour;
     }catch(e){ }
@@ -522,6 +565,7 @@
   });
   fetch('manifest.json').then(r=>r.json()).then(m=>{
     manifest=m;
+    applyManifestRuntimeSettings();
     buildTabEls();
     paint();
   }).catch(err=>{

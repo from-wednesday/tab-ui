@@ -1,13 +1,70 @@
 {
-  "title": "My Reminder To\u2026",
-  "colors": { "light": "#EDE0B4", "dark": "#6f7277" },
+  "title": "My Reminder To…",
+  "colors": {
+    "light": "#EDE0B4",
+    "dark": "#6f7277"
+  },
   "tabs": [
-    { "id": "water",   "label": "Water the plants",       "url": "pages/water.html" },
-    { "id": "invoice", "label": "Send the invoice",        "url": "pages/invoice.html" },
-    { "id": "call",    "label": "Call the dentist",        "url": "pages/call.html" },
-    { "id": "keys",    "label": "define keys",             "url": "pages/define_the_keys.html" },
-    { "id": "return",  "label": "Return the library book", "url": "pages/return.html" },
-    { "id": "gift",    "label": "Buy a birthday gift",     "url": "pages/gift.html" }
+    {
+      "objectId": 1,
+      "id": "water",
+      "label": "Water the plants",
+      "url": "pages/water.html",
+      "colors": {
+        "light": "#EDE0B4",
+        "dark": "#6f7277"
+      }
+    },
+    {
+      "objectId": 2,
+      "id": "invoice",
+      "label": "Send the invoice",
+      "url": "pages/invoice.html",
+      "colors": {
+        "light": "#E8D5A3",
+        "dark": "#74777c"
+      }
+    },
+    {
+      "objectId": 3,
+      "id": "call",
+      "label": "Call the dentist",
+      "url": "pages/call.html",
+      "colors": {
+        "light": "#E4CE97",
+        "dark": "#7a7d82"
+      }
+    },
+    {
+      "objectId": 4,
+      "id": "keys",
+      "label": "define keys",
+      "url": "pages/define_the_keys.html",
+      "colors": {
+        "light": "#F0E4C1",
+        "dark": "#686b70"
+      }
+    },
+    {
+      "objectId": 5,
+      "id": "return",
+      "label": "Return the library book",
+      "url": "pages/return.html",
+      "colors": {
+        "light": "#DDC487",
+        "dark": "#808388"
+      }
+    },
+    {
+      "objectId": 6,
+      "id": "gift",
+      "label": "Buy a birthday gift",
+      "url": "pages/gift.html",
+      "colors": {
+        "light": "#F3E8CA",
+        "dark": "#606368"
+      }
+    }
   ],
   "layout": {
     "peekStepPx": 28,
@@ -17,5 +74,27 @@
     "flapHeightPx": 40,
     "flapAngleDeg": 14,
     "cornerRadiusPx": 16
+  },
+  "responsive": {
+    "useDynamicViewport": true,
+    "useVisualViewport": true,
+    "minPeekStepPx": 18,
+    "tabStackMaxViewportShare": 0.34,
+    "compactAtViewportHeightPx": 720,
+    "narrowMode": {
+      "enabled": true,
+      "titleRow": true,
+      "fullWidthTabs": true,
+      "alternateFlaps": true,
+      "firstFlapSide": "right"
+    }
+  },
+  "animation": {
+    "easing": "cubic-bezier(.22,1,.36,1)",
+    "cascadeStepMs": 35,
+    "transitionMs": 560,
+    "pressMs": 90,
+    "pressOffsetPx": 4,
+    "parallaxPx": 18
   }
 }
