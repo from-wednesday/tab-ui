@@ -46,10 +46,12 @@
     position:absolute;
     overflow-y:auto;
     overflow-x:hidden;
+    opacity:1;
     background:transparent;
     transition:
-      top var(--dur) var(--ease), left var(--dur) var(--ease),
-      width var(--dur) var(--ease), height var(--dur) var(--ease);
+      top var(--frame-dur,var(--dur)) var(--ease), left var(--frame-dur,var(--dur)) var(--ease),
+      width var(--frame-dur,var(--dur)) var(--ease), height var(--frame-dur,var(--dur)) var(--ease),
+      opacity 180ms ease;
     -webkit-overflow-scrolling:touch;
   }
   #frameHost::-webkit-scrollbar{ width:9px; }
@@ -65,9 +67,9 @@
     top:0; left:0;
     height:var(--row-h);
     transition:
-      transform var(--dur) var(--ease),
-      width var(--dur) var(--ease),
-      height var(--dur) var(--ease);
+      transform var(--tab-dur,var(--dur)) var(--ease),
+      width var(--tab-dur,var(--dur)) var(--ease),
+      height var(--tab-dur,var(--dur)) var(--ease);
     will-change:transform;
     -webkit-backface-visibility:hidden;
     backface-visibility:hidden;
@@ -160,6 +162,12 @@
   let manifest=null;
   let activeIndex=0;
   let prevIndex=0;
+  let pressedIndex=null;
+  let revealTimer=null;
+  const baseTabDurationMs=420;
+  const perStepDurationMs=200;
+  const pressDurationMs=90;
+  const pressOffsetPx=4;
   const theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light';
   document.body.dataset.theme=theme;
   const shell=document.getElementById('shell');
@@ -203,7 +211,7 @@
       const x = margin;
       const zIndex = i;
       if(i===activeIndex){
-        return { tab,i,isOpen:true, x, y:openTop, width, height:BASELINE_H, frameHostH:frameHostBottom-openTop, zIndex, delayMs:0 };
+        return { tab,i,isOpen:true, x, y:openTop, width, height:BASELINE_H, frameHostH:frameHostBottom-openTop, zIndex };
       }
       let y;
       if(i<activeIndex){
@@ -213,14 +221,27 @@
         const j=i-(activeIndex+1);
         y=openBottomSeam + j*peekStepPx;
       }
-      const distFromSource=Math.abs(i-prevIndex);
-      const delayMs=Math.min(distFromSource,8)*L.staggerStepMs;
-      return {tab,i,isOpen:false,x,y,width,height:BASELINE_H,zIndex,delayMs};
+      return {tab,i,isOpen:false,x,y,width,height:BASELINE_H,zIndex};
     });
     return {layout, flapCascadeX};
   }
   let tabEls=[];
   let lastLayout=[];
+  function startPress(i,e,path){
+    if(!manifest || i===activeIndex) return;
+    pressedIndex=i;
+    try{ path.setPointerCapture(e.pointerId); }catch(err){}
+    paint();
+  }
+  function finishPress(i,activate){
+    if(pressedIndex!==i) return;
+    pressedIndex=null;
+    if(activate && i!==activeIndex){
+      setActive(i);
+    }else{
+      paint();
+    }
+  }
   function buildTabEls(){
     tabLayer.innerHTML='';
     tabEls=manifest.tabs.map((tab,i)=>{
@@ -230,9 +251,23 @@
       const ns='http://www.w3.org/2000/svg';
       const svg=document.createElementNS(ns,'svg');
       const path=document.createElementNS(ns,'path');
-      path.addEventListener('click',(e)=>{
+      path.addEventListener('pointerdown',(e)=>{
+        e.preventDefault();
         e.stopPropagation();
-        setActive(i);
+        startPress(i,e,path);
+      });
+      path.addEventListener('pointerup',(e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        finishPress(i,true);
+      });
+      path.addEventListener('pointercancel',(e)=>{
+        e.stopPropagation();
+        finishPress(i,false);
+      });
+      path.addEventListener('click',(e)=>{
+        e.preventDefault();
+        e.stopPropagation();
       });
       path.addEventListener('mouseenter',()=>{
         shell.style.cursor=i!==activeIndex?'pointer':'default';
@@ -249,19 +284,32 @@
       return {el,svg,path,h2};
     });
   }
+  function durationForTab(i,y,L,oldLayoutByIndex){
+    if(i===pressedIndex) return pressDurationMs;
+    const old=oldLayoutByIndex.get(i);
+    if(!old) return baseTabDurationMs;
+    const travel=Math.abs(y-old.y);
+    if(travel<1) return baseTabDurationMs;
+    const step=Math.max(0,Math.round(travel/Math.max(1,L.peekStepPx))-1);
+    return baseTabDurationMs + Math.min(step,8)*perStepDurationMs;
+  }
   function paint(){
     const L=manifest.layout;
+    const oldLayoutByIndex=new Map(lastLayout.map(t=>[t.i,t]));
     const {layout,flapCascadeX}=computeLayout();
-    lastLayout=layout.map(({tab,i,x,y,width,zIndex})=>({i,x,y,width,flapX:flapCascadeX(i,width),zIndex}));
+    let maxDuration=baseTabDurationMs;
     stackTitle.textContent=manifest.title||'';
-    layout.forEach(({tab,i,isOpen,x,y,width,height,frameHostH,zIndex,delayMs})=>{
+    layout.forEach(({tab,i,isOpen,x,y,width,height,frameHostH,zIndex})=>{
       const {el,svg,path,h2}=tabEls[i];
+      const pressDy=(i===pressedIndex && i!==activeIndex) ? (i<activeIndex ? -pressOffsetPx : pressOffsetPx) : 0;
+      const durationMs=durationForTab(i,y,L,oldLayoutByIndex);
+      maxDuration=Math.max(maxDuration,durationMs);
+      el.style.setProperty('--tab-dur', durationMs+'ms');
       el.style.setProperty('--row-h', height+'px');
       el.style.setProperty('--flap-h', L.flapHeightPx+'px');
-      el.style.transitionDelay=delayMs+'ms';
       el.style.width=width+'px';
       el.style.zIndex=zIndex;
-      el.style.transform=`translate(${x}px, ${y}px) translateZ(0)`;
+      el.style.transform=`translate(${x}px, ${y+pressDy}px) translateZ(0)`;
       el.classList.toggle('is-active', isOpen);
       const flapX=flapCascadeX(i, width);
       const leanPx=L.flapHeightPx*Math.tan(L.flapAngleDeg*Math.PI/180);
@@ -284,6 +332,7 @@
       if(isOpen){
         const fhX=x, fhW=width;
         const fhY=y+L.flapHeightPx, fhH=frameHostH-L.flapHeightPx;
+        frameHost.style.setProperty('--frame-dur', durationMs+'ms');
         frameHost.style.left=fhX+'px';
         frameHost.style.top=fhY+'px';
         frameHost.style.width=fhW+'px';
@@ -292,13 +341,26 @@
         frameHost.style.zIndex=zIndex;
       }
     });
+    lastLayout=layout.map(({tab,i,x,y,width,zIndex})=>({i,x,y,width,flapX:flapCascadeX(i,width),zIndex}));
+    return maxDuration;
+  }
+  function revealFrameAfter(waitMs){
+    if(revealTimer) clearTimeout(revealTimer);
+    frameHost.style.opacity='0';
+    revealTimer=setTimeout(()=>{
+      frameHost.style.opacity='1';
+      resizeFrame();
+    },Math.max(180,Math.round(waitMs*0.9)));
   }
   function setActive(i){
     if(i===activeIndex) return;
+    if(revealTimer) clearTimeout(revealTimer);
     prevIndex=activeIndex;
+    frameHost.style.opacity='0';
     activeIndex=i;
-    paint();
+    const maxDuration=paint();
     loadActiveFrame();
+    revealFrameAfter(maxDuration);
   }
   let ro=null;
   function applyFrameTextColour(){
@@ -382,6 +444,7 @@
     manifest=m;
     buildTabEls();
     paint();
+    frameHost.style.opacity='1';
     loadActiveFrame();
   }).catch(err=>{
     shell.innerHTML=`<div style="padding:24px;font-family:system-ui,sans-serif;color:#a33;">
