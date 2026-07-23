@@ -197,6 +197,9 @@
   let pressedIndex=null;
   let transitioningFrom=null;
   let transitionTimer=null;
+  let isLoadingPhase=true;
+  let framesLoadedCount=0;
+  let loadingSafetyTimer=null;
   const theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light';
   document.body.dataset.theme=theme;
   const shell=document.getElementById('shell');
@@ -300,13 +303,101 @@
     });
     return {layout,flapCascadeX,narrow};
   }
+
+  // ── Loading skeleton layout ─────────────────────────────────────
+  // All tabs sit closed, cascading gently down from the title, none
+  // open yet. x/width per index match computeLayout()'s formula
+  // exactly, so the reveal only ever has to animate y — the same
+  // kind of move already used when switching between tabs.
+  function computeLoadingLayout(){
+    const L=manifest.layout;
+    const n=manifest.tabs.length;
+    const vw=shell.clientWidth, vh=currentViewportHeight();
+    const narrow=isNarrowLayout(vw,L);
+    const titleRow=narrow && narrowSetting('titleRow',true);
+    const fullWidthTabs=narrow && narrowSetting('fullWidthTabs',true);
+    const alternateFlaps=narrow && narrowSetting('alternateFlaps',true);
+    const firstFlapSide=narrowSetting('firstFlapSide','right');
+    shell.classList.toggle('is-narrow', titleRow);
+    const baseMargin=32;
+    const titleOffset=titleRow ? 56 : 18;
+    const peekStepPx=effectivePeekStep(vh,n,narrow,L);
+    const BASELINE_H=vh;
+    const flapCascadeX=(i,containerW)=>{
+      const edgeClearance=L.cornerRadiusPx+8;
+      if(alternateFlaps){
+        const evenRight = firstFlapSide !== 'left';
+        const rightSide = (i%2===0) ? evenRight : !evenRight;
+        return rightSide ? Math.max(edgeClearance, containerW-edgeClearance-L.flapWidthPx) : edgeClearance;
+      }
+      const usableW=containerW-L.flapWidthPx-edgeClearance*2;
+      const slots=Math.max(1,Math.floor(usableW/L.flapStepPx)+1);
+      const slot=(i+1)%slots;
+      return edgeClearance+slot*L.flapStepPx;
+    };
+    const layout=manifest.tabs.map((tab,i)=>{
+      const stepsFromFront=(n-1)-i;
+      const margin=fullWidthTabs ? 0 : baseMargin+stepsFromFront;
+      const width=vw-margin*2;
+      const x=margin;
+      const y=titleOffset+i*peekStepPx;
+      const zIndex=i;
+      return {tab,i,isOpen:false,x,y,width,height:BASELINE_H,zIndex,narrow};
+    });
+    return {layout,flapCascadeX,narrow};
+  }
+
+  function paintLoading(opts={}){
+    const L=manifest.layout;
+    const {layout,flapCascadeX}=computeLoadingLayout();
+    const instant=opts.instant===true;
+    const transitionMs=animNumber('transitionMs',560);
+    stackTitle.textContent=manifest.title||'';
+    const refColour=darken(resolveTabBg(manifest.tabs[0]),0.80);
+    document.body.style.color=refColour;
+    stackTitle.style.color=refColour;
+    layout.forEach(({tab,i,x,y,width,height,zIndex})=>{
+      const {el,svg,path,h2,frameHost}=tabEls[i];
+      el.style.setProperty('--tab-delay','0ms');
+      el.style.setProperty('--tab-dur',(instant?0:transitionMs)+'ms');
+      el.style.setProperty('--row-h',height+'px');
+      el.style.setProperty('--flap-h',L.flapHeightPx+'px');
+      el.style.width=width+'px';
+      el.style.zIndex=zIndex;
+      el.style.transform=`translate(${x}px, ${y}px) translateZ(0)`;
+      el.classList.remove('is-active');
+      const flapX=flapCascadeX(i,width);
+      const leanPx=L.flapHeightPx*Math.tan(L.flapAngleDeg*Math.PI/180);
+      const d=folderPath(width,height,flapX,L.flapWidthPx,L.flapHeightPx,leanPx,L.cornerRadiusPx,L.cornerRadiusPx);
+      const tabBg=resolveTabBg(tab);
+      const pageBg=resolvePageBg();
+      const textColour=darken(tabBg,0.80);
+      h2.style.color=textColour;
+      path.setAttribute('d',d);
+      path.setAttribute('fill',tabBg);
+      path.setAttribute('stroke',pageBg);
+      path.setAttribute('stroke-width','1.6');
+      path.setAttribute('stroke-linejoin','round');
+      svg.style.filter=i===0?'drop-shadow(1px -1px 2px rgba(0,0,0,.055))':'drop-shadow(1px -2px 4px rgba(0,0,0,.10))';
+      h2.style.left=flapX+'px';
+      h2.style.width=L.flapWidthPx+'px';
+      h2.style.right='auto';
+      frameHost.style.top=L.flapHeightPx+'px';
+      frameHost.style.width='100%';
+      frameHost.style.height=Math.max(0,height-L.flapHeightPx)+'px';
+      frameHost.style.borderRadius=L.cornerRadiusPx+'px';
+      frameHost.classList.remove('is-visible');
+    });
+    lastLayout=layout.map(({tab,i,x,y,width,zIndex})=>({i,x,y,width,flapX:flapCascadeX(i,width),zIndex}));
+  }
+
   let tabEls=[];
   let lastLayout=[];
   function shouldShowPane(i){
     return i===activeIndex || i===transitioningFrom;
   }
   function startPress(i,e,path){
-    if(!manifest || i===activeIndex) return;
+    if(!manifest || isLoadingPhase || i===activeIndex) return;
     pressedIndex=i;
     try{ path.setPointerCapture(e.pointerId); }catch(err){}
     paint({mode:'press'});
@@ -437,7 +528,7 @@
       frameHost.classList.toggle('is-visible',shouldShowPane(i));
       if(shouldShowPane(i)) loadFrame(i);
     });
-    lastLayout=layout.map(({tab,i,x,y,width,zIndex})=>({i,x,y,width,flapX:flapCascadeX(i,width),zIndex}));
+    lastLayout=layout.map(({tab,i,x,y,width,zIndex})=>({i,x,y,width,zIndex,flapX:flapCascadeX(i,width)}));
     return maxDelay+transitionMs;
   }
   function primeParallaxStart(previousLayout){
@@ -482,6 +573,35 @@
       },totalMs+80);
     });
   }
+
+  // ── Skeleton reveal ──────────────────────────────────────────────
+  // Preload every tab's iframe while the skeleton row is showing.
+  // Once every tab has finished loading (or the safety timer fires),
+  // slide from the loading row into the "first tab open" layout
+  // using the same parallax start used for ordinary tab switches.
+  function beginPreload(){
+    framesLoadedCount=0;
+    loadingSafetyTimer=setTimeout(()=>{
+      if(isLoadingPhase) completeLoadingPhase();
+    },5000);
+    manifest.tabs.forEach((tab,i)=>loadFrame(i));
+  }
+  function completeLoadingPhase(){
+    if(!isLoadingPhase) return;
+    isLoadingPhase=false;
+    if(loadingSafetyTimer){ clearTimeout(loadingSafetyTimer); loadingSafetyTimer=null; }
+    if(transitionTimer) clearTimeout(transitionTimer);
+    const previousLayout=lastLayout.map(t=>({...t}));
+    primeParallaxStart(previousLayout);
+    requestAnimationFrame(()=>{
+      const totalMs=paint({mode:'switch'});
+      transitionTimer=setTimeout(()=>{
+        transitioningFrom=null;
+        paint();
+      },totalMs+80);
+    });
+  }
+
   function applyFrameTextColour(i){
     try{
       const item=tabEls[i];
@@ -534,6 +654,10 @@
         item.ro.observe(item.iframe.contentWindow.document.body);
         item.ro.observe(item.iframe.contentWindow.document.documentElement);
       }catch(e){}
+      framesLoadedCount++;
+      if(isLoadingPhase && framesLoadedCount>=manifest.tabs.length){
+        completeLoadingPhase();
+      }
     };
     item.iframe.src=tab.url;
   }
@@ -552,13 +676,13 @@
     return null;
   }
   shell.addEventListener('click',(e)=>{
-    if(!manifest) return;
+    if(!manifest || isLoadingPhase) return;
     const rect=shell.getBoundingClientRect();
     const i=tabAtPoint(e.clientX-rect.left,e.clientY-rect.top);
     if(i!==null) setActive(i);
   });
   shell.addEventListener('mousemove',(e)=>{
-    if(!manifest) return;
+    if(!manifest || isLoadingPhase) return;
     const rect=shell.getBoundingClientRect();
     const i=tabAtPoint(e.clientX-rect.left,e.clientY-rect.top);
     shell.style.cursor=(i!==null && i!==activeIndex)?'pointer':'default';
@@ -567,7 +691,8 @@
     manifest=m;
     applyManifestRuntimeSettings();
     buildTabEls();
-    paint();
+    paintLoading({instant:true});
+    beginPreload();
   }).catch(err=>{
     shell.innerHTML=`<div style="padding:24px;font-family:system-ui,sans-serif;color:#a33;">
       <strong>Failed to load the tab stack.</strong><br>${(err&&err.message)||err}
@@ -580,7 +705,10 @@
     </div>`;
   });
   function queuePaint(){
-    if(manifest) requestAnimationFrame(()=>paint());
+    if(!manifest) return;
+    requestAnimationFrame(()=>{
+      if(isLoadingPhase) paintLoading(); else paint();
+    });
   }
   window.addEventListener('resize',queuePaint);
   if(window.visualViewport){
