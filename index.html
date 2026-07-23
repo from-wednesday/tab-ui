@@ -80,7 +80,11 @@
     overflow:visible;
     pointer-events:none;
   }
-  .tab path{ transition:fill var(--dur) var(--ease), stroke var(--dur) var(--ease); }
+  .tab path{
+    transition:fill var(--dur) var(--ease), stroke var(--dur) var(--ease);
+    pointer-events:visiblePainted;
+    cursor:pointer;
+  }
   .tab h2{
     position:absolute;
     top:0; left:0; right:0;
@@ -226,6 +230,16 @@
       const ns='http://www.w3.org/2000/svg';
       const svg=document.createElementNS(ns,'svg');
       const path=document.createElementNS(ns,'path');
+      path.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        setActive(i);
+      });
+      path.addEventListener('mouseenter',()=>{
+        shell.style.cursor=i!==activeIndex?'pointer':'default';
+      });
+      path.addEventListener('mouseleave',()=>{
+        shell.style.cursor='default';
+      });
       svg.appendChild(path);
       el.appendChild(svg);
       const h2=document.createElement('h2');
