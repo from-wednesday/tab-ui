@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why Bother Learning the Shortcuts? · Keyboard Warriors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:          #1a1d23;
+    --ink-mid:      #4a5060;
+    --ink-soft:     #7a8090;
+    --rule:         #e2e5ea;
+    --rule-strong:  #c8cdd4;
+    --surface:      #ffffff;
+    --surface-2:    #f7f9fb;
+    --accent:       #1e3a5f;
+    --mac:          #1a5c38;
+    --mac-bg:       #d4f0e0;
+    --pc:           #5c4210;
+    --pc-bg:        #fef0c0;
+    --both-bg:      #eef2f7;
+    --chip-bg:      #f0f2f5;
+    --chip-border:  #c8cdd4;
+    --chip-shadow:  #b8bdc4;
+    --ext-bg:       #fdf0f8;
+    --ext-border:   #e0b8d8;
+    --ext-ink:      #7a2858;
+    --syn-bg:       #f2f0ff;
+    --syn-border:   #c8c0f0;
+    --syn-ink:      #4a3080;
+    --warn-bg:      #fff8f0;
+    --warn-border:  #f0d090;
+    --warn-ink:     #7a4010;
+    --info-bg:      #eef4ff;
+    --info-border:  #b8d0f0;
+    --info-ink:     #1e3a5f;
+    --mono:         'IBM Plex Mono', monospace;
+    --sans:         'IBM Plex Sans', sans-serif;
+  }
+
+  html { font-size: 14px; }
+
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    line-height: 1.65;
+    padding: 48px 32px 100px;
+  }
+
+  .page {
+    max-width: 980px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 52px;
+  }
+
+  /* ── Header ─────────────────────────────────────────────────── */
+  .page-header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 24px;
+  }
+  .page-header .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+    margin-bottom: 12px;
+    line-height: 1.1;
+    text-transform: none;
+  }
+  .page-header p {
+    font-size: 0.93rem;
+    color: var(--ink-mid);
+    max-width: 640px;
+    line-height: 1.7;
+  }
+
+  /* ── Section ─────────────────────────────────────────────────── */
+  section { display: flex; flex-direction: column; gap: 16px; }
+  section > h2 {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+  section > h3 {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-mid);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-family: var(--mono);
+    margin-top: 8px;
+  }
+  section > h4 {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-top: 4px;
+  }
+
+  /* ── Callouts ────────────────────────────────────────────────── */
+  .callout {
+    border-radius: 8px;
+    padding: 13px 17px;
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+  .callout.warn  { background: var(--warn-bg);  border: 1px solid var(--warn-border);  color: var(--warn-ink); }
+  .callout.info  { background: var(--info-bg);  border: 1px solid var(--info-border);  color: var(--info-ink); }
+  .callout strong { color: var(--ink); }
+  .callout p + p { margin-top: 8px; }
+
+  /* ── Tables ──────────────────────────────────────────────────── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    min-width: 620px;
+    border-collapse: collapse;
+    font-size: 0.855rem;
+  }
+  thead tr {
+    background: var(--surface-2);
+    border-bottom: 1.5px solid var(--rule-strong);
+  }
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--mono);
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    white-space: nowrap;
+  }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: middle;
+    color: var(--ink-mid);
+    line-height: 1.5;
+    text-align: center;
+  }
+  td:first-child { text-align: right; font-weight: 600; color: var(--ink); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface-2); }
+
+  /* ── Keyboard chip ───────────────────────────────────────────── */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #1e3a5f;
+    background: var(--chip-bg);
+    border: 1px solid var(--chip-border);
+    border-radius: 4px;
+    padding: 2px 8px 1px;
+    box-shadow: 0 1.5px 0 var(--chip-shadow);
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  /* ── Two-col / best-practice style boxes ────────────────────── */
+  .bp-row {
+    display: flex;
+    gap: 16px;
+  }
+  .bp-col {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bp-col h4 {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .bp-col p { font-size: 0.86rem; }
+
+  /* ── Prose paragraph ─────────────────────────────────────────── */
+  p {
+    font-size: 0.88rem;
+    color: var(--ink-mid);
+    line-height: 1.7;
+  }
+
+  /* ── Note text ───────────────────────────────────────────────── */
+  .note {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  /* ── Inline code ─────────────────────────────────────────────── */
+  code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: var(--both-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ── Lists ───────────────────────────────────────────────────── */
+  ul.plain-list, ol.plain-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  ul.plain-list li, ol.plain-list li {
+    font-size: 0.88rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  ul.plain-list li strong, ol.plain-list li strong { color: var(--ink); font-weight: 600; }
+  ul.plain-list li::before {
+    content: "–";
+    color: var(--ink-soft);
+    font-weight: 600;
+    flex: 0 0 auto;
+  }
+  ol.plain-list { counter-reset: item; }
+  ol.plain-list li::before {
+    counter-increment: item;
+    content: counter(item) ".";
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    flex: 0 0 auto;
+  }
+
+  /* ── Hero image ──────────────────────────────────────────────── */
+  .hero-media img {
+    display: block;
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--rule);
+  }
+
+  /* ── Avatar + callout row ────────────────────────────────────── */
+  .callout-avatar-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .callout-avatar-row .avatar {
+    flex: 0 0 52px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid var(--rule-strong);
+  }
+  .callout-avatar-row .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .callout-avatar-row .callout { flex: 1; }
+
+  /* ── Section-break divider with avatar ──────────────────────── */
+  .section-break {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 4px 0 2px;
+  }
+  .section-break .avatar {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid var(--rule-strong);
+  }
+  .section-break .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .section-break .line { flex: 1; height: 0; border-bottom: 1.5px solid var(--rule-strong); }
+
+  /* ── OS tab switcher (pure CSS, no script) ──────────────────── */
+  .os-tab-radio { position: absolute; opacity: 0; pointer-events: none; }
+  .os-tabs { display: flex; gap: 8px; }
+  .os-tab-btn {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.82rem;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--rule-strong);
+    background: var(--surface);
+    color: var(--ink-mid);
+    cursor: pointer;
+    user-select: none;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .os-panel { display: none; }
+  #os-tab-mac:checked ~ #panel-mac,
+  #os-tab-pc:checked ~ #panel-pc { display: block; }
+  #os-tab-mac:checked ~ .os-tabs label[for="os-tab-mac"],
+  #os-tab-pc:checked ~ .os-tabs label[for="os-tab-pc"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* ── Pattern list (icon-font replacement) ───────────────────── */
+  .pattern-list { display: flex; flex-direction: column; gap: 16px; }
+  .pattern-row { display: flex; align-items: flex-start; gap: 14px; }
+  .pattern-marker {
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--both-bg);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pattern-row .pattern-body { flex: 1; }
+
+  /* ── Inline "another example" reveal ────────────────────────── */
+  details.mini-note { margin-top: 6px; }
+  details.mini-note summary {
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    list-style: none;
+  }
+  details.mini-note summary::-webkit-details-marker { display: none; }
+  details.mini-note summary:hover { color: var(--accent); }
+  details.mini-note summary::before { content: "+ "; }
+  details.mini-note[open] summary::before { content: "– "; }
+  details.mini-note p { margin-top: 6px; font-size: 0.82rem; }
+
+  /* ── Big reveal (question / answer) ─────────────────────────── */
+  details.reveal summary {
+    cursor: pointer;
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 9px 18px;
+    border-radius: 20px;
+    background: var(--info-bg);
+    border: 1px solid var(--info-border);
+    color: var(--info-ink);
+    list-style: none;
+  }
+  details.reveal summary::-webkit-details-marker { display: none; }
+  details.reveal[open] summary { margin-bottom: 14px; }
+  details.reveal .reveal-body { display: flex; flex-direction: column; gap: 10px; }
+
+  @media (max-width: 640px) {
+    .bp-row { flex-direction: column; }
+    .callout-avatar-row { flex-direction: column; }
+    .os-tabs { flex-wrap: wrap; }
+  }
+
+
+
+  /* Folder UI skin overrides: subtle printed-on-folder treatment */
+  :root {
+    --ink: currentColor;
+    --ink-mid: currentColor;
+    --ink-soft: currentColor;
+    --rule: rgba(0,0,0,.10);
+    --rule-strong: rgba(0,0,0,.14);
+    --surface: rgba(255,255,255,.05);
+    --surface-2: rgba(255,255,255,.08);
+    --both-bg: rgba(255,255,255,.08);
+    --chip-bg: rgba(255,255,255,.12);
+    --chip-border: rgba(0,0,0,.12);
+    --chip-shadow: transparent;
+    --mac: currentColor;
+    --pc: currentColor;
+    --accent: currentColor;
+    --ext-ink: currentColor;
+    --syn-ink: currentColor;
+    --warn-ink: currentColor;
+    --info-ink: currentColor;
+  }
+
+  html,
+  body {
+    background: transparent;
+  }
+
+  body {
+    color: inherit;
+    padding: 34px 30px 84px;
+  }
+
+  .page-header h1,
+  .page-header p,
+  .page-header .eyebrow,
+  section > h2,
+  section > h3,
+  section > h4,
+  p,
+  th,
+  td,
+  .callout,
+  .callout strong,
+  .chip,
+  .note,
+  code,
+  .bp-col h4,
+  .bp-col p,
+  ul.plain-list li,
+  ol.plain-list li,
+  .os-tab-btn,
+  .pattern-marker,
+  details.mini-note summary,
+  details.mini-note p,
+  details.reveal summary {
+    color: inherit;
+  }
+
+  .page-header .eyebrow,
+  section > h2,
+  section > h3,
+  th,
+  .note,
+  ul.plain-list li::before,
+  details.mini-note summary {
+    opacity: .68;
+  }
+
+  .page-header,
+  section > h2,
+  td,
+  thead tr {
+    border-color: rgba(0,0,0,.10);
+  }
+
+  .table-wrap,
+  .bp-col {
+    background: rgba(255,255,255,.18);
+    background: color-mix(in srgb, white 18%, transparent);
+    border-color: rgba(0,0,0,.16);
+    border-color: color-mix(in srgb, currentColor 18%, transparent);
+  }
+
+  thead tr,
+  tr:hover td {
+    background: rgba(255,255,255,.22);
+    background: color-mix(in srgb, white 22%, transparent);
+  }
+
+  .callout.warn {
+    background: rgba(240,144,32,.10);
+    border-color: rgba(122,64,16,.16);
+  }
+
+  .callout.info {
+    background: rgba(30,58,95,.08);
+    border-color: rgba(30,58,95,.16);
+  }
+
+  .chip {
+    background: rgba(255,255,255,.12);
+    border-color: rgba(0,0,0,.12);
+    box-shadow: none;
+  }
+
+  code {
+    background: rgba(255,255,255,.08);
+  }
+
+  .hero-media img,
+  .callout-avatar-row .avatar,
+  .section-break .avatar {
+    border-color: rgba(0,0,0,.14);
+  }
+
+  .os-tab-btn {
+    background: rgba(255,255,255,.12);
+    border-color: rgba(0,0,0,.12);
+  }
+  #os-tab-mac:checked ~ .os-tabs label[for="os-tab-mac"],
+  #os-tab-pc:checked ~ .os-tabs label[for="os-tab-pc"] {
+    background: rgba(30,58,95,.16);
+    border-color: rgba(30,58,95,.16);
+    color: inherit;
+  }
+
+  .pattern-marker { background: rgba(255,255,255,.14); }
+
+  details.reveal summary {
+    background: rgba(30,58,95,.08);
+    border-color: rgba(30,58,95,.16);
+  }
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════════ -->
+  <header class="page-header">
+    <p class="eyebrow">Keyboard Warriors · Foundations</p>
+    <h1>why bother learning the shortcuts</h1>
+    <p>
+      A short case for building shortcut fluency, plus a working reference for
+      where Mac and Windows conventions line up, and where they quietly diverge.
+    </p>
+  </header>
+
+
+  <!-- ══ WHY BOTHER ══════════════════════════════════════════════ -->
+  <section>
+    <div class="hero-media">
+      <img src="../images/keyboard-and-stylus.png" alt="A minimalist keyboard and graphics tablet with modifier keys highlighted. A left hand hovers, ready to press any key.">
+    </div>
+    <p>Most guides tell you something like "they save seconds with every action, and over a year the time adds up to eight days. Now you'll get a holiday." That maths does add up, but personally, that's not particularly compelling, especially if it's going to take more time to memorise them in the first place. And it will. I don't think it's much about the time at all.</p>
+
+    <h3>the gap between thinking and doing is where your best ideas get lost</h3>
+    <p>Every time you look away from your work to find a tool, your flow breaks. Every time you stop to hunt through a menu, you lose seconds of focus. Over a workday, those lost seconds don't just add up to wasted time, they hold you back from staying in the idea.</p>
+    <p>True digital fluency happens when the tool becomes an <em>extension</em> of your intent, rather than a <em>barrier</em> to it.</p>
+    <p>By moving commands from your brain to your hands, you free up your mind to focus entirely on what you're creating.</p>
+    <p>Professional creation is an ambidextrous act. One hand provides the precision of the pointer, the other executes the commands. When they work together, the interface disappears.</p>
+    <p>This module was built to help you shorten the distance between an idea and its execution, by building the muscle memory that lets you move at the speed of thought.</p>
+  </section>
+
+
+  <!-- ══ HIGHEST VALUE FIRST ═════════════════════════════════════ -->
+  <section>
+    <h2>highest value first</h2>
+
+    <div class="callout-avatar-row">
+      <div class="avatar"><img src="../images/me-animated.gif" alt="Wednesday avatar"></div>
+      <div class="callout warn">
+        <p><strong>Important note for Windows users.</strong> <em>I see you.</em></p>
+        <p>In the following pages you will see me using the <span class="chip">⌘</span> symbol a lot. Also known as the "Command" key (cmd for short), it's the most commonly used modifier key on the Mac keyboard. Obviously, you don't have that key, but you're probably accustomed to seeing shortcuts listed like "<strong>⌘/Ctrl + Z</strong>." That's because, for the vast majority of cases, the <strong>⌘ key</strong> and the <strong>Ctrl key</strong> are interchangeable.</p>
+        <p>If they're ever not, I'll call it out, but so long as they remain in sync, I'm just showing the ⌘ version here. Not because I don't like you, just because having one simple symbol gives us focus and clarity.</p>
+        <p>The important thing is the <em>changing</em> part of the information. So get in the habit of thinking "⌘/Ctrl" whenever you see either ⌘ or Ctrl. That's good advice for all of us. Dogs and cats living together.</p>
+      </div>
+    </div>
+
+    <p>In a busy studio, time is your most precious resource. Keyboard shortcuts promise to help you work faster, but they can feel intimidating at first. The jargon can sound like a foreign language, and the multi-finger key combinations can feel a bit like practising guitar chords.</p>
+    <p>You can maximise your impact early on by focusing on the most frequent and standardised shortcuts first. You probably already know some, such as copy <span class="chip">⌘</span><span class="chip">C</span>, paste <span class="chip">⌘</span><span class="chip">V</span>, and undo <span class="chip">⌘</span><span class="chip">Z</span>. These work across almost every app you touch, so they save you from constantly digging through menus.</p>
+    <p>As shortcuts become second nature, they do more than just shave time off every process. You will also start to focus more on what you're doing, instead of how you're doing it.</p>
+
+    <div class="os-tabs-wrap">
+      <input type="radio" name="os-tab" id="os-tab-mac" class="os-tab-radio" checked>
+      <input type="radio" name="os-tab" id="os-tab-pc" class="os-tab-radio">
+      <div class="os-tabs">
+        <label class="os-tab-btn" for="os-tab-mac">Apple Mac OS</label>
+        <label class="os-tab-btn" for="os-tab-pc">Microsoft Windows PC</label>
+      </div>
+
+      <div class="os-panel" id="panel-mac">
+        <div class="table-wrap" style="margin-top:14px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Finder</th>
+                <th>InDesign</th>
+                <th>Illustrator</th>
+                <th>Photoshop</th>
+                <th>After Effects</th>
+                <th>Figma</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>New document</td><td>⌘N</td><td>⌘N</td><td>⌘N</td><td>⌘N</td><td>⌘N</td><td>⌘N</td></tr>
+              <tr><td>Open file</td><td>⌘O</td><td>⌘O</td><td>⌘O</td><td>⌘O</td><td>⌘O</td><td>⌘O</td></tr>
+              <tr><td>Select all</td><td>⌘A</td><td>⌘A</td><td>⌘A</td><td>⌘A</td><td>⌘A</td><td>⌘A</td></tr>
+              <tr><td>Duplicate</td><td>⌘D</td><td>-</td><td>⌘D</td><td>⌘D</td><td>⌘D</td><td>⌘D</td></tr>
+              <tr><td>Undo</td><td>⌘Z</td><td>⌘Z</td><td>⌘Z</td><td>⌘Z</td><td>⌘Z</td><td>⌘Z</td></tr>
+              <tr><td>Save</td><td>-</td><td>⌘S</td><td>⌘S</td><td>⌘S</td><td>⌘S</td><td>⌘S</td></tr>
+              <tr><td>Group</td><td>-</td><td>⌘G</td><td>⌘G</td><td>⌘G</td><td>⌘G</td><td>⌘G</td></tr>
+              <tr><td>Toggle guides</td><td>-</td><td>⌘;</td><td>⌘;</td><td>⌘;</td><td>⌘;</td><td>⌘;</td></tr>
+              <tr><td>Selection tool</td><td>-</td><td>V</td><td>V</td><td>V</td><td>V</td><td>V</td></tr>
+              <tr><td>Hand tool</td><td>-</td><td>Space</td><td>Space</td><td>Space</td><td>Space</td><td>Space</td></tr>
+              <tr><td>Bring forward</td><td>-</td><td>⌘]</td><td>⌘]</td><td>⌘]</td><td>-</td><td>⌘]</td></tr>
+              <tr><td>Send backward</td><td>-</td><td>⌘[</td><td>⌘[</td><td>⌘[</td><td>-</td><td>⌘[</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="os-panel" id="panel-pc">
+        <div class="table-wrap" style="margin-top:14px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>File Explorer</th>
+                <th>InDesign</th>
+                <th>Illustrator</th>
+                <th>Photoshop</th>
+                <th>After Effects</th>
+                <th>Figma</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>New document</td><td>Ctrl N</td><td>Ctrl N</td><td>Ctrl N</td><td>Ctrl N</td><td>Ctrl N</td><td>Ctrl N</td></tr>
+              <tr><td>Open file</td><td>Ctrl O</td><td>Ctrl O</td><td>Ctrl O</td><td>Ctrl O</td><td>Ctrl O</td><td>Ctrl O</td></tr>
+              <tr><td>Select all</td><td>Ctrl A</td><td>Ctrl A</td><td>Ctrl A</td><td>Ctrl A</td><td>Ctrl A</td><td>Ctrl A</td></tr>
+              <tr><td>Duplicate</td><td>Ctrl D</td><td>-</td><td>Ctrl D</td><td>Ctrl D</td><td>Ctrl D</td><td>Ctrl D</td></tr>
+              <tr><td>Undo</td><td>Ctrl Z</td><td>Ctrl Z</td><td>Ctrl Z</td><td>Ctrl Z</td><td>Ctrl Z</td><td>Ctrl Z</td></tr>
+              <tr><td>Save</td><td>-</td><td>Ctrl S</td><td>Ctrl S</td><td>Ctrl S</td><td>Ctrl S</td><td>Ctrl S</td></tr>
+              <tr><td>Group</td><td>-</td><td>Ctrl G</td><td>Ctrl G</td><td>Ctrl G</td><td>Ctrl G</td><td>Ctrl G</td></tr>
+              <tr><td>Toggle guides</td><td>-</td><td>Ctrl ;</td><td>Ctrl ;</td><td>Ctrl ;</td><td>Ctrl ;</td><td>Ctrl ;</td></tr>
+              <tr><td>Selection tool</td><td>-</td><td>V</td><td>V</td><td>V</td><td>V</td><td>V</td></tr>
+              <tr><td>Hand tool</td><td>-</td><td>Space</td><td>Space</td><td>Space</td><td>Space</td><td>Space</td></tr>
+              <tr><td>Bring forward</td><td>-</td><td>Ctrl ]</td><td>Ctrl ]</td><td>Ctrl ]</td><td>-</td><td>Ctrl ]</td></tr>
+              <tr><td>Send backward</td><td>-</td><td>Ctrl [</td><td>Ctrl [</td><td>Ctrl [</td><td>-</td><td>Ctrl [</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══ SEEING THROUGH THE CONVENTIONS ═════════════════════════ -->
+  <section>
+    <h2>seeing through the conventions</h2>
+    <p>Learning the most conventional shortcuts first is smart, but here is where it can quietly trip you up. Even within families of apps like Microsoft or Adobe, the same keys can mean different things, depending on the app's core workflow. Let's walk through an example.</p>
+
+    <div class="section-break">
+      <div class="avatar"><img src="../images/me-animated.gif" alt="Wednesday avatar"></div>
+      <div class="line"></div>
+    </div>
+
+    <h3>selecting and deselecting your content</h3>
+    <p>"Select All" is one of those very widely used conventions. <span class="chip">⌘</span><span class="chip">A</span> for "All" works in Photoshop, as it does in Microsoft Word, and elsewhere, but what about deselecting?</p>
+    <p>In <strong>Photoshop</strong>, "Deselect" is <span class="chip">⌘</span><span class="chip">D</span>. Seems obvious, right? It's clean, direct, and the <strong>D</strong> key sits just two across from <strong>A</strong> on the keyboard. Like our cut-copy-paste shortcuts, you can hold one finger on the modifier while another dances between the related options. What could be faster or more intuitive?</p>
+    <p>Now jump into <strong>Illustrator</strong>. "Select All" stays as <span class="chip">⌘</span><span class="chip">A</span>, but "Deselect All" moves to <span class="chip">⌘</span> + <span class="chip">Shift</span> + <span class="chip">A</span>. Did you see that one coming? Here, Adobe uses <strong>Shift</strong> as a modifier key. It flips the logic: <strong>A</strong> means "Select All," so <strong>Shift + A</strong> inverts the meaning to "Deselect All."</p>
+    <p>This is not a one-off. You will see this modifier pattern repeat across many actions in many apps.</p>
+    <p>You might like one of these better than the other, but whichever makes more sense to you, let's acknowledge that what we have here are two sensible conventions.</p>
+
+    <div class="bp-row">
+      <div class="bp-col">
+        <h4>Photoshop</h4>
+        <p>Pairs <span class="chip">A</span> and <span class="chip">D</span> directly.</p>
+      </div>
+      <div class="bp-col">
+        <h4>Illustrator</h4>
+        <p>Uses a modifier key, <span class="chip">Shift</span>, to invert the <span class="chip">A</span> key's action.</p>
+      </div>
+    </div>
+
+    <p>Both work well on their own terms, but now let's switch to a third app.</p>
+
+    <h3 style="text-align:center;">which convention do you think InDesign uses?</h3>
+    <details class="reveal">
+      <summary>Think about it, then click to reveal the answer</summary>
+      <div class="reveal-body">
+        <p><strong>InDesign</strong> follows Illustrator's approach. "Deselect All" is <span class="chip">⌘</span> + <span class="chip">Shift</span> + <span class="chip">A</span>.</p>
+
+        <h4>but the interesting part is always "why?"</h4>
+        <p>By now you should be a little annoyed that everything doesn't just work the same, and that's not a bad instinct. But let's dig a little deeper into why they'd be different.</p>
+        <p><strong>Photoshop</strong> lives inside pixel selections, where turning them off is a constant, high-frequency need, so the highly efficient and intuitive <span class="chip">⌘</span><span class="chip">D</span> for "Deselect" gets pride of place.</p>
+        <p><strong>Illustrator</strong> and <strong>InDesign</strong> work with objects on a canvas, where you can click any empty space and accomplish the equivalent action, even faster than the Photoshop user did. In this context, burying the rarely used "Deselect All" command a little deeper by using the modifier key frees a prime shortcut, <span class="chip">⌘</span><span class="chip">D</span>, for what proves to be a higher-frequency action in those apps (in this example it happens to be "Transform Again").</p>
+        <p>Once you see these competing conventions as different design mental models, not random quirks, your brain stops fighting them. As you learn the official shortcuts, you're also becoming fluent in these broader conventions.</p>
+        <p>Learning conventions is more powerful than just learning individual shortcuts, because you get better at predicting more shortcuts correctly, instead of relying entirely on memorisation. Plus, that memorisation itself becomes easier once you see how each one fits a familiar logical pattern.</p>
+
+        <h4>here are some more of those patterns to learn and watch for</h4>
+        <div class="pattern-list">
+          <div class="pattern-row">
+            <div class="pattern-marker">01</div>
+            <div class="pattern-body">
+              <p>Sometimes the obvious letter for a shortcut is already taken, so the app will use a pun to make it memorable. The <strong>eyedropper</strong> tool is an example of this. Don't press <span class="chip">E</span>, it's the <span class="chip">I</span> key.</p>
+              <details class="mini-note">
+                <summary>another example</summary>
+                <p>Many Adobe apps have an ellipse tool selected with the <span class="chip">L</span> key. That's "L" for "EL-lipse."</p>
+              </details>
+            </div>
+          </div>
+          <div class="pattern-row">
+            <div class="pattern-marker">02</div>
+            <div class="pattern-body">
+              <p>Or maybe the associated icon or cursor is more synonymous with the tool than the official name is. The <span class="chip">V</span> key is used across many apps for the pointer, or selection, tool because it looks like an arrow.</p>
+              <details class="mini-note">
+                <summary>another example</summary>
+                <p>Adobe uses the <span class="chip">X</span> key to swap the properties between the two swatches in the toolbar. Think of it as two arrows, up and down.</p>
+              </details>
+            </div>
+          </div>
+          <div class="pattern-row">
+            <div class="pattern-marker">03</div>
+            <div class="pattern-body">
+              <p>When keys clump into a small set on the standard keyboard layout, they can be useful both for conceptually grouping related tasks, and for efficiency in actual use. We saw that with copy and paste, but the <span class="chip">[</span> and <span class="chip">]</span> keys are another example. These "bookends" commonly get used for functions that move a setting down or up, smaller or bigger, and so on.</p>
+              <details class="mini-note">
+                <summary>other examples</summary>
+                <p>The <span class="chip">&lt;</span> and <span class="chip">&gt;</span> pair. The arrow keys. The number pad on extended keyboards. Any clump of four keys, or even nine, can become a "direction pad."</p>
+              </details>
+            </div>
+          </div>
+          <div class="pattern-row">
+            <div class="pattern-marker">04</div>
+            <div class="pattern-body">
+              <p>Similarly, right above that key pair is the <span class="chip">-</span> and <span class="chip">=</span> pair. Apps use this to mean minus and plus, even though, technically, the plus sign would be reached via <span class="chip">Shift</span> + <span class="chip">=</span>. The reason for this is efficiency, which is what shortcuts are all about after all. Being able to quickly zoom out and in by pressing <span class="chip">⌘</span><span class="chip">-</span> / <span class="chip">⌘</span><span class="chip">=</span> is easy to learn and very fast in practice. We don't want people having to add the shift key into one of those just because "the keyboard layout said so."<br>Most people never even stop to think they are actually zooming in with <span class="chip">⌘</span><span class="chip">=</span>, not <span class="chip">⌘</span><span class="chip">+</span>, at all.</p>
+              <details class="mini-note">
+                <summary>a further note</summary>
+                <p>If you have a full-size, or "extended," keyboard, you have a second set of dedicated single function <span class="chip">-</span> and <span class="chip">+</span> keys on the number pad. These also work with <span class="chip">⌘</span> to zoom out and in. In practice, few users actually do this, since it requires two hands.</p>
+              </details>
+            </div>
+          </div>
+        </div>
+
+        <p>By getting acquainted with these few conventions, what seemed arbitrary or meaningless actually starts making sense. Soon, as you switch contexts, both your fingers and mind will adapt faster. To get there, we just need to practise, which is exactly what Keyboard Warriors was built for.</p>
+      </div>
+    </details>
+  </section>
+
+
+  <!-- ══ WHEN TO CUSTOMISE ═══════════════════════════════════════ -->
+  <section>
+    <h2>when to customise</h2>
+    <h3>power, pitfalls, and studio norms</h3>
+    <p>Custom keyboard shortcuts are one of those topics that can divide a studio. Some designers swear by them and can't imagine working without their personalised "pro tweaks" to stay in flow. Others avoid them entirely, having been burned by a machine that behaved "wrong" at the worst possible moment. Both perspectives are valid, coming from real experience.</p>
+    <p>This final section is about helping you make intentional decisions. Custom shortcuts can absolutely make you faster, but they also introduce new problems, for yourself or your collaborators, if you don't handle them with care.</p>
+
+    <h3>why customise at all?</h3>
+    <p>Most designers eventually notice a handful of actions that interrupt their rhythm. These are usually small things: a command buried deep in a menu, a specific tool you reach for constantly, a repetitive action that forces your primary hand away from your mouse or stylus.</p>
+    <h4>custom shortcuts are most useful when:</h4>
+    <ul class="plain-list">
+      <li>You repeat the same action many times a day</li>
+      <li>The default shortcut is uncomfortable or slow</li>
+      <li>You want consistency across multiple apps</li>
+      <li>You are trying to reduce strain or unnecessary movement</li>
+    </ul>
+    <p>Used well, custom shortcuts remove friction and help you stay focused on the work rather than the interface.</p>
+
+    <h3>where customisation fits into your learning journey</h3>
+    <h4>this simple sequence works best:</h4>
+    <ol class="plain-list">
+      <li><strong>Always learn the defaults first.</strong> Defaults are the shared language of your tools. They are what you should expect to find on every shared studio machine and in every tutorial.</li>
+      <li><strong>Notice your friction points.</strong> Pay attention to the actions that break your flow. These are the best candidates for customisation.</li>
+      <li><strong>Customise sparingly.</strong> A small number of intentional changes is far more effective than a complete overhaul.</li>
+      <li><strong>Keep track of what you change.</strong> A short list is enough. It saves a lot of confusion later. <span class="note">(If you have more sticky notes than the bottom edge of your monitor can hold, make better life choices.)</span></li>
+    </ol>
+
+    <h3>how Adobe CC handles custom shortcuts</h3>
+    <p>Adobe apps make a great case study here, because they all have excellent support for user customisations. But each one has its own flavour. Let's take a look at what's possible, and what to watch out for.</p>
+
+    <h4>first, open the shortcut editor</h4>
+    <p>Yes, it's in the menu (Edit / Keyboard Shortcuts), but why not open the shortcut editor with its own shortcut:</p>
+    <div class="bp-row">
+      <div class="bp-col">
+        <h4>Mac</h4>
+        <p><span class="chip">⌘</span> <span class="chip">⌥</span> <span class="chip">⇧</span> <span class="chip">K</span></p>
+      </div>
+      <div class="bp-col">
+        <h4>Windows</h4>
+        <p><span class="chip">Ctrl</span> <span class="chip">Alt</span> <span class="chip">Shift</span> <span class="chip">K</span></p>
+      </div>
+    </div>
+
+    <h4>when you open the editor, expect to see:</h4>
+    <ul class="plain-list">
+      <li>A list of menus and tool categories</li>
+      <li>A search field to find commands quickly</li>
+      <li>A warning if you assign a shortcut that conflicts with an existing one</li>
+      <li>An option to save your custom set as a named file</li>
+    </ul>
+
+    <div class="callout-avatar-row">
+      <div class="avatar"><img src="../images/me-animated.gif" alt="Wednesday avatar"></div>
+      <div class="callout info">
+        <p><strong>Note:</strong> exploring the Adobe shortcut editor as a discovery tool.</p>
+        <p>The shortcut editor isn't only for customising your setup. It's also one of the clearest ways to learn how Adobe thinks. Every menu, tool and command is grouped in a way that reveals the structure of the app. You can search, browse and notice patterns that aren't obvious from the interface alone.</p>
+        <p>You don't need to memorise anything here. Treat it as a quiet place to explore. It can show you shortcuts you didn't know existed, and help you understand why certain tools share similar keys. Think of it as a map of the app that rewards curiosity.</p>
+      </div>
+    </div>
+
+    <h4>Adobe Photoshop (Ps)</h4>
+    <p>Photoshop offers a full shortcut editor with clear categories. Conflict warnings appear immediately. You can export and import shortcut sets. It's ideal for adding shortcuts to your high-frequency tasks.</p>
+    <h4>Adobe Illustrator (Ai)</h4>
+    <p>Illustrator behaves similarly, but some tools share shortcut slots. You may need to free up a key by reassigning something else.</p>
+    <h4>Adobe InDesign (In)</h4>
+    <p>InDesign is very flexible and often used to support specific production workflows. It allows multiple shortcut sets for different roles, and is excellent for long document work where speed matters.</p>
+    <h4>Adobe After Effects (Ae)</h4>
+    <p>After Effects is highly customisable but more complex. Many commands are hidden deep in menus. It's well suited to timeline navigation, layer operations and animation tools.</p>
+
+    <h3>the opportunities</h3>
+    <p>These are the situations where custom shortcuts consistently help in real studio practice.</p>
+    <ul class="plain-list">
+      <li><strong>High-frequency actions</strong></li>
+      <li><strong>Workflow-specific tools</strong></li>
+      <li><strong>Cross-app consistency</strong></li>
+      <li><strong>Reducing strain</strong></li>
+    </ul>
+
+    <h3>the pitfalls</h3>
+    <p>These are the problems that appear most often in shared studios and teaching environments.</p>
+    <ol class="plain-list">
+      <li><strong>Muscle memory breaks when you switch machines</strong></li>
+      <li><strong>You confuse collaborators</strong></li>
+      <li><strong>You forget what you changed</strong></li>
+      <li><strong>You create conflicts without realising</strong></li>
+      <li><strong>You become dependent on a setup you cannot reproduce everywhere</strong></li>
+    </ol>
+
+    <h3>best practices</h3>
+    <h4>these habits keep the benefits while avoiding the chaos:</h4>
+    <ul class="plain-list">
+      <li><strong>Start with, at most, three to five custom shortcuts</strong></li>
+      <li><strong>Keep a simple list of your changes</strong></li>
+      <li><strong>Export your shortcut sets</strong></li>
+      <li><strong>Avoid overriding universal conventions</strong></li>
+      <li><strong>Use custom shortcuts to extend, not replace</strong></li>
+    </ul>
+
+    <p>Custom shortcuts work best when they remove friction without creating new problems.</p>
+    <p>A small number of thoughtful changes can support your workflow, and help you stay focused on the creative decisions that matter.</p>
+  </section>
+
+</div><!-- /.page -->
+</body>
+</html>
