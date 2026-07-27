@@ -7,7 +7,7 @@
   "tabs": [
     {
       "objectId": 1,
-      "label": "KEYBOARD WARRIORS",
+      "label": "LICENSE",
       "url": "pages/water.html",
         "colors": {
         "light": "#d9c99d",
@@ -16,8 +16,8 @@
     },
     {
       "objectId": 2,
-      "label": "TIPS & TICKS",
-      "url": "pages/invoice.html",
+      "label": "BOOTCAMP",
+      "url": "pages/advice_general.html",
       "colors": {
         "light": "#e4d5a8",
         "dark": "#74777c"
@@ -25,7 +25,7 @@
     },
     {
       "objectId": 3,
-      "label": "Json SCHEMA",
+      "label": "KEYBOARD WARRIORS",
       "url": "pages/call.html",
       "colors": {
         "light": "#ede0b4",
@@ -34,8 +34,8 @@
     },
     {
       "objectId": 4,
-      "label": "DEFINING KEYS",
-      "url": "pages/define_the_keys.html",
+      "label": "Json SCHEMA",
+      "url": "pages/call.html",
       "colors": {
         "light": "#f6eec9",
         "dark": "#88BDA4"
@@ -43,8 +43,8 @@
     },
     {
       "objectId": 5,
-      "label": "APP MANIFEST",
-      "url": "pages/return.html",
+      "label": "DEFINING KEYS",
+      "url": "pages/define_the_keys.html",
       "colors": {
         "light": "#EEF8CD",
         "dark": "#B1D3B9"
