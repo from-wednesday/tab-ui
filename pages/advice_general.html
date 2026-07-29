@@ -6,266 +6,20 @@
 <title>Why Bother Learning the Shortcuts? · Keyboard Warriors</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/documentation_design-system.css">
 <style>
+  /* ══════════════════════════════════════════════════════════════
+     Page-specific components for advice_general.html.
+     Everything shared with the rest of the site (tokens, chrome,
+     callouts, tables, chips, bp-row, lists) lives in
+     ../styles/documentation_design-system.css — this block only covers components
+     unique to this page's narrative/interactive treatment.
+     ══════════════════════════════════════════════════════════════ */
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --ink:          #1a1d23;
-    --ink-mid:      #4a5060;
-    --ink-soft:     #7a8090;
-    --rule:         #e2e5ea;
-    --rule-strong:  #c8cdd4;
-    --surface:      #ffffff;
-    --surface-2:    #f7f9fb;
-    --accent:       #1e3a5f;
-    --mac:          #1a5c38;
-    --mac-bg:       #d4f0e0;
-    --pc:           #5c4210;
-    --pc-bg:        #fef0c0;
-    --both-bg:      #eef2f7;
-    --chip-bg:      #f0f2f5;
-    --chip-border:  #c8cdd4;
-    --chip-shadow:  #b8bdc4;
-    --ext-bg:       #fdf0f8;
-    --ext-border:   #e0b8d8;
-    --ext-ink:      #7a2858;
-    --syn-bg:       #f2f0ff;
-    --syn-border:   #c8c0f0;
-    --syn-ink:      #4a3080;
-    --warn-bg:      #fff8f0;
-    --warn-border:  #f0d090;
-    --warn-ink:     #7a4010;
-    --info-bg:      #eef4ff;
-    --info-border:  #b8d0f0;
-    --info-ink:     #1e3a5f;
-    --mono:         'IBM Plex Mono', monospace;
-    --sans:         'IBM Plex Sans', sans-serif;
-  }
-
-  html { font-size: 14px; }
-
-  body {
-    font-family: var(--sans);
-    color: var(--ink);
-    line-height: 1.65;
-    padding: 48px 32px 100px;
-  }
-
-  .page {
-    max-width: 980px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 52px;
-  }
-
-  /* ── Header ─────────────────────────────────────────────────── */
-  .page-header {
-    border-bottom: 2px solid var(--ink);
-    padding-bottom: 24px;
-  }
-  .page-header .eyebrow {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    margin-bottom: 10px;
-  }
-  .page-header h1 {
-    font-size: 2rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: var(--accent);
-    margin-bottom: 12px;
-    line-height: 1.1;
-    text-transform: none;
-  }
-  .page-header p {
-    font-size: 0.93rem;
-    color: var(--ink-mid);
-    max-width: 640px;
-    line-height: 1.7;
-  }
-
-  /* ── Section ─────────────────────────────────────────────────── */
-  section { display: flex; flex-direction: column; gap: 16px; }
-  section > h2 {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--ink-soft);
-    font-family: var(--mono);
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--rule);
-  }
-  section > h3 {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--ink-mid);
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    font-family: var(--mono);
-    margin-top: 8px;
-  }
-  section > h4 {
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--ink);
-    margin-top: 4px;
-  }
-
-  /* ── Callouts ────────────────────────────────────────────────── */
-  .callout {
-    border-radius: 8px;
-    padding: 13px 17px;
-    font-size: 0.875rem;
-    line-height: 1.65;
-  }
-  .callout.warn  { background: var(--warn-bg);  border: 1px solid var(--warn-border);  color: var(--warn-ink); }
-  .callout.info  { background: var(--info-bg);  border: 1px solid var(--info-border);  color: var(--info-ink); }
-  .callout strong { color: var(--ink); }
-  .callout p + p { margin-top: 8px; }
-
-  /* ── Tables ──────────────────────────────────────────────────── */
-  .table-wrap {
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 10px;
-    overflow-x: auto;
-  }
-  table {
-    width: 100%;
-    min-width: 620px;
-    border-collapse: collapse;
-    font-size: 0.855rem;
-  }
-  thead tr {
-    background: var(--surface-2);
-    border-bottom: 1.5px solid var(--rule-strong);
-  }
-  th {
-    text-align: left;
-    padding: 10px 14px;
-    font-size: 11px;
-    font-weight: 600;
-    font-family: var(--mono);
-    color: var(--ink-soft);
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    white-space: nowrap;
-  }
-  td {
-    padding: 9px 14px;
-    border-bottom: 1px solid var(--rule);
-    vertical-align: middle;
-    color: var(--ink-mid);
-    line-height: 1.5;
-    text-align: center;
-  }
+  /* ── Wide comparison table: horizontal scroll + centred cells ── */
+  .table-wrap table { min-width: 620px; }
+  td { text-align: center; }
   td:first-child { text-align: right; font-weight: 600; color: var(--ink); }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--surface-2); }
-
-  /* ── Keyboard chip ───────────────────────────────────────────── */
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--mono);
-    font-size: 11.5px;
-    font-weight: 600;
-    color: #1e3a5f;
-    background: var(--chip-bg);
-    border: 1px solid var(--chip-border);
-    border-radius: 4px;
-    padding: 2px 8px 1px;
-    box-shadow: 0 1.5px 0 var(--chip-shadow);
-    white-space: nowrap;
-    vertical-align: middle;
-  }
-
-  /* ── Two-col / best-practice style boxes ────────────────────── */
-  .bp-row {
-    display: flex;
-    gap: 16px;
-  }
-  .bp-col {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 8px;
-    padding: 14px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .bp-col h4 {
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--accent);
-  }
-  .bp-col p { font-size: 0.86rem; }
-
-  /* ── Prose paragraph ─────────────────────────────────────────── */
-  p {
-    font-size: 0.88rem;
-    color: var(--ink-mid);
-    line-height: 1.7;
-  }
-
-  /* ── Note text ───────────────────────────────────────────────── */
-  .note {
-    font-size: 0.8rem;
-    color: var(--ink-soft);
-    font-style: italic;
-  }
-
-  /* ── Inline code ─────────────────────────────────────────────── */
-  code {
-    font-family: var(--mono);
-    font-size: 0.88em;
-    background: var(--both-bg);
-    padding: 1px 5px;
-    border-radius: 3px;
-  }
-
-  /* ── Lists ───────────────────────────────────────────────────── */
-  ul.plain-list, ol.plain-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-  }
-  ul.plain-list li, ol.plain-list li {
-    font-size: 0.88rem;
-    color: var(--ink-mid);
-    line-height: 1.6;
-    display: flex;
-    gap: 10px;
-    align-items: baseline;
-  }
-  ul.plain-list li strong, ol.plain-list li strong { color: var(--ink); font-weight: 600; }
-  ul.plain-list li::before {
-    content: "–";
-    color: var(--ink-soft);
-    font-weight: 600;
-    flex: 0 0 auto;
-  }
-  ol.plain-list { counter-reset: item; }
-  ol.plain-list li::before {
-    counter-increment: item;
-    content: counter(item) ".";
-    font-family: var(--mono);
-    font-size: 0.78rem;
-    color: var(--accent);
-    flex: 0 0 auto;
-  }
 
   /* ── Hero image ──────────────────────────────────────────────── */
   .hero-media img {
@@ -399,63 +153,13 @@
   details.reveal .reveal-body { display: flex; flex-direction: column; gap: 10px; }
 
   @media (max-width: 640px) {
-    .bp-row { flex-direction: column; }
     .callout-avatar-row { flex-direction: column; }
     .os-tabs { flex-wrap: wrap; }
   }
 
 
-
-  /* Folder UI skin overrides: subtle printed-on-folder treatment */
-  :root {
-    --ink: currentColor;
-    --ink-mid: currentColor;
-    --ink-soft: currentColor;
-    --rule: rgba(0,0,0,.10);
-    --rule-strong: rgba(0,0,0,.14);
-    --surface: rgba(255,255,255,.05);
-    --surface-2: rgba(255,255,255,.08);
-    --both-bg: rgba(255,255,255,.08);
-    --chip-bg: rgba(255,255,255,.12);
-    --chip-border: rgba(0,0,0,.12);
-    --chip-shadow: transparent;
-    --mac: currentColor;
-    --pc: currentColor;
-    --accent: currentColor;
-    --ext-ink: currentColor;
-    --syn-ink: currentColor;
-    --warn-ink: currentColor;
-    --info-ink: currentColor;
-  }
-
-  html,
-  body {
-    background: transparent;
-  }
-
-  body {
-    color: inherit;
-    padding: 34px 30px 84px;
-  }
-
-  .page-header h1,
-  .page-header p,
-  .page-header .eyebrow,
-  section > h2,
-  section > h3,
-  section > h4,
-  p,
-  th,
-  td,
-  .callout,
-  .callout strong,
-  .chip,
-  .note,
-  code,
-  .bp-col h4,
-  .bp-col p,
-  ul.plain-list li,
-  ol.plain-list li,
+  /* Folder-skin additions — extends the :root currentColor override
+     already declared in design-system.css. Load that file first. */
   .os-tab-btn,
   .pattern-marker,
   details.mini-note summary,
@@ -464,55 +168,8 @@
     color: inherit;
   }
 
-  .page-header .eyebrow,
-  section > h2,
-  section > h3,
-  th,
-  .note,
-  ul.plain-list li::before,
   details.mini-note summary {
     opacity: .68;
-  }
-
-  .page-header,
-  section > h2,
-  td,
-  thead tr {
-    border-color: rgba(0,0,0,.10);
-  }
-
-  .table-wrap,
-  .bp-col {
-    background: rgba(255,255,255,.18);
-    background: color-mix(in srgb, white 18%, transparent);
-    border-color: rgba(0,0,0,.16);
-    border-color: color-mix(in srgb, currentColor 18%, transparent);
-  }
-
-  thead tr,
-  tr:hover td {
-    background: rgba(255,255,255,.22);
-    background: color-mix(in srgb, white 22%, transparent);
-  }
-
-  .callout.warn {
-    background: rgba(240,144,32,.10);
-    border-color: rgba(122,64,16,.16);
-  }
-
-  .callout.info {
-    background: rgba(30,58,95,.08);
-    border-color: rgba(30,58,95,.16);
-  }
-
-  .chip {
-    background: rgba(255,255,255,.12);
-    border-color: rgba(0,0,0,.12);
-    box-shadow: none;
-  }
-
-  code {
-    background: rgba(255,255,255,.08);
   }
 
   .hero-media img,
@@ -538,7 +195,6 @@
     background: rgba(30,58,95,.08);
     border-color: rgba(30,58,95,.16);
   }
-
 </style>
 </head>
 <body>
@@ -558,14 +214,14 @@
       <img src="../images/keyboard-and-stylus.png" alt="A minimalist keyboard and graphics tablet with modifier keys highlighted. A left hand hovers, ready to press any key.">
     </div>
        <h2>why bother learning the shortcuts?</h2>
-    <p>Most guides tell you something like <em>"they save seconds with every action, and over a year the time adds up to eight days. Now you'll get a holiday!"</em> While the maths there does add up, personally, I don't think that's not particularly compelling. Especially if it's going to take you even more time to memorise them in the first place, and it will. I don't think it's much about the time at all.</p>
+    <p>Most guides tell you something like "they save seconds with every action, and over a year the time adds up to eight days. Now you'll get a holiday." That maths does add up, but personally, that's not particularly compelling, especially if it's going to take more time to memorise them in the first place. And it will. I don't think it's much about the time at all.</p>
 
     <h3>the gap between thinking and doing is where your best ideas get lost</h3>
     <p>Every time you look away from your work to find a tool, your flow breaks. Every time you stop to hunt through a menu, you lose seconds of focus. Over a workday, those lost seconds don't just add up to wasted time, they hold you back from staying in the idea.</p>
     <p>True digital fluency happens when the tool becomes an <em>extension</em> of your intent, rather than a <em>barrier</em> to it.</p>
     <p>By moving commands from your brain to your hands, you free up your mind to focus entirely on what you're creating.</p>
     <p>Professional creation is an ambidextrous act. One hand provides the precision of the pointer, the other executes the commands. When they work together, the interface disappears.</p>
-    <p>I built this guide, and the 'Keyboard Warriors' game itself, to help you shorten the distance between an idea and its execution, by building the muscle memory that lets you move at the speed of thought.</p>
+    <p>This module was built to help you shorten the distance between an idea and its execution, by building the muscle memory that lets you move at the speed of thought.</p>
   </section>
 
 

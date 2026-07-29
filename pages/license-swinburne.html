@@ -6,271 +6,26 @@
 <title>Swinburne Licence · Keyboard Warriors</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<style>
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --ink:          #1a1d23;
-    --ink-mid:      #4a5060;
-    --ink-soft:     #7a8090;
-    --rule:         #e2e5ea;
-    --rule-strong:  #c8cdd4;
-    --surface:      #ffffff;
-    --surface-2:    #f7f9fb;
-    --accent:       #1e3a5f;
-    --mac:          #1a5c38;
-    --mac-bg:       #d4f0e0;
-    --pc:           #5c4210;
-    --pc-bg:        #fef0c0;
-    --both-bg:      #eef2f7;
-    --chip-bg:      #f0f2f5;
-    --chip-border:  #c8cdd4;
-    --chip-shadow:  #b8bdc4;
-    --ext-bg:       #fdf0f8;
-    --ext-border:   #e0b8d8;
-    --ext-ink:      #7a2858;
-    --syn-bg:       #f2f0ff;
-    --syn-border:   #c8c0f0;
-    --syn-ink:      #4a3080;
-    --warn-bg:      #fff8f0;
-    --warn-border:  #f0d090;
-    --warn-ink:     #7a4010;
-    --info-bg:      #eef4ff;
-    --info-border:  #b8d0f0;
-    --info-ink:     #1e3a5f;
-    --mono:         'IBM Plex Mono', monospace;
-    --sans:         'IBM Plex Sans', sans-serif;
-  }
-
-  html { font-size: 14px; }
-
-  body {
-    font-family: var(--sans);
-    color: var(--ink);
-    line-height: 1.65;
-    padding: 48px 32px 100px;
-  }
-
-  .page {
-    max-width: 980px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 52px;
-  }
-
-  /* ── Header ─────────────────────────────────────────────────── */
-  .page-header {
-    border-bottom: 1px dashed var(--ink);
-    padding-bottom: 16px;
-  }
-  .page-header .eyebrow {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    margin-bottom: 10px;
-  }
-  .page-header h1 {
-    font-size: 2rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: var(--accent);
-    margin-bottom: 12px;
-    line-height: 1.1;
-  }
-  .page-header p {
-    font-size: 0.93rem;
-    color: var(--ink-mid);
-    max-width: 640px;
-    line-height: 1.7;
-  }
-
-  /* ── Section ─────────────────────────────────────────────────── */
-  section { display: flex; flex-direction: column; gap: 16px; }
-  section > h2 {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--ink-soft);
-    font-family: var(--mono);
-    padding-bottom: 10px;
-    border-bottom: 1px dashed var(--ink);
-  }
-  section > h3 {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--ink-mid);
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    font-family: var(--mono);
-    margin-top: 8px;
-  }
-
-  /* ── Callouts ────────────────────────────────────────────────── */
-  .callout {
-    border-radius: 8px;
-    padding: 13px 17px;
-    font-size: 0.875rem;
-    line-height: 1.65;
-  }
-  .callout.warn  { background: var(--warn-bg);  border: 1px solid var(--warn-border);  color: var(--warn-ink); }
-  .callout.info  { background: var(--info-bg);  border: 1px solid var(--info-border);  color: var(--info-ink); }
-  .callout strong { color: var(--ink); }
-
-  /* ── Tables ──────────────────────────────────────────────────── */
-  .table-wrap {
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.855rem;
-  }
-  thead tr {
-    background: var(--surface-2);
-    border-bottom: 1.5px solid var(--rule-strong);
-  }
-  th {
-    text-align: left;
-    padding: 10px 16px;
-    font-size: 11px;
-    font-weight: 600;
-    font-family: var(--mono);
-    color: var(--ink-soft);
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    white-space: nowrap;
-  }
-  td {
-    padding: 9px 16px;
-    border-bottom: 1px solid var(--rule);
-    vertical-align: middle;
-    color: var(--ink-mid);
-    line-height: 1.5;
-  }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--surface-2); }
-
-  /* ── Best practice block ─────────────────────────────────────── */
-  .bp-row {
-    display: flex;
-    gap: 16px;
-  }
-  .bp-col {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 8px;
-    padding: 14px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .bp-col h4 {
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  /* ── Note text ───────────────────────────────────────────────── */
-  .note {
-    font-size: 0.8rem;
-    color: var(--ink-soft);
-    font-style: italic;
-  }
-
-  /* ── Lists ───────────────────────────────────────────────────── */
-  ul.plain-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-  }
-  ul.plain-list li {
-    font-size: 0.86rem;
-    color: var(--ink-mid);
-    line-height: 1.6;
-    display: flex;
-    gap: 10px;
-    align-items: baseline;
-  }
-  ul.plain-list li::before {
-    content: "–";
-    color: var(--ink-soft);
-    font-weight: 600;
-    flex: 0 0 auto;
-  }
-
-  /* Folder UI skin overrides */
-  :root {
-    --ink: currentColor;
-    --ink-mid: currentColor;
-    --ink-soft: currentColor;
-    --rule: rgba(0,0,0,.10);
-    --rule-strong: rgba(0,0,0,.14);
-    --surface: rgba(255,255,255,.05);
-    --surface-2: rgba(255,255,255,.08);
-    --both-bg: rgba(255,255,255,.08);
-    --accent: currentColor;
-  }
-
-  html, body { background: transparent; }
-  body { color: inherit; padding: 34px 30px 84px; }
-
-  .page-header h1, .page-header p, .page-header .eyebrow,
-  section > h2, section > h3, p, th, td, .callout,
-  .bp-col h4, .bp-col p, ul.plain-list li { color: inherit; }
-
-  .page-header .eyebrow, section > h2, section > h3, th, .note,
-  ul.plain-list li::before { opacity: .68; }
-
-  .page-header, section > h2, td, thead tr { border-color: rgba(0,0,0,.10); }
-
-  .table-wrap, .bp-col {
-    background: color-mix(in srgb, white 18%, transparent);
-    border-color: color-mix(in srgb, currentColor 18%, transparent);
-  }
-
-  thead tr, tr:hover td { background: color-mix(in srgb, white 22%, transparent); }
-
-  .callout.info {
-    background: rgba(30,58,95,.08);
-    border-color: rgba(30,58,95,.16);
-  }
-
-  @media (max-width: 640px) {
-    .bp-row { flex-direction: column; }
-  }
-
-</style>
+<link rel="stylesheet" href="../styles/documentation_design-system.css">
 </head>
 <body>
 <div class="page">
 
   <!-- ══ HEADER ══════════════════════════════════════════════════ -->
   <header class="page-header">
-    <p class="eyebrow">Keyboard Warriors · Instituition Specific Licence</p>
+    <p class="eyebrow">Keyboard Warriors · Licence</p>
     <h1>Licence for Swinburne University of Technology</h1>
     <p>
       A perpetual, royalty-free licence granted directly to Swinburne University of
-      Technology, permitting use, hosting and integration of
+      Technology, including Swinburne TAFE, permitting use, hosting and integration of
       Keyboard Warriors within its educational programmes and Learning Management Systems.
     </p>
   </header>
 
 
-  <!-- ══ LICENSE DETAILS ═════════════════════════════════════════════ -->
+  <!-- ══ MEMO DETAILS ═════════════════════════════════════════════ -->
   <section>
-    <h3>License details</h3>
+    <h3>Memo details</h3>
     <div class="table-wrap">
       <table>
         <tbody>
@@ -287,7 +42,7 @@
   <!-- ══ PURPOSE ══════════════════════════════════════════════════ -->
   <section>
     <h2>01 ) Purpose</h2>
-    <p>This document formally grants Swinburne University of Technology, including Swinburne VE, permission to use, host and integrate the web-based training application Keyboard Warriors into its educational programmes and Learning Management Systems (LMS), such as Canvas.</p>
+    <p>This document formally grants Swinburne University of Technology, including Swinburne TAFE, permission to use, host and integrate the web-based training application Keyboard Warriors into its educational programmes and Learning Management Systems (LMS), such as Canvas.</p>
   </section>
 
 
@@ -313,7 +68,7 @@
       </div>
       <div class="bp-col">
         <h4>Public licensing</h4>
-        <p>This permission acts as a specific exception to the Polyform Noncommercial License 1.0.0 applied to the public GitHub repository.</p>
+        <p>This permission acts as a specific exception to the Polyform Non-Commercial License 1.0.0 applied to the public GitHub repository.</p>
       </div>
       <div class="bp-col">
         <h4>Attribution</h4>
