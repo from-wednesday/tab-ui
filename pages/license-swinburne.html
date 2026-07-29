@@ -1,37 +1,594 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-		"http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en-GB">
 <head>
-	<title>LICENSE.txt</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swinburne Licence · Keyboard Warriors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:          #1a1d23;
+    --ink-mid:      #4a5060;
+    --ink-soft:     #7a8090;
+    --rule:         #e2e5ea;
+    --rule-strong:  #c8cdd4;
+    --surface:      #ffffff;
+    --surface-2:    #f7f9fb;
+    --accent:       #1e3a5f;
+    --mac:          #1a5c38;
+    --mac-bg:       #d4f0e0;
+    --pc:           #5c4210;
+    --pc-bg:        #fef0c0;
+    --both-bg:      #eef2f7;
+    --chip-bg:      #f0f2f5;
+    --chip-border:  #c8cdd4;
+    --chip-shadow:  #b8bdc4;
+    --ext-bg:       #fdf0f8;
+    --ext-border:   #e0b8d8;
+    --ext-ink:      #7a2858;
+    --syn-bg:       #f2f0ff;
+    --syn-border:   #c8c0f0;
+    --syn-ink:      #4a3080;
+    --warn-bg:      #fff8f0;
+    --warn-border:  #f0d090;
+    --warn-ink:     #7a4010;
+    --info-bg:      #eef4ff;
+    --info-border:  #b8d0f0;
+    --info-ink:     #1e3a5f;
+    --mono:         'IBM Plex Mono', monospace;
+    --sans:         'IBM Plex Sans', sans-serif;
+  }
+
+  html { font-size: 14px; }
+
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    line-height: 1.65;
+    padding: 48px 32px 100px;
+  }
+
+  .page {
+    max-width: 980px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 52px;
+  }
+
+  /* ── Header ─────────────────────────────────────────────────── */
+  .page-header {
+    border-bottom: 1px dashed var(--ink);
+    padding-bottom: 16px;
+  }
+  .page-header .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+  .page-header p {
+    font-size: 0.93rem;
+    color: var(--ink-mid);
+    max-width: 640px;
+    line-height: 1.7;
+  }
+
+  /* ── Section ─────────────────────────────────────────────────── */
+  section { display: flex; flex-direction: column; gap: 16px; }
+  section > h2 {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--ink);
+  }
+  section > h3 {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-mid);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-family: var(--mono);
+    margin-top: 8px;
+  }
+
+  /* ── Callouts ────────────────────────────────────────────────── */
+  .callout {
+    border-radius: 8px;
+    padding: 13px 17px;
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+  .callout.warn  { background: var(--warn-bg);  border: 1px solid var(--warn-border);  color: var(--warn-ink); }
+  .callout.info  { background: var(--info-bg);  border: 1px solid var(--info-border);  color: var(--info-ink); }
+  .callout strong { color: var(--ink); }
+
+  /* ── Code block ──────────────────────────────────────────────── */
+  .code-block {
+    background: #1a2030;
+    color: #d8e0f0;
+    border-radius: 8px;
+    padding: 18px 22px;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.9;
+    overflow-x: auto;
+  }
+  .code-block .c-key   { color: #80b8f8; }
+  .code-block .c-val   { color: #90d890; }
+  .code-block .c-note  { color: #999999; }
+  .code-block .c-null  { color: #a08080; }
+
+  /* ── Tables ──────────────────────────────────────────────────── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.855rem;
+  }
+  thead tr {
+    background: var(--surface-2);
+    border-bottom: 1.5px solid var(--rule-strong);
+  }
+  th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--mono);
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    white-space: nowrap;
+  }
+  td {
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: middle;
+    color: var(--ink-mid);
+    line-height: 1.5;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface-2); }
+
+  /* ── Token pill ──────────────────────────────────────────────── */
+  .tok {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 3px;
+    padding: 1px 6px;
+    white-space: nowrap;
+  }
+  .tok.mac  { background: var(--mac); }
+  .tok.pc   { background: #8b6000; }
+
+  /* ── Synonym pill ────────────────────────────────────────────── */
+  .syn {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--syn-bg);
+    color: var(--syn-ink);
+    border: 1px solid var(--syn-border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    white-space: nowrap;
+  }
+
+  /* ── OS badge ────────────────────────────────────────────────── */
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: var(--mono);
+    letter-spacing: 0.05em;
+    border-radius: 3px;
+    padding: 1px 6px;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  .badge.mac  { background: var(--mac-bg);  color: var(--mac); }
+  .badge.pc   { background: var(--pc-bg);   color: var(--pc); }
+  .badge.both { background: var(--both-bg); color: var(--accent); }
+  .badge.ext  { background: var(--ext-bg);  color: var(--ext-ink); border: 1px solid var(--ext-border); }
+
+  /* ── Keyboard chip ───────────────────────────────────────────── */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #1e3a5f;
+    background: var(--chip-bg);
+    border: 1px solid var(--chip-border);
+    border-radius: 4px;
+    padding: 2px 8px 1px;
+    box-shadow: 0 1.5px 0 var(--chip-shadow);
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  /* ── Extended chip pill ──────────────────────────────────────── */
+  .chip-ext {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ext-ink);
+    background: var(--ext-bg);
+    border: 1px solid var(--ext-border);
+    border-radius: 10px;
+    padding: 2px 10px 1px;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  /* ── Chip pair (short + long form) ──────────────────────────── */
+  .chip-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  /* ── Two-col layout ──────────────────────────────────────────── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  /* ── Prose paragraph ─────────────────────────────────────────── */
+  p {
+    font-size: 0.88rem;
+    color: var(--ink-mid);
+    line-height: 1.7;
+  }
+
+  /* ── Best practice block ─────────────────────────────────────── */
+  .bp-row {
+    display: flex;
+    gap: 16px;
+  }
+  .bp-col {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bp-col h4 {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .bp-col.mac h4 { color: var(--mac); }
+  .bp-col.pc  h4 { color: var(--pc); }
+  .bp-col p { font-size: 0.86rem; }
+
+  /* ── Null value ──────────────────────────────────────────────── */
+  .null-val {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #888;
+    background: #eeeeee;
+    border-radius: 3px;
+    padding: 1px 6px;
+  }
+
+  /* ── Note text ───────────────────────────────────────────────── */
+  .note {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  /* ── Inline code ─────────────────────────────────────────────── */
+  code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: var(--both-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ── Lists ───────────────────────────────────────────────────── */
+  ul.plain-list, ol.plain-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  ul.plain-list li, ol.plain-list li {
+    font-size: 0.86rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  ul.plain-list li strong, ol.plain-list li strong { color: var(--ink); font-weight: 600; }
+  ul.plain-list li::before {
+    content: "–";
+    color: var(--ink-soft);
+    font-weight: 600;
+    flex: 0 0 auto;
+  }
+  ol.plain-list { counter-reset: item; }
+  ol.plain-list li::before {
+    counter-increment: item;
+    content: counter(item) ".";
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    flex: 0 0 auto;
+  }
+
+
+
+  /* Folder UI skin overrides: subtle printed-on-folder treatment */
+  :root {
+    --ink: currentColor;
+    --ink-mid: currentColor;
+    --ink-soft: currentColor;
+    --rule: rgba(0,0,0,.10);
+    --rule-strong: rgba(0,0,0,.14);
+    --surface: rgba(255,255,255,.05);
+    --surface-2: rgba(255,255,255,.08);
+    --both-bg: rgba(255,255,255,.08);
+    --chip-bg: rgba(255,255,255,.12);
+    --chip-border: rgba(0,0,0,.12);
+    --chip-shadow: transparent;
+    --mac: currentColor;
+    --pc: currentColor;
+    --accent: currentColor;
+    --ext-ink: currentColor;
+    --syn-ink: currentColor;
+    --warn-ink: currentColor;
+    --info-ink: currentColor;
+  }
+
+  html,
+  body {
+    background: transparent;
+  }
+
+  body {
+    color: inherit;
+    padding: 34px 30px 84px;
+  }
+
+  .page-header h1,
+  .page-header p,
+  .page-header .eyebrow,
+  section > h2,
+  section > h3,
+  p,
+  th,
+  td,
+  .callout,
+  .callout strong,
+  .tok,
+  .syn,
+  .badge,
+  .chip,
+  .chip-ext,
+  .null-val,
+  .note,
+  code,
+  .bp-col h4,
+  .bp-col p,
+  ul.plain-list li,
+  ol.plain-list li,
+  .code-block,
+  .code-block .c-key,
+  .code-block .c-val,
+  .code-block .c-note,
+  .code-block .c-null {
+    color: inherit;
+  }
+
+  .page-header .eyebrow,
+  section > h2,
+  section > h3,
+  th,
+  .note,
+  ul.plain-list li::before,
+  .code-block .c-note {
+    opacity: .68;
+  }
+
+  .page-header,
+  section > h2,
+  td,
+  thead tr {
+    border-color: rgba(0,0,0,.10);
+  }
+
+  .table-wrap,
+  .bp-col {
+    background: rgba(255,255,255,.18);
+    background: color-mix(in srgb, white 18%, transparent);
+    border-color: rgba(0,0,0,.16);
+    border-color: color-mix(in srgb, currentColor 18%, transparent);
+  }
+
+  thead tr,
+  tr:hover td {
+    background: rgba(255,255,255,.22);
+    background: color-mix(in srgb, white 22%, transparent);
+  }
+
+  .callout.warn {
+    background: rgba(240,144,32,.10);
+    border-color: rgba(122,64,16,.16);
+  }
+
+  .callout.info {
+    background: rgba(30,58,95,.08);
+    border-color: rgba(30,58,95,.16);
+  }
+
+  .code-block {
+    background: rgba(26,32,48,.12);
+    border: 1px solid rgba(0,0,0,.12);
+  }
+
+  .tok,
+  .tok.mac,
+  .tok.pc {
+    background: rgba(30,58,95,.16);
+    border: 1px solid rgba(30,58,95,.16);
+  }
+
+  .syn {
+    background: rgba(74,48,128,.08);
+    border-color: rgba(74,48,128,.14);
+  }
+
+  .badge.mac { background: rgba(26,92,56,.10); }
+  .badge.pc { background: rgba(139,96,0,.10); }
+  .badge.both { background: rgba(30,58,95,.08); }
+  .badge.ext { background: rgba(122,40,88,.08); border-color: rgba(122,40,88,.14); }
+
+  .chip {
+    background: rgba(255,255,255,.12);
+    border-color: rgba(0,0,0,.12);
+    box-shadow: none;
+  }
+
+  .chip-ext {
+    background: rgba(122,40,88,.08);
+    border-color: rgba(122,40,88,.14);
+  }
+
+  .null-val,
+  code {
+    background: rgba(255,255,255,.08);
+  }
+
+  @media (max-width: 640px) {
+    .bp-row { flex-direction: column; }
+  }
+
+</style>
 </head>
-<body style="color: rgb(20, 20, 20); background-color: rgb(247, 247, 247)">
-<pre><code>
-<span style="color: rgb(20, 20, 20);">To:&nbsp;Swinburne&nbsp;University&nbsp;of&nbsp;Technology
+<body>
+<div class="page">
 
-From:&nbsp;Wednesday&nbsp;Dessauer
+  <!-- ══ HEADER ══════════════════════════════════════════════════ -->
+  <header class="page-header">
+    <p class="eyebrow">Keyboard Warriors · Licence</p>
+    <h1>Licence for Swinburne University of Technology</h1>
+    <p>
+      A perpetual, royalty-free licence granted directly to Swinburne University of
+      Technology, including Swinburne TAFE, permitting use, hosting and integration of
+      Keyboard Warriors within its educational programmes and Learning Management Systems.
+    </p>
+  </header>
 
-Date:&nbsp;1&nbsp;April&nbsp;2026
 
-Subject:&nbsp;Perpetual&nbsp;Royalty-Free&nbsp;Licence&nbsp;for&nbsp;"Keyboard&nbsp;Warriors"&nbsp;Training&nbsp;Software
+  <!-- ══ MEMO DETAILS ═════════════════════════════════════════════ -->
+  <section>
+    <h3>Memo details</h3>
+    <div class="table-wrap">
+      <table>
+        <tbody>
+          <tr><th>To</th><td>Swinburne University of Technology</td></tr>
+          <tr><th>From</th><td>Wednesday Dessauer</td></tr>
+          <tr><th>Date</th><td>1 April 2026</td></tr>
+          <tr><th>Subject</th><td>Perpetual Royalty-Free Licence for “Keyboard Warriors” Training Software</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
-1.&nbsp;Purpose
 
-This&nbsp;document&nbsp;formally&nbsp;grants&nbsp;Swinburne&nbsp;University&nbsp;of&nbsp;Technology&nbsp;(including&nbsp;Swinburne&nbsp;TAFE)&nbsp;permission&nbsp;to&nbsp;use,&nbsp;host,&nbsp;and&nbsp;integrate&nbsp;the&nbsp;web-based&nbsp;training&nbsp;application&nbsp;Keyboard&nbsp;Warriors&nbsp;into&nbsp;its&nbsp;educational&nbsp;programmes&nbsp;and&nbsp;Learning&nbsp;Management&nbsp;Systems&nbsp;(LMS),&nbsp;such&nbsp;as&nbsp;Canvas.
+  <!-- ══ PURPOSE ══════════════════════════════════════════════════ -->
+  <section>
+    <h2>01 ) Purpose</h2>
+    <p>This document formally grants Swinburne University of Technology, including Swinburne TAFE, permission to use, host and integrate the web-based training application Keyboard Warriors into its educational programmes and Learning Management Systems (LMS), such as Canvas.</p>
+  </section>
 
-2.&nbsp;Scope&nbsp;of&nbsp;Use
 
-As&nbsp;the&nbsp;sole&nbsp;creator&nbsp;and&nbsp;copyright&nbsp;holder&nbsp;of&nbsp;Keyboard&nbsp;Warriors,&nbsp;I&nbsp;grant&nbsp;Swinburne&nbsp;a&nbsp;non-exclusive,&nbsp;perpetual,&nbsp;and&nbsp;royalty-free&nbsp;licence&nbsp;to:
+  <!-- ══ SCOPE OF USE ═════════════════════════════════════════════ -->
+  <section>
+    <h2>02 ) Scope of Use</h2>
+    <p>As the sole creator and copyright holder of Keyboard Warriors, I grant Swinburne a non-exclusive, perpetual and royalty-free licence to:</p>
+    <ul class="plain-list">
+      <li>Incorporate the software into formal units of competency and paid educational syllabuses.</li>
+      <li>Distribute the software to enrolled students for use in classroom environments and self-study.</li>
+      <li>Utilise the software for internal staff training and vocational development.</li>
+    </ul>
+  </section>
 
-Incorporate&nbsp;the&nbsp;software&nbsp;into&nbsp;formal&nbsp;units&nbsp;of&nbsp;competency&nbsp;and&nbsp;paid&nbsp;educational&nbsp;syllabuses.
-Distribute&nbsp;the&nbsp;software&nbsp;to&nbsp;enrolled&nbsp;students&nbsp;for&nbsp;use&nbsp;in&nbsp;classroom&nbsp;environments&nbsp;and&nbsp;self-study.
-Utilise&nbsp;the&nbsp;software&nbsp;for&nbsp;internal&nbsp;staff&nbsp;training&nbsp;and&nbsp;vocational&nbsp;development.
-3.&nbsp;Intellectual&nbsp;Property&nbsp;&amp;&nbsp;Attribution
 
-Ownership:&nbsp;I&nbsp;retain&nbsp;all&nbsp;intellectual&nbsp;property&nbsp;rights,&nbsp;including&nbsp;the&nbsp;source&nbsp;code,&nbsp;branding,&nbsp;and&nbsp;game&nbsp;logic&nbsp;developed&nbsp;for&nbsp;the&nbsp;"Keyboard&nbsp;Warrior"&nbsp;project.
-Public&nbsp;Licensing:&nbsp;This&nbsp;permission&nbsp;acts&nbsp;as&nbsp;a&nbsp;specific&nbsp;exception&nbsp;to&nbsp;the&nbsp;Polyform&nbsp;Non-Commercial&nbsp;License&nbsp;1.0.0&nbsp;applied&nbsp;to&nbsp;the&nbsp;public&nbsp;GitHub&nbsp;repository.
-Attribution:&nbsp;Swinburne&nbsp;agrees&nbsp;to&nbsp;maintain&nbsp;the&nbsp;original&nbsp;author&nbsp;attribution&nbsp;(Wednesday&nbsp;Dessauer)&nbsp;within&nbsp;the&nbsp;software&nbsp;interface&nbsp;and&nbsp;any&nbsp;associated&nbsp;instructional&nbsp;materials.
-4.&nbsp;Terms
+  <!-- ══ IP & ATTRIBUTION ═════════════════════════════════════════ -->
+  <section>
+    <h2>03 ) Intellectual Property &amp; Attribution</h2>
+    <div class="bp-row">
+      <div class="bp-col">
+        <h4>Ownership</h4>
+        <p>I retain all intellectual property rights, including the source code, branding and game logic developed for the “Keyboard Warrior” project.</p>
+      </div>
+      <div class="bp-col">
+        <h4>Public licensing</h4>
+        <p>This permission acts as a specific exception to the Polyform Non-Commercial License 1.0.0 applied to the public GitHub repository.</p>
+      </div>
+      <div class="bp-col">
+        <h4>Attribution</h4>
+        <p>Swinburne agrees to maintain the original author attribution, Wednesday Dessauer, within the software interface and any associated instructional materials.</p>
+      </div>
+    </div>
+  </section>
 
-This&nbsp;agreement&nbsp;is&nbsp;provided&nbsp;"as&nbsp;is"&nbsp;without&nbsp;warranty.&nbsp;While&nbsp;I&nbsp;will&nbsp;endeavour&nbsp;to&nbsp;support&nbsp;the&nbsp;integration&nbsp;of&nbsp;this&nbsp;tool&nbsp;within&nbsp;the&nbsp;Swinburne&nbsp;EIX&nbsp;framework,&nbsp;the&nbsp;university&nbsp;accepts&nbsp;responsibility&nbsp;for&nbsp;its&nbsp;deployment&nbsp;to&nbsp;students.
-</span></code></pre></body>
+
+  <!-- ══ TERMS ════════════════════════════════════════════════════ -->
+  <section>
+    <h2>04 ) Terms</h2>
+    <div class="callout info">
+      <p>This agreement is provided “as is” without warranty. While I will endeavour to support the integration of this tool within the Swinburne EIX framework, the university accepts responsibility for its deployment to students.</p>
+    </div>
+  </section>
+
+  <p class="note" style="text-align: right;">— Wednesday Dessauer</p>
+
+</div><!-- /.page -->
+</body>
 </html>
