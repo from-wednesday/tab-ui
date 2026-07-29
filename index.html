@@ -690,17 +690,35 @@
     const i=tabAtPoint(e.clientX-rect.left,e.clientY-rect.top);
     shell.style.cursor=(i!==null && i!==activeIndex)?'pointer':'default';
   });
-  fetch('manifest.json').then(r=>r.json()).then(m=>{
-    manifest=m;
-    applyManifestRuntimeSettings();
-    buildTabEls();
-    paintLoading({instant:true});
-    beginPreload();
-  }).catch(err=>{
-    shell.innerHTML=`<div style="padding:24px;font-family:system-ui,sans-serif;color:#a33;">
-      <strong>Failed to load the tab stack.</strong><br>${(err&&err.message)||err}
-    </div>`;
-  });
+    function resolveEditionId(){
+    var Requested=null;
+    try{ Requested=new URLSearchParams(window.location.search).get('to'); }catch(e){}
+    return Requested || 'public';
+  }
+  var EditionId=resolveEditionId();
+  function loadManifest(FileName, IsFallbackAttempt){
+    fetch(FileName).then(r=>{
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    }).then(m=>{
+      manifest=m;
+      applyManifestRuntimeSettings();
+      buildTabEls();
+      paintLoading({instant:true});
+      beginPreload();
+    }).catch(err=>{
+      if(!IsFallbackAttempt && EditionId!=='public'){
+        // Unknown or missing edition — fall back to the public manifest
+        // rather than failing outright.
+        loadManifest('to-public.json', true);
+        return;
+      }
+      shell.innerHTML=`<div style="padding:24px;font-family:system-ui,sans-serif;color:#a33;">
+        <strong>Failed to load the tab stack.</strong><br>${(err&&err.message)||err}
+      </div>`;
+    });
+  }
+  loadManifest('to-'+EditionId+'.json', false);
   window.addEventListener('error',(e)=>{
     if(shell.querySelector('.tab')) return;
     shell.innerHTML=`<div style="padding:24px;font-family:system-ui,sans-serif;color:#a33;">
