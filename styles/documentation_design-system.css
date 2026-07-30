@@ -294,7 +294,7 @@ ol.plain-list li::before {
   --chip-shadow: transparent;
   --mac: currentColor;
   --pc: currentColor;
-  --accent: currentColor;
+  --accent: rgba(231,134,255,.88);
   --ext-ink: currentColor;
   --syn-ink: currentColor;
   --warn-ink: currentColor;
