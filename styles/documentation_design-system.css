@@ -60,8 +60,27 @@ body {
 
 /* ── Header ─────────────────────────────────────────────────── */
 .page-header {
-  border-bottom: 2px solid var(--ink);
+  position: relative;
   padding-bottom: 24px;
+}
+/* The rule under the page title deliberately breaks out of the 980px
+   .page column to run edge-to-edge across the tab. left:50% + a
+   translateX(-50%) centres it on .page-header's own centre point,
+   which — because .page is auto-centred inside body's symmetric
+   padding — always lands exactly on the tab's true centre too, so
+   100vw reaches precisely to both tab edges and no further. Dashed,
+   at the same weight/colour the solid rule used, so it reads as a
+   perforation rather than a printed line. */
+.page-header::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 100vw;
+  height: 0;
+  transform: translateX(-50%);
+  border-bottom: 2px dashed var(--ink);
+  pointer-events: none;
 }
 .page-header .eyebrow {
   font-family: var(--mono);
@@ -86,7 +105,7 @@ body {
    folder-skin override below, so it holds regardless of tab colour.
    Currently applied to: advice_general.html (Bootcamp). */
 .page-header h1.h1-alt {
-  color: rgba(231, 134, 43, 0.88);
+  color: rgba(213, 137, 66, 0.9);
 }
 .page-header p {
   font-size: 0.93rem;
@@ -364,7 +383,7 @@ ul.plain-list li::before {
   opacity: .68;
 }
 
-.page-header,
+.page-header::after,
 section > h2,
 td,
 thead tr {
