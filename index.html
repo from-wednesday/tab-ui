@@ -696,12 +696,31 @@
     return Requested || 'public';
   }
   var EditionId=resolveEditionId();
+  // Second param, independent of the tenant ("to"): which tab to land
+  // on. Accepts either a tab's objectId or its label (case-insensitive).
+  // Falls back to 0 (the first tab) if the param is absent, unmatched,
+  // or the manifest doesn't have that many tabs.
+  function resolveInitialTabIndex(m){
+    var Requested=null;
+    try{ Requested=new URLSearchParams(window.location.search).get('tab'); }catch(e){}
+    if(!Requested) return 0;
+    var tabs=(m && m.tabs) || [];
+    var byId=tabs.findIndex(function(t){ return String(t.objectId)===String(Requested); });
+    if(byId!==-1) return byId;
+    var byLabel=tabs.findIndex(function(t){ return (t.label||'').toLowerCase()===String(Requested).toLowerCase(); });
+    if(byLabel!==-1) return byLabel;
+    var asIndex=parseInt(Requested,10);
+    if(Number.isFinite(asIndex) && asIndex>=0 && asIndex<tabs.length) return asIndex;
+    return 0;
+  }
   function loadManifest(FileName, IsFallbackAttempt){
     fetch(FileName).then(r=>{
       if(!r.ok) throw new Error('HTTP '+r.status);
       return r.json();
     }).then(m=>{
       manifest=m;
+      activeIndex=resolveInitialTabIndex(m);
+      prevIndex=activeIndex;
       applyManifestRuntimeSettings();
       buildTabEls();
       paintLoading({instant:true});
