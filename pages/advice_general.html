@@ -272,11 +272,22 @@ details.reveal {
   }
 
   .note-card {
-    background: rgba(255,255,255,.92);
-    background: color-mix(in srgb, white 92%, transparent);
+    /* Solid, not translucent — a floating card can sit over arbitrary
+       content, so it can't rely on "blend with whatever's behind me"
+       the way the inline chips do. These two values ARE that blend,
+       precomputed: rgba(255,255,255,.12) over this tab's own light/
+       dark background colours (#e4d5a8 / #74777c, from the manifest),
+       flattened to a fixed hex so it reads the same everywhere.
+       Swapped via prefers-color-scheme below. */
+    background: #e7dab2;
     border-color: rgba(0,0,0,.16);
     border-color: color-mix(in srgb, currentColor 18%, transparent);
     color: var(--ink);
+  }
+  @media (prefers-color-scheme: dark) {
+    .note-card {
+      background: #85878c;
+    }
   }
 
   .hero-media img,
