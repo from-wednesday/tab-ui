@@ -72,37 +72,57 @@
   .section-break .line { flex: 1; height: 0; border-bottom: 1.5px solid var(--rule-strong); }
 
   /* ── OS tab switcher (pure CSS, no script) ──────────────────── */
-  .os-tab-radio { position: absolute; opacity: 0; pointer-events: none; }
-  .os-tabs-wrap { display: flex; flex-direction: column; align-items: center; }
-  .os-tabs {
-    display: inline-flex;
-    padding: 3px;
-    border-radius: 22px;
-    border: 1px solid var(--rule-strong);
-    background: var(--surface);
+  .os-switch-wrap { display: flex; flex-direction: column; align-items: center; }
+  .os-switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
   }
-  .os-tab-btn {
+  .os-switch-label {
     font-family: var(--sans);
     font-weight: 600;
-    font-size: 0.82rem;
-    padding: 8px 18px;
-    border-radius: 18px;
-    border: none;
-    background: transparent;
-    color: var(--ink-mid);
+    font-size: 0.78rem;
+    color: inherit;
+    opacity: .5;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1;
     cursor: pointer;
     user-select: none;
-    transition: background .15s ease, color .15s ease;
+    transition: opacity .15s ease;
   }
+  .os-switch-label svg { display: block; }
+  .os-switch-label.is-active { opacity: 1; }
+
+  /* SVG toggle switch — geometry, icons and fill behaviour carried over
+     from the game project's component unchanged. */
+  .os-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    width: 36px;
+    height: 14px;
+  }
+  .os-switch input {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+    pointer-events: none;
+  }
+  .os-track { display: block; pointer-events: none; overflow: visible; color: inherit; }
+  #osKnobEl {
+    transition: transform 0.18s ease, fill 0.18s ease;
+    transform-origin: 7px 7px;
+    transform-box: fill-box;
+  }
+
   .os-panel { display: none; width: 100%; }
-  #os-tab-mac:checked ~ #panel-mac,
-  #os-tab-pc:checked ~ #panel-pc { display: block; }
-  #os-tab-mac:checked ~ .os-tabs-wrap .os-tabs label[for="os-tab-mac"],
-  #os-tab-pc:checked ~ .os-tabs-wrap .os-tabs label[for="os-tab-pc"] {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
+  .os-panel.is-active { display: block; }
 
   /* ── Pattern list (icon-font replacement) ───────────────────── */
   .pattern-list { display: flex; flex-direction: column; gap: 16px; }
@@ -168,7 +188,7 @@
 
   /* Folder-skin additions — extends the :root currentColor override
      already declared in design-system.css. Load that file first. */
-  .os-tab-btn,
+  .os-switch-label,
   .pattern-marker,
   details.mini-note summary,
   details.mini-note p,
@@ -184,20 +204,6 @@
   .callout-avatar-row .avatar,
   .section-break .avatar {
     border-color: rgba(0,0,0,.14);
-  }
-
-  .os-tabs {
-    background: rgba(255,255,255,.12);
-    border-color: rgba(0,0,0,.12);
-  }
-  .os-tab-btn {
-    background: transparent;
-  }
-  #os-tab-mac:checked ~ .os-tabs-wrap .os-tabs label[for="os-tab-mac"],
-  #os-tab-pc:checked ~ .os-tabs-wrap .os-tabs label[for="os-tab-pc"] {
-    background: rgba(30,58,95,.16);
-    border-color: rgba(30,58,95,.16);
-    color: inherit;
   }
 
   .pattern-marker { background: rgba(255,255,255,.14); }
@@ -254,15 +260,22 @@
     <p>You can maximise your impact early on by focusing on the most frequent and standardised shortcuts first. You probably already know some, such as copy <span class="chip">⌘</span><span class="chip">C</span>, paste <span class="chip">⌘</span><span class="chip">V</span>, and undo <span class="chip">⌘</span><span class="chip">Z</span>. These work across almost every app you touch, so they save you from constantly digging through menus.</p>
     <p>As shortcuts become second nature, they do more than just shave time off every process. You will also start to focus more on what you're doing, instead of how you're doing it.</p>
 
-    <div class="os-tabs-wrap">
-      <input type="radio" name="os-tab" id="os-tab-mac" class="os-tab-radio" checked>
-      <input type="radio" name="os-tab" id="os-tab-pc" class="os-tab-radio">
-      <div class="os-tabs">
-        <label class="os-tab-btn" for="os-tab-mac">Apple Mac OS</label>
-        <label class="os-tab-btn" for="os-tab-pc">Microsoft Windows PC</label>
+    <div class="os-switch-wrap">
+      <div class="os-switch-row">
+        <span class="os-switch-label is-active" id="osLabelLeft" data-os="mac"></span>
+        <label class="os-switch" id="osToggleLabel" title="Switch OS mode">
+          <input type="checkbox" id="osToggle">
+          <svg class="os-track" width="36" height="14" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect id="osTrackRect" x="1" y="1" width="34" height="12" rx="6"
+                  stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <circle id="osKnobEl" cx="7" cy="7" r="4"
+                    stroke="currentColor" stroke-width="1.5" fill="white"/>
+          </svg>
+        </label>
+        <span class="os-switch-label" id="osLabelRight" data-os="pc"></span>
       </div>
 
-      <div class="os-panel" id="panel-mac">
+      <div class="os-panel is-active" id="panel-mac">
         <div class="table-wrap" style="margin-top:14px;">
           <table>
             <colgroup>
@@ -535,5 +548,52 @@
   </section>
 
 </div><!-- /.page -->
+
+<script>
+/* ══════════════════════════════════════
+   OS SWITCH — geometry, icons and dot-fill
+   behaviour carried over from the game
+   project's toggle component. No OS
+   detection here: Mac starts active,
+   clicking either label or the switch
+   itself flips which table panel shows.
+   ══════════════════════════════════════ */
+(function () {
+  var MAC_ICON_SVG = '<svg width="10" height="12" viewBox="0 0 686.7 761.2" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M563.7,589c-27.7,41.3-57,81.7-101.7,82.3-44.7,1-59-26.3-109.7-26.3s-66.7,25.7-109,27.3c-43.7,1.7-76.7-44-104.7-84.3-57-82.3-100.7-234-42-336,29-50.7,81-82.7,137.3-83.7,42.7-.7,83.3,29,109.7,29s75.3-35.7,127-30.3c21.7,1,82.3,8.7,121.3,66-3,2-72.3,42.7-71.7,127,1,100.7,88.3,134.3,89.3,134.7-1,2.3-14,48-46,94.3h0ZM373.3,55.7c24.3-27.7,64.7-48.7,98-50,4.3,39-11.3,78.3-34.7,106.3-23,28.3-61,50.3-98.3,47.3-5-38.3,13.7-78.3,35-103.7h0Z"/></svg>';
+  var PC_ICON_SVG  = '<svg width="11" height="11" viewBox="0 0 102.73 104.6" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16,50.4h26.6v-27.7l-26.6,6.3v21.4Z"/><path d="M86,12.6l-37,8.6v29.2h37V12.6Z"/><path d="M16,76.2l26.6,6.3v-25.6H16v19.3Z"/><path d="M49,84l37,8.6v-35.7h-37v27.1Z"/></svg>';
+
+  var osToggleEl = document.getElementById('osToggle');
+  var osKnobEl   = document.getElementById('osKnobEl');
+  var leftLabel  = document.getElementById('osLabelLeft');
+  var rightLabel = document.getElementById('osLabelRight');
+  var panelMac   = document.getElementById('panel-mac');
+  var panelPc    = document.getElementById('panel-pc');
+
+  leftLabel.innerHTML  = MAC_ICON_SVG + ' Mac';
+  rightLabel.innerHTML = 'PC ' + PC_ICON_SVG;
+
+  function applyOsMode(os) {
+    var checked = (os === 'pc');
+    osToggleEl.checked = checked;
+    // Knob slides right and its fill moves from white to the current
+    // ink colour — the same "dot fill hangs between white and stroke
+    // colour" behaviour as the source component.
+    osKnobEl.style.transform = checked ? 'translateX(22px)' : 'translateX(0)';
+    osKnobEl.setAttribute('fill', checked ? 'currentColor' : 'white');
+    leftLabel.classList.toggle('is-active', os === 'mac');
+    rightLabel.classList.toggle('is-active', os === 'pc');
+    panelMac.classList.toggle('is-active', os === 'mac');
+    panelPc.classList.toggle('is-active', os === 'pc');
+  }
+
+  leftLabel.addEventListener('click', function () { applyOsMode('mac'); });
+  rightLabel.addEventListener('click', function () { applyOsMode('pc'); });
+  osToggleEl.addEventListener('change', function () {
+    applyOsMode(osToggleEl.checked ? 'pc' : 'mac');
+  });
+
+  applyOsMode('mac');
+})();
+</script>
 </body>
 </html>
