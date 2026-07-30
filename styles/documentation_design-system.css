@@ -196,6 +196,13 @@ p {
   line-height: 1.7;
 }
 
+/* ── Inline links ────────────────────────────────────────────── */
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 /* ── Best practice / grouped-info blocks ────────────────────── */
 .bp-row {
   display: flex;
