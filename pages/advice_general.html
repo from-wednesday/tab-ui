@@ -34,17 +34,19 @@ td:first-child { font-weight: 600; color: var(--ink); }
 
   /* ── Avatar + callout row ────────────────────────────────────── */
   .callout-avatar-row {
-    display: flex;
-    gap: 14px;
-    align-items: center;
+    position: relative;
   }
   .callout-avatar-row .avatar {
-    flex: 0 0 52px;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    z-index: 1;
     width: 52px;
     height: 52px;
     border-radius: 50%;
     overflow: hidden;
     border: 1px solid var(--rule-strong);
+    transform: translate(-50%, -50%);
   }
   .callout-avatar-row .avatar img {
     width: 100%;
@@ -53,33 +55,8 @@ td:first-child { font-weight: 600; color: var(--ink); }
     display: block;
   }
   .callout-avatar-row .callout {
-    flex: 1;
-    position: relative;
-  }
-
-  /* Speech-bubble notch: a square rotated 45deg, centred on the
-     callout's left edge so half of it pokes out toward the avatar.
-     background/border use "inherit" rather than the --warn-bg /
-     --info-bg tokens directly, so the notch always matches whatever
-     colour actually rendered on .callout (including the folder-skin
-     overrides further down this stylesheet) without needing a
-     separate rule per variant. Only the two outward-facing edges
-     (left + bottom, which become the notch's visible NW/SW edges
-     once rotated) carry a border, so it reads as a continuation of
-     the callout's own stroke rather than a seam cutting into it. */
-  .callout-avatar-row .callout::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 14px;
-    height: 14px;
-    background-color: inherit;
-    border-left: inherit;
-    border-bottom: inherit;
-    border-top: none;
-    border-right: none;
-    transform: translate(-50%, -50%) rotate(45deg);
+    width: 100%;
+    padding-top: 36px;
   }
 
   /* ── Section-break divider with avatar ──────────────────────── */
@@ -209,21 +186,6 @@ td:first-child { font-weight: 600; color: var(--ink); }
   details.reveal summary::-webkit-details-marker { display: none; }
   details.reveal[open] summary { margin-bottom: 14px; }
   details.reveal .reveal-body { display: flex; flex-direction: column; gap: 10px; }
-
-  @media (max-width: 640px) {
-    .callout-avatar-row { flex-direction: column; }
-    /* Row is now stacked (avatar above callout), so re-point the
-       notch upward at the avatar instead of leftward. */
-    .callout-avatar-row .callout::before {
-      top: 0;
-      left: 50%;
-      border-left: none;
-      border-bottom: none;
-      border-top: inherit;
-      border-right: inherit;
-    }
-  }
-
 
   /* Folder-skin additions — extends the :root currentColor override
      already declared in design-system.css. Load that file first. */
@@ -409,11 +371,11 @@ td:first-child { font-weight: 600; color: var(--ink); }
 
     <div class="bp-row">
       <div class="bp-col">
-        <h4>Adobe Photoshop</h4>
+        <h4>Photoshop</h4>
         <p>Pairs <span class="chip">A</span> and <span class="chip">D</span> directly.</p>
       </div>
       <div class="bp-col">
-        <h4>Adobe Illustrator</h4>
+        <h4>Illustrator</h4>
         <p>Uses a modifier key, <span class="chip">Shift</span>, to invert the <span class="chip">A</span> key's action.</p>
       </div>
     </div>
@@ -422,7 +384,7 @@ td:first-child { font-weight: 600; color: var(--ink); }
 
     <h3 style="text-align:center;">which convention do you think InDesign uses?</h3>
     <details class="reveal">
-      <div style="text-align:center;><summary>Think about it, then click to reveal the answer</summary></div>
+      <summary>Think about it, then click to reveal the answer</summary>
       <div class="reveal-body">
         <p><strong>InDesign</strong> follows Illustrator's approach. "Deselect All" is <span class="chip">⌘</span> + <span class="chip">Shift</span> + <span class="chip">A</span>.</p>
 
@@ -479,6 +441,10 @@ td:first-child { font-weight: 600; color: var(--ink); }
 
         <p>By getting acquainted with these few conventions, what seemed arbitrary or meaningless actually starts making sense. Soon, as you switch contexts, both your fingers and mind will adapt faster. To get there, we just need to practise, which is exactly what Keyboard Warriors was built for.</p>
       </div>
+    </details>
+  </section>
+
+
   <!-- ══ WHEN TO CUSTOMISE ═══════════════════════════════════════ -->
   <section>
     <h2>when to customise</h2>
@@ -580,8 +546,7 @@ td:first-child { font-weight: 600; color: var(--ink); }
     <p>Custom shortcuts work best when they remove friction without creating new problems.</p>
     <p>A small number of thoughtful changes can support your workflow, and help you stay focused on the creative decisions that matter.</p>
   </section>
-    </details>
-  </section>
+
 </div><!-- /.page -->
 
 <script>
