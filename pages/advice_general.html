@@ -16,12 +16,13 @@
      unique to this page's narrative/interactive treatment.
      ══════════════════════════════════════════════════════════════ */
 
-  /* ── Wide comparison table: horizontal scroll + centred cells ── */
-  .table-wrap table { min-width: 620px; table-layout: fixed; }
-  .table-wrap col.col-action { width: 20%; }
-  .table-wrap col.col-app    { width: 13.33%; }
-  td { text-align: center; }
-  td:first-child { text-align: right; font-weight: 600; color: var(--ink); }
+/* ── Wide comparison table: horizontal scroll + centred cells ── */
+.table-wrap table { min-width: 620px; table-layout: fixed; }
+.table-wrap col.col-action { width: 20%; }
+.table-wrap col.col-app    { width: 13.33%; }
+th, td { text-align: center; }
+th:first-child, td:first-child { text-align: right; }
+td:first-child { font-weight: 600; color: var(--ink); }
 
   /* ── Hero image ──────────────────────────────────────────────── */
   .hero-media img {
