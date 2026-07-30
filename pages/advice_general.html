@@ -36,7 +36,7 @@ td:first-child { font-weight: 600; color: var(--ink); }
   .callout-avatar-row {
     display: flex;
     gap: 14px;
-    align-items: flex-start;
+    align-items: center;
   }
   .callout-avatar-row .avatar {
     flex: 0 0 52px;
@@ -52,7 +52,35 @@ td:first-child { font-weight: 600; color: var(--ink); }
     object-fit: cover;
     display: block;
   }
-  .callout-avatar-row .callout { flex: 1; }
+  .callout-avatar-row .callout {
+    flex: 1;
+    position: relative;
+  }
+
+  /* Speech-bubble notch: a square rotated 45deg, centred on the
+     callout's left edge so half of it pokes out toward the avatar.
+     background/border use "inherit" rather than the --warn-bg /
+     --info-bg tokens directly, so the notch always matches whatever
+     colour actually rendered on .callout (including the folder-skin
+     overrides further down this stylesheet) without needing a
+     separate rule per variant. Only the two outward-facing edges
+     (left + bottom, which become the notch's visible NW/SW edges
+     once rotated) carry a border, so it reads as a continuation of
+     the callout's own stroke rather than a seam cutting into it. */
+  .callout-avatar-row .callout::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 14px;
+    height: 14px;
+    background-color: inherit;
+    border-left: inherit;
+    border-bottom: inherit;
+    border-top: none;
+    border-right: none;
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
 
   /* ── Section-break divider with avatar ──────────────────────── */
   .section-break {
@@ -184,6 +212,16 @@ td:first-child { font-weight: 600; color: var(--ink); }
 
   @media (max-width: 640px) {
     .callout-avatar-row { flex-direction: column; }
+    /* Row is now stacked (avatar above callout), so re-point the
+       notch upward at the avatar instead of leftward. */
+    .callout-avatar-row .callout::before {
+      top: 0;
+      left: 50%;
+      border-left: none;
+      border-bottom: none;
+      border-top: inherit;
+      border-right: inherit;
+    }
   }
 
 
@@ -359,7 +397,6 @@ td:first-child { font-weight: 600; color: var(--ink); }
     <p>Learning the most conventional shortcuts first is smart, but here is where it can quietly trip you up. Even within families of apps like Microsoft or Adobe, the same keys can mean different things, depending on the app's core workflow. Let's walk through an example.</p>
 
     <div class="section-break">
-      <div class="avatar"><img src="../images/me-animated.gif" alt="Wednesday avatar"></div>
       <div class="line"></div>
     </div>
 
