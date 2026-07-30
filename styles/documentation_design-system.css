@@ -80,6 +80,14 @@ body {
   line-height: 1.1;
   text-transform: none;
 }
+/* Elective alternate — add class="h1-alt" to opt a page's <h1> into this
+   fixed colour instead of the tab-inherited currentColor treatment.
+   Specificity (two classes) beats both the base rule above and the
+   folder-skin override below, so it holds regardless of tab colour.
+   Currently applied to: advice_general.html (Bootcamp). */
+.page-header h1.h1-alt {
+  color: rgba(231, 134, 43, 0.88);
+}
 .page-header p {
   font-size: 0.93rem;
   color: var(--ink-mid);
