@@ -196,10 +196,18 @@ p {
   line-height: 1.7;
 }
 
-/* ── Inline links ────────────────────────────────────────────── */
+/* ── Inline links ────────────────────────────────────────────────
+   Matches the dotted credit-link treatment from the main app
+   (#credit .credit-link in beta.css): text colour just inherits from
+   its surroundings, and the underline itself is a lighter, muted
+   tone rather than solid — quietly indicates "linked" without
+   competing with the text. */
 a {
-  color: var(--accent);
+  color: inherit;
   text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--rule-strong);
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
   text-underline-offset: 2px;
 }
 
