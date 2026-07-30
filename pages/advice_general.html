@@ -17,7 +17,9 @@
      ══════════════════════════════════════════════════════════════ */
 
   /* ── Wide comparison table: horizontal scroll + centred cells ── */
-  .table-wrap table { min-width: 620px; }
+  .table-wrap table { min-width: 620px; table-layout: fixed; }
+  .table-wrap col.col-action { width: 20%; }
+  .table-wrap col.col-app    { width: 13.33%; }
   td { text-align: center; }
   td:first-child { text-align: right; font-weight: 600; color: var(--ink); }
 
@@ -71,25 +73,32 @@
 
   /* ── OS tab switcher (pure CSS, no script) ──────────────────── */
   .os-tab-radio { position: absolute; opacity: 0; pointer-events: none; }
-  .os-tabs { display: flex; gap: 8px; }
+  .os-tabs-wrap { display: flex; flex-direction: column; align-items: center; }
+  .os-tabs {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 22px;
+    border: 1px solid var(--rule-strong);
+    background: var(--surface);
+  }
   .os-tab-btn {
     font-family: var(--sans);
     font-weight: 600;
     font-size: 0.82rem;
-    padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid var(--rule-strong);
-    background: var(--surface);
+    padding: 8px 18px;
+    border-radius: 18px;
+    border: none;
+    background: transparent;
     color: var(--ink-mid);
     cursor: pointer;
     user-select: none;
-    transition: background .15s ease, color .15s ease, border-color .15s ease;
+    transition: background .15s ease, color .15s ease;
   }
-  .os-panel { display: none; }
+  .os-panel { display: none; width: 100%; }
   #os-tab-mac:checked ~ #panel-mac,
   #os-tab-pc:checked ~ #panel-pc { display: block; }
-  #os-tab-mac:checked ~ .os-tabs label[for="os-tab-mac"],
-  #os-tab-pc:checked ~ .os-tabs label[for="os-tab-pc"] {
+  #os-tab-mac:checked ~ .os-tabs-wrap .os-tabs label[for="os-tab-mac"],
+  #os-tab-pc:checked ~ .os-tabs-wrap .os-tabs label[for="os-tab-pc"] {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
@@ -154,7 +163,6 @@
 
   @media (max-width: 640px) {
     .callout-avatar-row { flex-direction: column; }
-    .os-tabs { flex-wrap: wrap; }
   }
 
 
@@ -178,12 +186,15 @@
     border-color: rgba(0,0,0,.14);
   }
 
-  .os-tab-btn {
+  .os-tabs {
     background: rgba(255,255,255,.12);
     border-color: rgba(0,0,0,.12);
   }
-  #os-tab-mac:checked ~ .os-tabs label[for="os-tab-mac"],
-  #os-tab-pc:checked ~ .os-tabs label[for="os-tab-pc"] {
+  .os-tab-btn {
+    background: transparent;
+  }
+  #os-tab-mac:checked ~ .os-tabs-wrap .os-tabs label[for="os-tab-mac"],
+  #os-tab-pc:checked ~ .os-tabs-wrap .os-tabs label[for="os-tab-pc"] {
     background: rgba(30,58,95,.16);
     border-color: rgba(30,58,95,.16);
     color: inherit;
@@ -254,6 +265,11 @@
       <div class="os-panel" id="panel-mac">
         <div class="table-wrap" style="margin-top:14px;">
           <table>
+            <colgroup>
+              <col class="col-action">
+              <col class="col-app"><col class="col-app"><col class="col-app">
+              <col class="col-app"><col class="col-app"><col class="col-app">
+            </colgroup>
             <thead>
               <tr>
                 <th>Action</th>
@@ -286,6 +302,11 @@
       <div class="os-panel" id="panel-pc">
         <div class="table-wrap" style="margin-top:14px;">
           <table>
+            <colgroup>
+              <col class="col-action">
+              <col class="col-app"><col class="col-app"><col class="col-app">
+              <col class="col-app"><col class="col-app"><col class="col-app">
+            </colgroup>
             <thead>
               <tr>
                 <th>Action</th>
