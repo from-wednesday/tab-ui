@@ -209,16 +209,28 @@ details.reveal {
      pseudo-element of the summary itself rather than the details
      wrapper. That means it's always centred on the button's own box,
      open or closed — no dependence on the (growing) details height. */
-  details.reveal summary::before {
+  /* Two segments, each anchored to the button's own edge (right:100%
+     / left:100%, relative to summary's position:relative box) rather
+     than a guessed percentage of 100vw. That means the gap always
+     matches the pill's real rendered width — at any viewport size,
+     with any button label — instead of assuming a fixed proportion. */
+  details.reveal summary::before,
+  details.reveal summary::after {
     content: "";
     position: absolute;
     top: 50%;
-    left: 50%;
     z-index: -1;
     width: 100vw;
-    transform: translate(-50%, -50%);
     border-bottom: 2px dashed var(--info-border);
     pointer-events: none;
+  }
+  details.reveal summary::before {
+    right: 100%;
+    transform: translateY(-50%);
+  }
+  details.reveal summary::after {
+    left: 100%;
+    transform: translateY(-50%);
   }
 
   /* Folder-skin additions — extends the :root currentColor override
@@ -247,7 +259,8 @@ details.reveal {
     background: rgba(30,58,95,.08);
     border-color: rgba(30,58,95,.16);
   }
-  details.reveal summary::before {
+  details.reveal summary::before,
+  details.reveal summary::after {
     border-color: rgba(30,58,95,.16);
   }
 </style>
