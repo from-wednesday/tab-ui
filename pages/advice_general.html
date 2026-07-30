@@ -185,7 +185,8 @@ td:first-child { font-weight: 600; color: var(--ink); }
   }
   details.reveal summary::-webkit-details-marker { display: none; }
   details.reveal[open] summary { margin-bottom: 14px; }
-  details.reveal .reveal-body { display: flex; flex-direction: column; gap: 10px; }
+  details.reveal { text-align: center; }
+  details.reveal .reveal-body { display: flex; flex-direction: column; gap: 10px; text-align: left; }
 
   /* Folder-skin additions — extends the :root currentColor override
      already declared in design-system.css. Load that file first. */
@@ -383,9 +384,11 @@ td:first-child { font-weight: 600; color: var(--ink); }
     <p>Both work well on their own terms, but now let's switch to a third app.</p>
 
     <h3 style="text-align:center;">which convention do you think InDesign uses?</h3>
-    <details class="reveal">
-      <summary>Think about it, then click to reveal the answer</summary>
-      <div class="reveal-body">
+  </section>
+
+  <details class="reveal">
+    <summary>Think about it, then click to reveal the answer</summary>
+    <div class="reveal-body">
         <p><strong>InDesign</strong> follows Illustrator's approach. "Deselect All" is <span class="chip">⌘</span> + <span class="chip">Shift</span> + <span class="chip">A</span>.</p>
 
         <h4>but the interesting part is always "why?"</h4>
@@ -440,13 +443,9 @@ td:first-child { font-weight: 600; color: var(--ink); }
         </div>
 
         <p>By getting acquainted with these few conventions, what seemed arbitrary or meaningless actually starts making sense. Soon, as you switch contexts, both your fingers and mind will adapt faster. To get there, we just need to practise, which is exactly what Keyboard Warriors was built for.</p>
-      </div>
-    </details>
-  </section>
 
-
-  <!-- ══ WHEN TO CUSTOMISE ═══════════════════════════════════════ -->
-  <section>
+    <!-- ══ WHEN TO CUSTOMISE ═══════════════════════════════════════ -->
+    <section>
     <h2>when to customise</h2>
     <h3>power, pitfalls, and studio norms</h3>
     <p>Custom keyboard shortcuts are one of those topics that can divide a studio. Some designers swear by them and can't imagine working without their personalised "pro tweaks" to stay in flow. Others avoid them entirely, having been burned by a machine that behaved "wrong" at the worst possible moment. Both perspectives are valid, coming from real experience.</p>
@@ -545,7 +544,9 @@ td:first-child { font-weight: 600; color: var(--ink); }
 
     <p>Custom shortcuts work best when they remove friction without creating new problems.</p>
     <p>A small number of thoughtful changes can support your workflow, and help you stay focused on the creative decisions that matter.</p>
-  </section>
+    </section>
+    </div>
+  </details>
 
 </div><!-- /.page -->
 
