@@ -149,23 +149,55 @@ td:first-child { font-weight: 600; color: var(--ink); }
   }
   .pattern-row .pattern-body { flex: 1; }
 
-  /* ── Inline "another example" reveal ────────────────────────── */
-  details.mini-note { margin-top: 6px; }
-  details.mini-note summary {
+  /* ── Inline "another example" note ──────────────────────────────
+     Trigger sits inline at the tail end of its paragraph. display:
+     inline (not inline-block) is what matters here — vertical
+     padding/border on an inline non-replaced element never affects
+     the line box, so this can't change the paragraph's line height
+     no matter how it's styled. Same font as the surrounding prose,
+     no background; only a soft dotted underline (borrowed from the
+     site's ordinary link treatment) hints that it's clickable.
+     Clicking opens a floating card next to it — see the script near
+     the end of the page — and any click elsewhere dismisses it. */
+  .note-trigger {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    display: inline;
+    padding: 0 2px;
+    margin: 0;
     cursor: pointer;
-    font-family: var(--mono);
-    font-size: 10.5px;
-    font-weight: 600;
-    color: var(--ink-soft);
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    list-style: none;
+    text-decoration: underline dotted;
+    text-decoration-color: var(--rule-strong);
+    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+    text-underline-offset: 2px;
+    opacity: .7;
   }
-  details.mini-note summary::-webkit-details-marker { display: none; }
-  details.mini-note summary:hover { color: var(--accent); }
-  details.mini-note summary::before { content: "+ "; }
-  details.mini-note[open] summary::before { content: "– "; }
-  details.mini-note p { margin-top: 6px; font-size: 0.82rem; }
+  .note-trigger:hover,
+  .note-trigger:focus-visible {
+    opacity: 1;
+  }
+
+  .note-card {
+    display: none;
+    position: fixed;
+    z-index: 500;
+    width: max-content;
+    max-width: 260px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 12px 14px;
+    box-shadow: 0 10px 28px rgba(0,0,0,.16);
+  }
+  .note-card.is-open { display: block; }
+  .note-card p {
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--ink-mid);
+    margin: 0;
+  }
 
   /* ── Big reveal (question / answer) ─────────────────────────── */
   details.reveal summary {
@@ -205,10 +237,6 @@ details.reveal {
   }
   details.reveal .reveal-body { grid-area: 2 / 1; display: flex; flex-direction: column; gap: 10px; }
 
-  /* Same edge-to-edge dashed rule as .page-header::after, but now a
-     pseudo-element of the summary itself rather than the details
-     wrapper. That means it's always centred on the button's own box,
-     open or closed — no dependence on the (growing) details height. */
   /* Two segments, each anchored to the button's own edge (right:100%
      / left:100%, relative to summary's position:relative box) rather
      than a guessed percentage of 100vw. That means the gap always
@@ -237,14 +265,18 @@ details.reveal {
      already declared in design-system.css. Load that file first. */
   .os-switch-label,
   .pattern-marker,
-  details.mini-note summary,
-  details.mini-note p,
+  .note-trigger,
+  .note-card p,
   details.reveal summary {
     color: inherit;
   }
 
-  details.mini-note summary {
-    opacity: .68;
+  .note-card {
+    background: rgba(255,255,255,.92);
+    background: color-mix(in srgb, white 92%, transparent);
+    border-color: rgba(0,0,0,.16);
+    border-color: color-mix(in srgb, currentColor 18%, transparent);
+    color: var(--ink);
   }
 
   .hero-media img,
@@ -452,41 +484,37 @@ details.reveal {
           <div class="pattern-row">
             <div class="pattern-marker">01</div>
             <div class="pattern-body">
-              <p>Sometimes the obvious letter for a shortcut is already taken, so the app will use a pun to make it memorable. The <strong>eyedropper</strong> tool is an example of this. Don't press <span class="chip">E</span>, it's the <span class="chip">I</span> key.</p>
-              <details class="mini-note">
-                <summary>another example</summary>
+              <p>Sometimes the obvious letter for a shortcut is already taken, so the app will use a pun to make it memorable. The <strong>eyedropper</strong> tool is an example of this. Don't press <span class="chip">E</span>, it's the <span class="chip">I</span> key. <button type="button" class="note-trigger">another example</button></p>
+              <div class="note-card">
                 <p>Many Adobe apps have an ellipse tool selected with the <span class="chip">L</span> key. That's "L" for "EL-lipse."</p>
-              </details>
+              </div>
             </div>
           </div>
           <div class="pattern-row">
             <div class="pattern-marker">02</div>
             <div class="pattern-body">
-              <p>Or maybe the associated icon or cursor is more synonymous with the tool than the official name is. The <span class="chip">V</span> key is used across many apps for the pointer, or selection, tool because it looks like an arrow.</p>
-              <details class="mini-note">
-                <summary>another example</summary>
+              <p>Or maybe the associated icon or cursor is more synonymous with the tool than the official name is. The <span class="chip">V</span> key is used across many apps for the pointer, or selection, tool because it looks like an arrow. <button type="button" class="note-trigger">another example</button></p>
+              <div class="note-card">
                 <p>Adobe uses the <span class="chip">X</span> key to swap the properties between the two swatches in the toolbar. Think of it as two arrows, up and down.</p>
-              </details>
+              </div>
             </div>
           </div>
           <div class="pattern-row">
             <div class="pattern-marker">03</div>
             <div class="pattern-body">
-              <p>When keys clump into a small set on the standard keyboard layout, they can be useful both for conceptually grouping related tasks, and for efficiency in actual use. We saw that with copy and paste, but the <span class="chip">[</span> and <span class="chip">]</span> keys are another example. These "bookends" commonly get used for functions that move a setting down or up, smaller or bigger, and so on.</p>
-              <details class="mini-note">
-                <summary>other examples</summary>
+              <p>When keys clump into a small set on the standard keyboard layout, they can be useful both for conceptually grouping related tasks, and for efficiency in actual use. We saw that with copy and paste, but the <span class="chip">[</span> and <span class="chip">]</span> keys are another example. These "bookends" commonly get used for functions that move a setting down or up, smaller or bigger, and so on. <button type="button" class="note-trigger">other examples</button></p>
+              <div class="note-card">
                 <p>The <span class="chip">&lt;</span> and <span class="chip">&gt;</span> pair. The arrow keys. The number pad on extended keyboards. Any clump of four keys, or even nine, can become a "direction pad."</p>
-              </details>
+              </div>
             </div>
           </div>
           <div class="pattern-row">
             <div class="pattern-marker">04</div>
             <div class="pattern-body">
-              <p>Similarly, right above that key pair is the <span class="chip">-</span> and <span class="chip">=</span> pair. Apps use this to mean minus and plus, even though, technically, the plus sign would be reached via <span class="chip">Shift</span> + <span class="chip">=</span>. The reason for this is efficiency, which is what shortcuts are all about after all. Being able to quickly zoom out and in by pressing <span class="chip">⌘</span><span class="chip">-</span> / <span class="chip">⌘</span><span class="chip">=</span> is easy to learn and very fast in practice. We don't want people having to add the shift key into one of those just because "the keyboard layout said so."<br>Most people never even stop to think they are actually zooming in with <span class="chip">⌘</span><span class="chip">=</span>, not <span class="chip">⌘</span><span class="chip">+</span>, at all.</p>
-              <details class="mini-note">
-                <summary>a further note</summary>
+              <p>Similarly, right above that key pair is the <span class="chip">-</span> and <span class="chip">=</span> pair. Apps use this to mean minus and plus, even though, technically, the plus sign would be reached via <span class="chip">Shift</span> + <span class="chip">=</span>. The reason for this is efficiency, which is what shortcuts are all about after all. Being able to quickly zoom out and in by pressing <span class="chip">⌘</span><span class="chip">-</span> / <span class="chip">⌘</span><span class="chip">=</span> is easy to learn and very fast in practice. We don't want people having to add the shift key into one of those just because "the keyboard layout said so."<br>Most people never even stop to think they are actually zooming in with <span class="chip">⌘</span><span class="chip">=</span>, not <span class="chip">⌘</span><span class="chip">+</span>, at all. <button type="button" class="note-trigger">a further note</button></p>
+              <div class="note-card">
                 <p>If you have a full-size, or "extended," keyboard, you have a second set of dedicated single function <span class="chip">-</span> and <span class="chip">+</span> keys on the number pad. These also work with <span class="chip">⌘</span> to zoom out and in. In practice, few users actually do this, since it requires two hands.</p>
-              </details>
+              </div>
             </div>
           </div>
         </div>
@@ -643,6 +671,84 @@ details.reveal {
   });
 
   applyOsMode('mac');
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════
+   INLINE NOTE TRIGGERS
+   Each .note-trigger sits inline at the end
+   of its paragraph. Its floating card is the
+   next element after the paragraph in the
+   DOM. Only one card is ever open at a time;
+   a click anywhere outside the open card
+   (including scrolling, which would leave it
+   mis-positioned) closes it.
+   ══════════════════════════════════════ */
+(function () {
+  var triggers = Array.prototype.slice.call(document.querySelectorAll('.note-trigger'));
+  var openCard = null;
+  var openTrigger = null;
+
+  function closeCard() {
+    if (openCard) openCard.classList.remove('is-open');
+    openCard = null;
+    openTrigger = null;
+  }
+
+  function positionCard(trigger, card) {
+    var margin = 10;
+    var rect = trigger.getBoundingClientRect();
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+
+    // Reveal off-screen first so we can measure its real size, then
+    // place it — preferring the trigger's right side, flipping to
+    // the left if it wouldn't fit, and clamping vertically so it
+    // never runs off the top or bottom of the visible area.
+    card.style.left = '-9999px';
+    card.style.top = '-9999px';
+    card.classList.add('is-open');
+    var cardW = card.offsetWidth;
+    var cardH = card.offsetHeight;
+
+    var left = rect.right + margin;
+    if (left + cardW > vw - 8) {
+      left = rect.left - cardW - margin;
+    }
+    left = Math.max(8, Math.min(left, vw - cardW - 8));
+
+    var top = rect.top;
+    top = Math.max(8, Math.min(top, vh - cardH - 8));
+
+    card.style.left = left + 'px';
+    card.style.top = top + 'px';
+  }
+
+  triggers.forEach(function (trigger) {
+    var host = trigger.closest('p');
+    var card = host ? host.nextElementSibling : null;
+    if (!card || !card.classList.contains('note-card')) return;
+
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var wasOpen = card === openCard;
+      closeCard();
+      if (!wasOpen) {
+        positionCard(trigger, card);
+        openCard = card;
+        openTrigger = trigger;
+      }
+    });
+  });
+
+  document.addEventListener('click', function (e) {
+    if (openCard && !openCard.contains(e.target) && e.target !== openTrigger) {
+      closeCard();
+    }
+  });
+  window.addEventListener('scroll', closeCard, true);
+  window.addEventListener('resize', closeCard);
 })();
 </script>
 </body>
