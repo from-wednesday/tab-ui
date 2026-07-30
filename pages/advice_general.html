@@ -185,8 +185,33 @@ td:first-child { font-weight: 600; color: var(--ink); }
   }
   details.reveal summary::-webkit-details-marker { display: none; }
   details.reveal[open] summary { margin-bottom: 14px; }
-  details.reveal { text-align: center; }
-  details.reveal .reveal-body { display: flex; flex-direction: column; gap: 10px; text-align: left; }
+
+  /* Grid keeps the summary and the dashed rule sharing row 1, sized to
+     the summary's own height, so the rule stays centred on the button
+     whether or not the reveal-body row below is present. */
+  details.reveal {
+    display: grid;
+    position: relative;
+  }
+  details.reveal summary { grid-area: 1 / 1; justify-self: center; position: relative; }
+  details.reveal .reveal-body { grid-area: 2 / 1; display: flex; flex-direction: column; gap: 10px; }
+
+  /* Same edge-to-edge dashed rule as .page-header::after (see
+     design-system.css), centred behind the button instead of sitting
+     under the header. Absolutely positioned within the row-1 grid
+     area, so it doesn't affect that row's auto height and stays
+     locked to summary's own vertical centre either way. */
+  details.reveal::before {
+    content: "";
+    grid-area: 1 / 1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    transform: translate(-50%, -50%);
+    border-bottom: 2px dashed var(--ink);
+    pointer-events: none;
+  }
 
   /* Folder-skin additions — extends the :root currentColor override
      already declared in design-system.css. Load that file first. */
@@ -372,11 +397,11 @@ td:first-child { font-weight: 600; color: var(--ink); }
 
     <div class="bp-row">
       <div class="bp-col">
-        <h4>Photoshop</h4>
+        <h4><small>ADOBE</small> Photoshop</h4>
         <p>Pairs <span class="chip">A</span> and <span class="chip">D</span> directly.</p>
       </div>
       <div class="bp-col">
-        <h4>Illustrator</h4>
+        <h4><small>ADOBE</small> Illustrator</h4>
         <p>Uses a modifier key, <span class="chip">Shift</span>, to invert the <span class="chip">A</span> key's action.</p>
       </div>
     </div>
@@ -389,7 +414,7 @@ td:first-child { font-weight: 600; color: var(--ink); }
   <details class="reveal">
     <summary>Think about it, then click to reveal the answer</summary>
     <div class="reveal-body">
-        <p><strong>InDesign</strong> follows Illustrator's approach. "Deselect All" is <span class="chip">⌘</span> + <span class="chip">Shift</span> + <span class="chip">A</span>.</p>
+        <p style="text-align:center;"><strong>InDesign</strong> follows Illustrator's approach. "Deselect All" is <span class="chip">⌘</span> + <span class="chip">Shift</span> + <span class="chip">A</span>.</p>
 
         <h4>but the interesting part is always "why?"</h4>
         <p>By now you should be a little annoyed that everything doesn't just work the same, and that's not a bad instinct. But let's dig a little deeper into why they'd be different.</p>
