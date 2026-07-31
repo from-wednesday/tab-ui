@@ -251,11 +251,15 @@ td:first-child { font-weight: 600; color: var(--ink); }
   details.reveal summary::-webkit-details-marker { display: none; }
   details.reveal[open] summary { margin-bottom: 14px; }
 
-  /* Grid keeps the summary and the dashed rule sharing row 1, sized to
-     the summary's own height, so the rule stays centred on the button
-     whether or not the reveal-body row below is present. */
+  /* Safari forces <details> to render as display:block regardless of
+     what's set here — display:grid/flex on the details element itself
+     is defined to be ignored (spec restriction Chrome/Firefox don't
+     actually enforce). So centring happens via text-align instead of
+     a grid, which keeps working in every browser. The dashed-line
+     pseudo-elements don't need grid either — they're positioned off
+     summary's own position:relative box, not the parent. */
 details.reveal {
-    display: grid;
+    text-align: center;
     position: relative;
     isolation: isolate; /* stacking context lives HERE, not on summary —
                             if summary itself were the stacking-context
@@ -264,11 +268,9 @@ details.reveal {
                             z-index child, putting the line back on top */
   }
   details.reveal summary {
-    grid-area: 1 / 1;
-    justify-self: center;
     position: relative;
   }
-  details.reveal .reveal-body { grid-area: 2 / 1; display: flex; flex-direction: column; gap: 10px; }
+  details.reveal .reveal-body { display: flex; flex-direction: column; gap: 10px; text-align: left; }
 
   /* Two segments, each anchored to the button's own edge (right:100%
      / left:100%, relative to summary's position:relative box) rather
