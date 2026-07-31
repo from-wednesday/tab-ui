@@ -169,30 +169,35 @@ td:first-child { font-weight: 600; color: var(--ink); }
   }
   .pattern-row .pattern-body { flex: 1; }
 
-  /* ── Inline "another example" note ──────────────────────────────
-     Trigger sits inline at the tail end of its paragraph. display:
-     inline (not inline-block) is what matters here — vertical
-     padding/border on an inline non-replaced element never affects
-     the line box, so this can't change the paragraph's line height
-     no matter how it's styled. Same font as the surrounding prose,
-     no background; only a soft dotted underline (borrowed from the
-     site's ordinary link treatment) hints that it's clickable.
+  /* ── Inline note trigger ──────────────────────────────────────────
+     A small "?" roundel sits inline at the tail end of its paragraph,
+     borrowing the chip token's colours so it reads as part of the
+     same component family rather than as body text. Its former label
+     ("another example", etc.) now lives as a small heading inside the
+     card it opens, instead of cluttering the sentence itself.
      Clicking opens a floating card next to it — see the script near
      the end of the page — and any click elsewhere dismisses it. */
   .note-trigger {
-    font: inherit;
-    color: inherit;
-    background: none;
-    border: none;
-    display: inline;
-    padding: 0 2px;
-    margin: 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ink-soft);
+    background: var(--chip-bg);
+    border: 1px solid var(--chip-border);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    margin: 0 0 0 3px;
     cursor: pointer;
-    text-decoration: underline dotted;
-    text-decoration-color: var(--rule-strong);
-    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
-    text-underline-offset: 2px;
-    opacity: .7;
+    vertical-align: middle;
+    transform: translateY(-1px);
+    opacity: .75;
+    transition: opacity .15s ease, background .15s ease;
   }
   .note-trigger:hover,
   .note-trigger:focus-visible {
@@ -212,6 +217,15 @@ td:first-child { font-weight: 600; color: var(--ink); }
     box-shadow: 0 10px 28px rgba(0,0,0,.16);
   }
   .note-card.is-open { display: block; }
+  .note-card p.note-card-title {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    margin: 0 0 6px;
+  }
   .note-card p {
     font-size: 0.82rem;
     line-height: 1.55;
@@ -513,37 +527,41 @@ details.reveal {
         <h4>here are some more of those patterns to learn and watch for</h4>
         <div class="pattern-list">
           <div class="pattern-row">
-            <div class="pattern-marker">01</div>
+            <div class="pattern-marker">1</div>
             <div class="pattern-body">
-              <p>Sometimes the obvious letter for a shortcut is already taken, so the app will use a pun to make it memorable. The <strong>eyedropper</strong> tool is an example of this. Don't press <span class="chip">E</span>, it's the <span class="chip">I</span> key. <button type="button" class="note-trigger">another example</button></p>
+              <p>Sometimes the obvious letter for a shortcut is already taken, so the app will use a pun to make it memorable. The <strong>eyedropper</strong> tool is an example of this. Don't press <span class="chip">E</span>, it's the <span class="chip">I</span> key. <button type="button" class="note-trigger" aria-label="another example">?</button></p>
               <div class="note-card">
+                <p class="note-card-title">another example</p>
                 <p>Many Adobe apps have an ellipse tool selected with the <span class="chip">L</span> key. That's "L" for "EL-lipse."</p>
               </div>
             </div>
           </div>
           <div class="pattern-row">
-            <div class="pattern-marker">02</div>
+            <div class="pattern-marker">2</div>
             <div class="pattern-body">
-              <p>Or maybe the associated icon or cursor is more synonymous with the tool than the official name is. The <span class="chip">V</span> key is used across many apps for the pointer, or selection, tool because it looks like an arrow. <button type="button" class="note-trigger">another example</button></p>
+              <p>Or maybe the associated icon or cursor is more synonymous with the tool than the official name is. The <span class="chip">V</span> key is used across many apps for the pointer, or selection, tool because it looks like an arrow. <button type="button" class="note-trigger" aria-label="another example">?</button></p>
               <div class="note-card">
+                <p class="note-card-title">another example</p>
                 <p>Adobe uses the <span class="chip">X</span> key to swap the properties between the two swatches in the toolbar. Think of it as two arrows, up and down.</p>
               </div>
             </div>
           </div>
           <div class="pattern-row">
-            <div class="pattern-marker">03</div>
+            <div class="pattern-marker">3</div>
             <div class="pattern-body">
-              <p>When keys clump into a small set on the standard keyboard layout, they can be useful both for conceptually grouping related tasks, and for efficiency in actual use. We saw that with copy and paste, but the <span class="chip">[</span> and <span class="chip">]</span> keys are another example. These "bookends" commonly get used for functions that move a setting down or up, smaller or bigger, and so on. <button type="button" class="note-trigger">other examples</button></p>
+              <p>When keys clump into a small set on the standard keyboard layout, they can be useful both for conceptually grouping related tasks, and for efficiency in actual use. We saw that with copy and paste, but the <span class="chip">[</span> and <span class="chip">]</span> keys are another example. These "bookends" commonly get used for functions that move a setting down or up, smaller or bigger, and so on. <button type="button" class="note-trigger" aria-label="other examples">?</button></p>
               <div class="note-card">
+                <p class="note-card-title">other examples</p>
                 <p>The <span class="chip">&lt;</span> and <span class="chip">&gt;</span> pair. The arrow keys. The number pad on extended keyboards. Any clump of four keys, or even nine, can become a "direction pad."</p>
               </div>
             </div>
           </div>
           <div class="pattern-row">
-            <div class="pattern-marker">04</div>
+            <div class="pattern-marker">4</div>
             <div class="pattern-body">
-              <p>Similarly, right above that key pair is the <span class="chip">-</span> and <span class="chip">=</span> pair. Apps use this to mean minus and plus, even though, technically, the plus sign would be reached via <span class="chip">Shift</span> + <span class="chip">=</span>. The reason for this is efficiency, which is what shortcuts are all about after all. Being able to quickly zoom out and in by pressing <span class="chip">⌘</span><span class="chip">-</span> / <span class="chip">⌘</span><span class="chip">=</span> is easy to learn and very fast in practice. We don't want people having to add the shift key into one of those just because "the keyboard layout said so."<br>Most people never even stop to think they are actually zooming in with <span class="chip">⌘</span><span class="chip">=</span>, not <span class="chip">⌘</span><span class="chip">+</span>, at all. <button type="button" class="note-trigger">a further note</button></p>
+              <p>Similarly, right above that key pair is the <span class="chip">-</span> and <span class="chip">=</span> pair. Apps use this to mean minus and plus, even though, technically, the plus sign would be reached via <span class="chip">Shift</span> + <span class="chip">=</span>. The reason for this is efficiency, which is what shortcuts are all about after all. Being able to quickly zoom out and in by pressing <span class="chip">⌘</span><span class="chip">-</span> / <span class="chip">⌘</span><span class="chip">=</span> is easy to learn and very fast in practice. We don't want people having to add the shift key into one of those just because "the keyboard layout said so."<br>Most people never even stop to think they are actually zooming in with <span class="chip">⌘</span><span class="chip">=</span>, not <span class="chip">⌘</span><span class="chip">+</span>, at all. <button type="button" class="note-trigger" aria-label="a further note">?</button></p>
               <div class="note-card">
+                <p class="note-card-title">a further note</p>
                 <p>If you have a full-size, or "extended," keyboard, you have a second set of dedicated single function <span class="chip">-</span> and <span class="chip">+</span> keys on the number pad. These also work with <span class="chip">⌘</span> to zoom out and in. In practice, few users actually do this, since it requires two hands.</p>
               </div>
             </div>
