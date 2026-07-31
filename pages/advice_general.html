@@ -24,6 +24,26 @@ th, td { text-align: center; }
 th:first-child, td:first-child { text-align: right; }
 td:first-child { font-weight: 600; color: var(--ink); }
 
+  /* ── List marker overrides ─────────────────────────────────────
+     The shared design-system gives .plain-list a dash bullet and
+     increments its ol counter on the li's ::before. That pseudo
+     sits inside a nested flex row (li itself is display:flex), and
+     that combination is a known trigger for browsers dropping the
+     first increment — showing as the list starting at 0 instead of
+     1. Moving counter-increment onto the real <li>, with the
+     ::before left only to display the value, sidesteps that,
+     alongside swapping the bullet glyph for a tick. ── */
+  .page ul.plain-list li::before {
+    content: "\2714";
+  }
+  .page ol.plain-list li {
+    counter-increment: item;
+  }
+  .page ol.plain-list li::before {
+    counter-increment: none;
+    content: counter(item) ".";
+  }
+
   /* ── Hero image ──────────────────────────────────────────────── */
   .hero-media img {
     display: block;
