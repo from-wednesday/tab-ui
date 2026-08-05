@@ -119,6 +119,11 @@
     border:0;
     display:block;
     background:transparent;
+    overflow:hidden; /* the iframe must never own its own scroll state —
+                         .frameHost is the single source of truth for
+                         scrolling, this just closes the gap where a
+                         subpixel mismatch could give the iframe its
+                         own native scrollbar alongside frameHost's */
   }
 </style>
 </head>
