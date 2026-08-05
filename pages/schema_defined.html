@@ -45,6 +45,29 @@
 
   html { font-size: 14px; }
 
+  /* ── Scrollbar suppression ─────────────────────────────────────
+     frameHost in index.html is the single intended scroll owner for
+     every tab's content. If this document ever tries to grow its
+     own scrollbar, whether from genuine overflow or a stray flash
+     while webfonts load, that scrollbar should never actually
+     paint. overflow:hidden stops the box scrolling at all, and the
+     scrollbar-hiding rules back that up so even a scrollbar that
+     briefly thinks it's needed has zero width and can't push layout
+     sideways either. */
+  html, body {
+    overflow: hidden !important;
+  }
+  html {
+    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;   /* older Edge/IE */
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
   body {
     font-family: var(--sans);
     color: var(--ink);
