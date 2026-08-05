@@ -7,14 +7,10 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600&display=swap" rel="stylesheet">
 <style>
   /* ══════════════════════════════════════════════════════════════
-     Token system — the spread's palette is deliberately pulled from
-     this tab's own mint fill (see colors.light/.dark for objectId 6
-     in to-public.json / to-swinburne.json: #BBF1D2 / #E6F2DD), the
-     same way a tarot deck's card stock so often echoes the cloth
-     it's dealt on. Card backs sit one or two steps darker than that
-     mint, ink borrows the deep forest tone used for the shadow, and
-     the only warm note is the brass of the "go there" button — a
-     nod to gilt card edges rather than a screen-default accent.
+     Token system — unchanged from the previous version. The spread's
+     palette is still pulled from this tab's own mint fill (see
+     colors.light/.dark for objectId 6 in to-public.json /
+     to-swinburne.json: #BBF1D2 / #E6F2DD).
      ══════════════════════════════════════════════════════════════ */
   :root{
     --mint:        #BBF1D2;
@@ -46,8 +42,8 @@
   .spread {
     position: relative;
     max-width: 760px;
-    margin: 56px auto 0;
-    height: 620px;
+    margin: 64px auto 0;
+    height: 660px;
   }
   .spread-label {
     position: absolute;
@@ -61,6 +57,11 @@
     opacity: .7;
   }
 
+  /* Two arcs, four cards over three, slightly overlapping — each
+     card's --x/--y/--r places it along one of the two fans. Cards
+     never change appearance because a sibling was picked: no dimming,
+     no opacity shifts tied to selection. Only the chosen card itself
+     moves (it flips and grows to read easily). */
   .card {
     position: absolute;
     top: 50%;
@@ -69,10 +70,9 @@
     height: 252px;
     perspective: 1400px;
     transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--r));
-    transition: transform .45s cubic-bezier(.22,1,.36,1), opacity .35s ease, z-index 0s;
+    transition: transform .45s cubic-bezier(.22,1,.36,1);
     z-index: var(--z, 1);
   }
-  .card.is-dimmed { opacity: .55; }
   .card.is-active {
     transform: translate(-50%, -50%) rotate(0deg) scale(1.18);
     z-index: 50;
@@ -96,7 +96,12 @@
     overflow: hidden;
   }
 
-  /* ── Back face (the card as dealt) ──────────────────────────── */
+  /* ── Back face (the card as dealt — greenish, this is the side
+     that faces you first) ────────────────────────────────────────
+     A single heavy frame line, inset from the edge, whose corners
+     flare towards the true corner point instead of rounding away
+     from it — the opposite curvature to the card's own outer
+     radius. A small diamond sits at the tip of each flare. */
   .card-back {
     display: block;
     width: 100%; height: 100%;
@@ -109,34 +114,14 @@
     text-align: left;
   }
   .card-back:focus-visible { outline: 2px solid var(--border-line); outline-offset: 3px; }
-  .card-back-frame {
+
+  .card-frame-svg {
     position: absolute;
-    inset: 9px;
-    border: 1.25px solid var(--border-line);
-    border-radius: 6px;
-    opacity: .85;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
   }
-  .card-back-frame::before {
-    content: "";
-    position: absolute;
-    inset: 4px;
-    border: .75px solid var(--border-line);
-    border-radius: 3px;
-    opacity: .55;
-  }
-  /* Small corner flourishes — enough ornament to read as a card
-     back, not so much that it competes with the icon. */
-  .flourish {
-    position: absolute;
-    width: 7px; height: 7px;
-    border: 1.25px solid var(--border-line);
-    transform: rotate(45deg);
-    opacity: .85;
-  }
-  .flourish.tl { top: 15px; left: 15px; }
-  .flourish.tr { top: 15px; right: 15px; }
-  .flourish.bl { bottom: 15px; left: 15px; }
-  .flourish.br { bottom: 15px; right: 15px; }
 
   .card-numeral {
     position: absolute;
@@ -166,7 +151,8 @@
     opacity: .85;
   }
 
-  /* ── Front face (the reading) ───────────────────────────────── */
+  /* ── Front face (the reading) — off white, so it reads clearly
+     as the reverse side once the card is turned. ─────────────── */
   .card-front {
     transform: rotateY(180deg);
     background: var(--card-front);
@@ -226,11 +212,11 @@
   }
 
   /* ── Narrow screens: fall back to a simple hand of cards ──────
-     Absolute placement stops making sense once the spread is
+     Absolute arc placement stops making sense once the spread is
      narrower than a couple of cards, so it becomes a wrapped row
-     with light alternating tilt instead of true random placement. */
+     with light alternating tilt instead of the two-arc layout. */
   @media (max-width: 640px) {
-    .spread { height: auto; max-width: 420px; }
+    .spread { height: auto; max-width: 420px; margin-top: 40px; }
     .spread-label { position: static; display: block; margin-bottom: 16px; }
     .card {
       position: static;
@@ -247,20 +233,39 @@
   <h1>to-wednesday</h1>
   <p class="intro">You are welcome to contact me through any of these forums:</p>
 
+  <!-- ══ SHARED FRAME GEOMETRY ═══════════════════════════════════
+       Defined once, referenced by every card via <use>. The path's
+       corners are quadratic curves whose control point sits exactly
+       on the true corner — the opposite of a normal border-radius,
+       which curves its control point away from the corner. That
+       pulls the line towards a point at each corner rather than
+       rounding it off, and is the deliberate contrast with the
+       card's own outer (conventionally rounded) radius. ══════════ -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <path id="cardFrameLine"
+            d="M 9,26 Q 9,9 26,9 L 146,9 Q 163,9 163,26 L 163,226 Q 163,243 146,243 L 26,243 Q 9,243 9,226 Z"
+            fill="none" stroke="currentColor" stroke-width="2"/>
+      <g id="cardFrameDiamonds" fill="none" stroke="currentColor" stroke-width="1.3">
+        <rect x="10.7" y="10.7" width="6.6" height="6.6" transform="rotate(45 14 14)"/>
+        <rect x="154.7" y="10.7" width="6.6" height="6.6" transform="rotate(45 158 14)"/>
+        <rect x="154.7" y="234.7" width="6.6" height="6.6" transform="rotate(45 158 238)"/>
+        <rect x="10.7" y="234.7" width="6.6" height="6.6" transform="rotate(45 14 238)"/>
+      </g>
+    </defs>
+  </svg>
+
   <div class="spread">
     <span class="spread-label">turn a card over</span>
 
-    <!-- I — Mastodon -->
-    <div class="card" style="--x:-200px; --y:6px; --r:-7deg; --r-mobile:-3deg; --z:2;">
+    <!-- I — Mastodon (top arc) -->
+    <div class="card" style="--x:-198px; --y:-100px; --r:-7.5deg; --r-mobile:-3deg; --z:1;">
       <div class="card-inner">
         <div class="card-face">
           <button class="card-back" aria-label="Reveal note about Mastodon">
-            <span class="card-back-frame"></span>
-            <span class="flourish tl"></span><span class="flourish tr"></span>
-            <span class="flourish bl"></span><span class="flourish br"></span>
+            <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
             <span class="card-numeral">I</span>
             <span class="card-icon">
-              <!-- placeholder monogram — swap for your Illustrator mark -->
               <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="23" cy="23" r="17" stroke="currentColor" stroke-width="1.4"/>
                 <text x="23" y="28" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="currentColor">M</text>
@@ -278,14 +283,12 @@
       </div>
     </div>
 
-    <!-- II — GitHub -->
-    <div class="card" style="--x:-66px; --y:-28px; --r:4deg; --r-mobile:2deg; --z:3;">
+    <!-- II — GitHub (top arc) -->
+    <div class="card" style="--x:-66px; --y:-136px; --r:-2.5deg; --r-mobile:2deg; --z:2;">
       <div class="card-inner">
         <div class="card-face">
           <button class="card-back" aria-label="Reveal note about GitHub">
-            <span class="card-back-frame"></span>
-            <span class="flourish tl"></span><span class="flourish tr"></span>
-            <span class="flourish bl"></span><span class="flourish br"></span>
+            <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
             <span class="card-numeral">II</span>
             <span class="card-icon">
               <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -305,14 +308,12 @@
       </div>
     </div>
 
-    <!-- III — Apple Music -->
-    <div class="card" style="--x:78px; --y:12px; --r:-3deg; --r-mobile:-2deg; --z:2;">
+    <!-- III — Apple Music (top arc) -->
+    <div class="card" style="--x:66px; --y:-136px; --r:2.5deg; --r-mobile:-2deg; --z:3;">
       <div class="card-inner">
         <div class="card-face">
           <button class="card-back" aria-label="Reveal note about Apple Music">
-            <span class="card-back-frame"></span>
-            <span class="flourish tl"></span><span class="flourish tr"></span>
-            <span class="flourish bl"></span><span class="flourish br"></span>
+            <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
             <span class="card-numeral">III</span>
             <span class="card-icon">
               <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -332,14 +333,12 @@
       </div>
     </div>
 
-    <!-- IV — YouTube -->
-    <div class="card" style="--x:-142px; --y:206px; --r:6deg; --r-mobile:3deg; --z:1;">
+    <!-- IV — YouTube (top arc) -->
+    <div class="card" style="--x:198px; --y:-100px; --r:7.5deg; --r-mobile:3deg; --z:4;">
       <div class="card-inner">
         <div class="card-face">
           <button class="card-back" aria-label="Reveal note about YouTube">
-            <span class="card-back-frame"></span>
-            <span class="flourish tl"></span><span class="flourish tr"></span>
-            <span class="flourish bl"></span><span class="flourish br"></span>
+            <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
             <span class="card-numeral">IV</span>
             <span class="card-icon">
               <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -359,14 +358,12 @@
       </div>
     </div>
 
-    <!-- V — LinkedIn -->
-    <div class="card" style="--x:22px; --y:228px; --r:-5deg; --r-mobile:-3deg; --z:2;">
+    <!-- V — LinkedIn (bottom arc) -->
+    <div class="card" style="--x:-150px; --y:124px; --r:-6deg; --r-mobile:-3deg; --z:5;">
       <div class="card-inner">
         <div class="card-face">
           <button class="card-back" aria-label="Reveal note about LinkedIn">
-            <span class="card-back-frame"></span>
-            <span class="flourish tl"></span><span class="flourish tr"></span>
-            <span class="flourish bl"></span><span class="flourish br"></span>
+            <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
             <span class="card-numeral">V</span>
             <span class="card-icon">
               <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -386,14 +383,12 @@
       </div>
     </div>
 
-    <!-- VI — Email -->
-    <div class="card" style="--x:185px; --y:196px; --r:8deg; --r-mobile:4deg; --z:1;">
+    <!-- VI — Email (bottom arc) -->
+    <div class="card" style="--x:0px; --y:110px; --r:0deg; --r-mobile:4deg; --z:6;">
       <div class="card-inner">
         <div class="card-face">
           <button class="card-back" aria-label="Reveal note about email">
-            <span class="card-back-frame"></span>
-            <span class="flourish tl"></span><span class="flourish tr"></span>
-            <span class="flourish bl"></span><span class="flourish br"></span>
+            <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
             <span class="card-numeral">VI</span>
             <span class="card-icon">
               <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -414,6 +409,31 @@
       </div>
     </div>
 
+    <!-- VII — Pinterest (bottom arc) -->
+    <div class="card" style="--x:150px; --y:124px; --r:6deg; --r-mobile:-4deg; --z:7;">
+      <div class="card-inner">
+        <div class="card-face">
+          <button class="card-back" aria-label="Reveal note about Pinterest">
+            <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
+            <span class="card-numeral">VII</span>
+            <span class="card-icon">
+              <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="23" cy="23" r="17" stroke="currentColor" stroke-width="1.4"/>
+                <text x="23" y="28" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="currentColor">P</text>
+              </svg>
+            </span>
+            <span class="card-name">Pinterest</span>
+          </button>
+        </div>
+        <div class="card-face card-front">
+          <span class="card-front-eyebrow">VII · Pinterest</span>
+          <p>Boards of layout references, colour palettes, and other people's beautifully organised keyboards. A quiet moodboard habit.</p>
+          <a class="card-go" href="https://pinterest.com/wednesday" target="_blank" rel="noopener">Browse the boards</a>
+          <button class="card-close" type="button">‹ back to the spread</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
 <script>
@@ -423,14 +443,12 @@
   function closeAll() {
     cards.forEach(function (c) {
       c.classList.remove('is-active');
-      c.classList.remove('is-dimmed');
     });
   }
   function openCard(card) {
     cards.forEach(function (c) {
-      if (c !== card) { c.classList.add('is-dimmed'); c.classList.remove('is-active'); }
+      if (c !== card) c.classList.remove('is-active');
     });
-    card.classList.remove('is-dimmed');
     card.classList.add('is-active');
   }
 
