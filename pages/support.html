@@ -2,18 +2,455 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600&display=swap" rel="stylesheet">
 <style>
-  html, body { overflow: hidden !important; }
-  html { scrollbar-width: none; -ms-overflow-style: none; }
-  html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
-  body { font-family: 'Iowan Old Style', 'Georgia', serif; margin: 0; padding: 40px 32px 60px; color: #24352b; line-height: 1.6; }
+  /* ══════════════════════════════════════════════════════════════
+     Token system — the spread's palette is deliberately pulled from
+     this tab's own mint fill (see colors.light/.dark for objectId 6
+     in to-public.json / to-swinburne.json: #BBF1D2 / #E6F2DD), the
+     same way a tarot deck's card stock so often echoes the cloth
+     it's dealt on. Card backs sit one or two steps darker than that
+     mint, ink borrows the deep forest tone used for the shadow, and
+     the only warm note is the brass of the "go there" button — a
+     nod to gilt card edges rather than a screen-default accent.
+     ══════════════════════════════════════════════════════════════ */
+  :root{
+    --mint:        #BBF1D2;
+    --card-back:   #6FA98B;
+    --card-edge:   #4F8069;
+    --card-shadow: rgba(37,74,58,.35);
+    --border-line: #F4EFDE;
+    --card-front:  #F6F1E1;
+    --ink:         #1F3327;
+    --ink-soft:    #43594C;
+    --brass:       #9C7A2E;
+    --brass-dark:  #7C6023;
+    --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+    --mono:  'IBM Plex Mono', monospace;
+    --sans:  'IBM Plex Sans', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body {
+    font-family: var(--serif);
+    margin: 0;
+    padding: 40px 32px 90px;
+    color: var(--ink);
+    line-height: 1.6;
+  }
   h1 { font-size: 1.6rem; margin: 0 0 .6rem; }
-  p { max-width: 60ch; }
-  ul { max-width: 55ch; }
+  p.intro { max-width: 55ch; color: var(--ink-soft); }
+
+  /* ── Spread ──────────────────────────────────────────────────── */
+  .spread {
+    position: relative;
+    max-width: 760px;
+    margin: 56px auto 0;
+    height: 620px;
+  }
+  .spread-label {
+    position: absolute;
+    top: -34px;
+    left: 4px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    opacity: .7;
+  }
+
+  .card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 172px;
+    height: 252px;
+    perspective: 1400px;
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--r));
+    transition: transform .45s cubic-bezier(.22,1,.36,1), opacity .35s ease, z-index 0s;
+    z-index: var(--z, 1);
+  }
+  .card.is-dimmed { opacity: .55; }
+  .card.is-active {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1.18);
+    z-index: 50;
+  }
+
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform .55s cubic-bezier(.22,1,.36,1);
+    filter: drop-shadow(0 10px 16px var(--card-shadow));
+  }
+  .card.is-active .card-inner { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 11px;
+    overflow: hidden;
+  }
+
+  /* ── Back face (the card as dealt) ──────────────────────────── */
+  .card-back {
+    display: block;
+    width: 100%; height: 100%;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    background: var(--card-back);
+    color: var(--border-line);
+    font: inherit;
+    text-align: left;
+  }
+  .card-back:focus-visible { outline: 2px solid var(--border-line); outline-offset: 3px; }
+  .card-back-frame {
+    position: absolute;
+    inset: 9px;
+    border: 1.25px solid var(--border-line);
+    border-radius: 6px;
+    opacity: .85;
+  }
+  .card-back-frame::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border: .75px solid var(--border-line);
+    border-radius: 3px;
+    opacity: .55;
+  }
+  /* Small corner flourishes — enough ornament to read as a card
+     back, not so much that it competes with the icon. */
+  .flourish {
+    position: absolute;
+    width: 7px; height: 7px;
+    border: 1.25px solid var(--border-line);
+    transform: rotate(45deg);
+    opacity: .85;
+  }
+  .flourish.tl { top: 15px; left: 15px; }
+  .flourish.tr { top: 15px; right: 15px; }
+  .flourish.bl { bottom: 15px; left: 15px; }
+  .flourish.br { bottom: 15px; right: 15px; }
+
+  .card-numeral {
+    position: absolute;
+    top: 20px; left: 0; right: 0;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    opacity: .8;
+  }
+  .card-icon {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -58%);
+    width: 46px; height: 46px;
+  }
+  .card-icon svg { width: 100%; height: 100%; display: block; }
+  .card-name {
+    position: absolute;
+    bottom: 22px; left: 0; right: 0;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    opacity: .85;
+  }
+
+  /* ── Front face (the reading) ───────────────────────────────── */
+  .card-front {
+    transform: rotateY(180deg);
+    background: var(--card-front);
+    border: 1px solid rgba(31,51,39,.14);
+    padding: 20px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .card-front-eyebrow {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .card-front p {
+    font-family: var(--sans);
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--ink);
+    margin: 0;
+    flex: 1;
+  }
+  .card-go {
+    display: block;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-decoration: none;
+    color: var(--card-front);
+    background: var(--brass);
+    border: 1px solid var(--brass-dark);
+    border-radius: 5px;
+    padding: 8px 10px;
+  }
+  .card-go:hover { background: var(--brass-dark); }
+  .card-close {
+    align-self: center;
+    background: none;
+    border: 0;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    opacity: .75;
+    cursor: pointer;
+    padding: 2px;
+  }
+  .card-close:hover { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card, .card-inner { transition: none; }
+  }
+
+  /* ── Narrow screens: fall back to a simple hand of cards ──────
+     Absolute placement stops making sense once the spread is
+     narrower than a couple of cards, so it becomes a wrapped row
+     with light alternating tilt instead of true random placement. */
+  @media (max-width: 640px) {
+    .spread { height: auto; max-width: 420px; }
+    .spread-label { position: static; display: block; margin-bottom: 16px; }
+    .card {
+      position: static;
+      display: inline-block;
+      margin: 10px 8px;
+      transform: rotate(var(--r-mobile, 0deg));
+    }
+    .card.is-active { transform: scale(1.06) rotate(0deg); }
+    .spread { display: flex; flex-wrap: wrap; justify-content: center; }
+  }
 </style>
 </head>
 <body>
   <h1>to-wednesday</h1>
-  <p>You are welcome to contact me through any of these forums:</p>
+  <p class="intro">You are welcome to contact me through any of these forums:</p>
+
+  <div class="spread">
+    <span class="spread-label">turn a card over</span>
+
+    <!-- I — Mastodon -->
+    <div class="card" style="--x:-200px; --y:6px; --r:-7deg; --r-mobile:-3deg; --z:2;">
+      <div class="card-inner">
+        <div class="card-face">
+          <button class="card-back" aria-label="Reveal note about Mastodon">
+            <span class="card-back-frame"></span>
+            <span class="flourish tl"></span><span class="flourish tr"></span>
+            <span class="flourish bl"></span><span class="flourish br"></span>
+            <span class="card-numeral">I</span>
+            <span class="card-icon">
+              <!-- placeholder monogram — swap for your Illustrator mark -->
+              <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="23" cy="23" r="17" stroke="currentColor" stroke-width="1.4"/>
+                <text x="23" y="28" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="currentColor">M</text>
+              </svg>
+            </span>
+            <span class="card-name">Mastodon</span>
+          </button>
+        </div>
+        <div class="card-face card-front">
+          <span class="card-front-eyebrow">I · Mastodon</span>
+          <p>This is where I post rough sketches, the odd rant, and progress shots of Keyboard Warriors between releases.</p>
+          <a class="card-go" href="https://mastodon.social/@wednesday" target="_blank" rel="noopener">Follow along</a>
+          <button class="card-close" type="button">‹ back to the spread</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- II — GitHub -->
+    <div class="card" style="--x:-66px; --y:-28px; --r:4deg; --r-mobile:2deg; --z:3;">
+      <div class="card-inner">
+        <div class="card-face">
+          <button class="card-back" aria-label="Reveal note about GitHub">
+            <span class="card-back-frame"></span>
+            <span class="flourish tl"></span><span class="flourish tr"></span>
+            <span class="flourish bl"></span><span class="flourish br"></span>
+            <span class="card-numeral">II</span>
+            <span class="card-icon">
+              <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="23" cy="23" r="17" stroke="currentColor" stroke-width="1.4"/>
+                <text x="23" y="28" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor">GH</text>
+              </svg>
+            </span>
+            <span class="card-name">GitHub</span>
+          </button>
+        </div>
+        <div class="card-face card-front">
+          <span class="card-front-eyebrow">II · GitHub</span>
+          <p>The full source for Keyboard Warriors lives here, warts and commit history included. Feel free to poke around or open an issue.</p>
+          <a class="card-go" href="https://github.com/wednesday" target="_blank" rel="noopener">View the repository</a>
+          <button class="card-close" type="button">‹ back to the spread</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- III — Apple Music -->
+    <div class="card" style="--x:78px; --y:12px; --r:-3deg; --r-mobile:-2deg; --z:2;">
+      <div class="card-inner">
+        <div class="card-face">
+          <button class="card-back" aria-label="Reveal note about Apple Music">
+            <span class="card-back-frame"></span>
+            <span class="flourish tl"></span><span class="flourish tr"></span>
+            <span class="flourish bl"></span><span class="flourish br"></span>
+            <span class="card-numeral">III</span>
+            <span class="card-icon">
+              <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="23" cy="23" r="17" stroke="currentColor" stroke-width="1.4"/>
+                <text x="23" y="28" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor">AM</text>
+              </svg>
+            </span>
+            <span class="card-name">Apple Music</span>
+          </button>
+        </div>
+        <div class="card-face card-front">
+          <span class="card-front-eyebrow">III · Apple Music</span>
+          <p>A playlist of whatever has been on repeat while I've been building this. Mostly synths, occasionally silence.</p>
+          <a class="card-go" href="https://music.apple.com/profile/wednesday" target="_blank" rel="noopener">Listen along</a>
+          <button class="card-close" type="button">‹ back to the spread</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- IV — YouTube -->
+    <div class="card" style="--x:-142px; --y:206px; --r:6deg; --r-mobile:3deg; --z:1;">
+      <div class="card-inner">
+        <div class="card-face">
+          <button class="card-back" aria-label="Reveal note about YouTube">
+            <span class="card-back-frame"></span>
+            <span class="flourish tl"></span><span class="flourish tr"></span>
+            <span class="flourish bl"></span><span class="flourish br"></span>
+            <span class="card-numeral">IV</span>
+            <span class="card-icon">
+              <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="23" cy="23" r="17" stroke="currentColor" stroke-width="1.4"/>
+                <text x="23" y="28" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor">YT</text>
+              </svg>
+            </span>
+            <span class="card-name">YouTube</span>
+          </button>
+        </div>
+        <div class="card-face card-front">
+          <span class="card-front-eyebrow">IV · YouTube</span>
+          <p>Short walkthroughs and the occasional devlog, for anyone who would rather watch than read the docs.</p>
+          <a class="card-go" href="https://youtube.com/@wednesday" target="_blank" rel="noopener">Watch here</a>
+          <button class="card-close" type="button">‹ back to the spread</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- V — LinkedIn -->
+    <div class="card" style="--x:22px; --y:228px; --r:-5deg; --r-mobile:-3deg; --z:2;">
+      <div class="card-inner">
+        <div class="card-face">
+          <button class="card-back" aria-label="Reveal note about LinkedIn">
+            <span class="card-back-frame"></span>
+            <span class="flourish tl"></span><span class="flourish tr"></span>
+            <span class="flourish bl"></span><span class="flourish br"></span>
+            <span class="card-numeral">V</span>
+            <span class="card-icon">
+              <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="23" cy="23" r="17" stroke="currentColor" stroke-width="1.4"/>
+                <text x="23" y="28" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="currentColor">in</text>
+              </svg>
+            </span>
+            <span class="card-name">LinkedIn</span>
+          </button>
+        </div>
+        <div class="card-face card-front">
+          <span class="card-front-eyebrow">V · LinkedIn</span>
+          <p>For the more official version of me, the one who wears a blazer to meetings about typography.</p>
+          <a class="card-go" href="https://linkedin.com/in/wednesday" target="_blank" rel="noopener">Connect</a>
+          <button class="card-close" type="button">‹ back to the spread</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VI — Email -->
+    <div class="card" style="--x:185px; --y:196px; --r:8deg; --r-mobile:4deg; --z:1;">
+      <div class="card-inner">
+        <div class="card-face">
+          <button class="card-back" aria-label="Reveal note about email">
+            <span class="card-back-frame"></span>
+            <span class="flourish tl"></span><span class="flourish tr"></span>
+            <span class="flourish bl"></span><span class="flourish br"></span>
+            <span class="card-numeral">VI</span>
+            <span class="card-icon">
+              <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="23" cy="23" r="17" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M13.5 17.5h19v11h-19z" stroke="currentColor" stroke-width="1.3"/>
+                <path d="M13.5 17.5 23 25l9.5-7.5" stroke="currentColor" stroke-width="1.3" fill="none"/>
+              </svg>
+            </span>
+            <span class="card-name">Email</span>
+          </button>
+        </div>
+        <div class="card-face card-front">
+          <span class="card-front-eyebrow">VI · Email</span>
+          <p>Still the most reliable way to reach me. I read everything, even if replies take a few days.</p>
+          <a class="card-go" href="mailto:hello@wednesday.dev">Send an email</a>
+          <button class="card-close" type="button">‹ back to the spread</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+(function () {
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+
+  function closeAll() {
+    cards.forEach(function (c) {
+      c.classList.remove('is-active');
+      c.classList.remove('is-dimmed');
+    });
+  }
+  function openCard(card) {
+    cards.forEach(function (c) {
+      if (c !== card) { c.classList.add('is-dimmed'); c.classList.remove('is-active'); }
+    });
+    card.classList.remove('is-dimmed');
+    card.classList.add('is-active');
+  }
+
+  cards.forEach(function (card) {
+    card.querySelector('.card-back').addEventListener('click', function () {
+      openCard(card);
+    });
+    card.querySelector('.card-close').addEventListener('click', function (e) {
+      e.stopPropagation();
+      closeAll();
+    });
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.card')) closeAll();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeAll();
+  });
+})();
+</script>
 </body>
 </html>
