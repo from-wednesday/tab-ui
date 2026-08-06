@@ -102,9 +102,21 @@
   /* ── Back face (the card as dealt — greenish, this is the side
      that faces you first) ────────────────────────────────────────
      A single heavy frame line, inset from the edge, whose corners
-     flare OUTWARD past the true corner point — a concave hook,
-     curving the opposite way to the card's own (convex) outer
-     radius. A small diamond sits at the tip of each flare. */
+     curve smoothly inward toward the true corner point — a normal
+     concave-from-outside round corner that stays fully within the
+     card's own bounds. A small diamond sits at the tip of each
+     curve, nested in the pocket the curve leaves behind.
+
+     NOTE: this element is a <div role="button"> rather than a real
+     <button>. Native form controls (button/input/select) are a
+     documented exception to backface-visibility in Chrome and
+     Safari — the browser's own control-rendering layer ignores the
+     3D transform state and keeps painting the control face-on
+     regardless, which is what caused the mirrored "ghost of the
+     back" to show through instead of the card ever revealing its
+     off-white front face. Swapping to a div (with tabindex + a
+     keydown handler below for keyboard parity) lets
+     backface-visibility work as intended. */
   .card-back {
     display: block;
     width: 100%; height: 100%;
@@ -224,15 +236,14 @@
 
   <!-- ══ SHARED FRAME GEOMETRY ═══════════════════════════════════
        Defined once, referenced by every card via <use>. Each corner
-       is a quadratic curve whose control point sits BEYOND the true
-       corner, out in the margin between the frame and the card's
-       own outer edge — so the line hooks outward past the corner
-       rather than cutting it off. That's the concave opposite of
-       the card's own convex (rounded) outer radius. ══════════════ -->
+       is a quadratic curve whose control point sits AT the true
+       corner — a standard rounded-rect corner that curves inward,
+       staying fully inside the card's own bounds, rather than
+       flaring out past the edge. ══════════════════════════════════ -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <path id="cardFrameLine"
-            d="M 9,26 Q -26,-26 26,9 L 146,9 Q 198,-26 163,26 L 163,226 Q 198,278 146,243 L 26,243 Q -26,278 9,226 Z"
+            d="M 9,26 Q 9,9 26,9 L 146,9 Q 163,9 163,26 L 163,226 Q 163,243 146,243 L 26,243 Q 9,243 9,226 Z"
             fill="none" stroke="currentColor" stroke-width="2"/>
       <g id="cardFrameDiamonds" fill="none" stroke="currentColor" stroke-width="1.2">
         <rect x="2.95" y="2.95" width="6.6" height="6.6" transform="rotate(45 6.25 6.25)"/>
@@ -250,7 +261,7 @@
       <div class="card-flip">
         <div class="card-inner">
           <div class="card-face">
-            <button class="card-back" aria-label="Reveal note about Mastodon">
+            <div class="card-back" role="button" tabindex="0" aria-label="Reveal note about Mastodon">
               <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
               <span class="card-numeral">I</span>
               <span class="card-icon">
@@ -260,7 +271,7 @@
                 </svg>
               </span>
               <span class="card-name">Mastodon</span>
-            </button>
+            </div>
           </div>
           <div class="card-face card-front">
             <p>I left FB and Twitter long ago, but this is what social media <em>can</em> be.</p>
@@ -276,7 +287,7 @@
       <div class="card-flip">
         <div class="card-inner">
           <div class="card-face">
-            <button class="card-back" aria-label="Reveal note about GitHub">
+            <div class="card-back" role="button" tabindex="0" aria-label="Reveal note about GitHub">
               <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
               <span class="card-numeral">II</span>
               <span class="card-icon">
@@ -286,7 +297,7 @@
                 </svg>
               </span>
               <span class="card-name">GitHub</span>
-            </button>
+            </div>
           </div>
           <div class="card-face card-front">
             <p>The full source for Keyboard Warriors and any other personal coding projects I do lives here, warts and commit history included. Feel free to poke around or open an issue.</p>
@@ -301,7 +312,7 @@
       <div class="card-flip">
         <div class="card-inner">
           <div class="card-face">
-            <button class="card-back" aria-label="Reveal note about Apple Music">
+            <div class="card-back" role="button" tabindex="0" aria-label="Reveal note about Apple Music">
               <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
               <span class="card-numeral">III</span>
               <span class="card-icon">
@@ -311,7 +322,7 @@
                 </svg>
               </span>
               <span class="card-name">Apple Music</span>
-            </button>
+            </div>
           </div>
           <div class="card-face card-front">
             <p>Credit to Klek de Poitrine who has no knowledge of the long nights in BBEdit he saw me through bringing this app to life in early 2026.</p>
@@ -326,7 +337,7 @@
       <div class="card-flip">
         <div class="card-inner">
           <div class="card-face">
-            <button class="card-back" aria-label="Reveal note about YouTube">
+            <div class="card-back" role="button" tabindex="0" aria-label="Reveal note about YouTube">
               <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
               <span class="card-numeral">IV</span>
               <span class="card-icon">
@@ -336,7 +347,7 @@
                 </svg>
               </span>
               <span class="card-name">YouTube</span>
-            </button>
+            </div>
           </div>
           <div class="card-face card-front">
             <p>For any educators, here is a link to a talk I gave on the pedagogy behind this project.</p>
@@ -351,7 +362,7 @@
       <div class="card-flip">
         <div class="card-inner">
           <div class="card-face">
-            <button class="card-back" aria-label="Reveal note about LinkedIn">
+            <div class="card-back" role="button" tabindex="0" aria-label="Reveal note about LinkedIn">
               <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
               <span class="card-numeral">V</span>
               <span class="card-icon">
@@ -361,7 +372,7 @@
                 </svg>
               </span>
               <span class="card-name">LinkedIn</span>
-            </button>
+            </div>
           </div>
           <div class="card-face card-front">
             <p>I'm not really active here either, but I will respond to sincere messages.</p>
@@ -376,7 +387,7 @@
       <div class="card-flip">
         <div class="card-inner">
           <div class="card-face">
-            <button class="card-back" aria-label="Reveal note about email">
+            <div class="card-back" role="button" tabindex="0" aria-label="Reveal note about email">
               <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
               <span class="card-numeral">VI</span>
               <span class="card-icon">
@@ -387,7 +398,7 @@
                 </svg>
               </span>
               <span class="card-name">Email</span>
-            </button>
+            </div>
           </div>
           <div class="card-face card-front">
             <p>Still the most reliable way to reach me. I read everything, even if replies take a few days.</p>
@@ -402,7 +413,7 @@
       <div class="card-flip">
         <div class="card-inner">
           <div class="card-face">
-            <button class="card-back" aria-label="Reveal note about Pinterest">
+            <div class="card-back" role="button" tabindex="0" aria-label="Reveal note about Pinterest">
               <svg class="card-frame-svg" viewBox="0 0 172 252"><use href="#cardFrameLine"/><use href="#cardFrameDiamonds"/></svg>
               <span class="card-numeral">VII</span>
               <span class="card-icon">
@@ -412,7 +423,7 @@
                 </svg>
               </span>
               <span class="card-name">Pinterest</span>
-            </button>
+            </div>
           </div>
           <div class="card-face card-front">
             <p>Apparently, I am a visual thinker.</p>
@@ -440,9 +451,20 @@
   }
 
   cards.forEach(function (card) {
-    card.querySelector('.card-back').addEventListener('click', function (e) {
+    var back = card.querySelector('.card-back');
+    back.addEventListener('click', function (e) {
       e.stopPropagation();
       toggleCard(card);
+    });
+    // .card-back is a div standing in for a button (see the CSS
+    // comment above), so Enter/Space activation has to be wired up
+    // by hand to keep it keyboard-accessible.
+    back.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleCard(card);
+      }
     });
     card.querySelector('.card-front').addEventListener('click', function (e) {
       e.stopPropagation();
