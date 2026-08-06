@@ -226,13 +226,6 @@
   }
   .card-go:hover { background: var(--brass-dark); }
 
-  /* Front content hidden until the real text/CTA are ready.
-     Remove this rule once card-front copy is finalised. */
-  .card-front p,
-  .card-front .card-go {
-    display: none;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .card, .card-inner { transition: none; }
   }
@@ -274,23 +267,23 @@
        standard rounded corner bulging toward the corner, which is
        what a control point AT the corner produces).
 
-       The diamonds are centred at (13,13) etc — comfortably inside
-       the visible area despite the card's own 11px border-radius
-       clip (centred at (11,11) with radius 11): the diamond's
-       closest approach to that clip's true corner is still only
-       ~1.8px from the clip centre, versus the previous (6.25,6.25)
-       placement's ~10px, which was right on the clip boundary and
-       got sliced. ══════════════════════════════════════════════════ -->
+       The diamonds sit centred on the notional corner point — where
+       the left/right and top/bottom straight edges would actually
+       meet if the corner weren't scalloped away — e.g. (16,16) for
+       the top-left corner, since the left edge runs at x=16 and the
+       top edge at y=16. Stroke weight matches the frame line (1.8)
+       so the diamond reads as part of the same border, not a
+       separate lighter accent. ══════════════════════════════════ -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <path id="cardFrameLine"
             d="M 16,36 Q 36,36 36,16 L 136,16 Q 136,36 156,36 L 156,216 Q 136,216 136,236 L 36,236 Q 36,216 16,216 Z"
             fill="none" stroke="currentColor" stroke-width="2"/>
-      <g id="cardFrameDiamonds" fill="none" stroke="currentColor" stroke-width="1.2">
-        <rect x="9.7" y="9.7" width="6.6" height="6.6" transform="rotate(45 13 13)"/>
-        <rect x="155.7" y="9.7" width="6.6" height="6.6" transform="rotate(45 159 13)"/>
-        <rect x="155.7" y="235.7" width="6.6" height="6.6" transform="rotate(45 159 239)"/>
-        <rect x="9.7" y="235.7" width="6.6" height="6.6" transform="rotate(45 13 239)"/>
+      <g id="cardFrameDiamonds" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="12.7" y="12.7" width="6.6" height="6.6" transform="rotate(45 16 16)"/>
+        <rect x="152.7" y="12.7" width="6.6" height="6.6" transform="rotate(45 156 16)"/>
+        <rect x="152.7" y="232.7" width="6.6" height="6.6" transform="rotate(45 156 236)"/>
+        <rect x="12.7" y="232.7" width="6.6" height="6.6" transform="rotate(45 16 236)"/>
       </g>
     </defs>
   </svg>
