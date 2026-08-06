@@ -175,6 +175,7 @@
     padding: 20px 18px 18px;
     display: flex;
     flex-direction: column;
+    cursor: pointer;
   }
   .card-front p {
     font-family: var(--sans);
@@ -199,6 +200,13 @@
     padding: 8px 10px;
   }
   .card-go:hover { background: var(--brass-dark); }
+
+  /* Front content hidden until the real text/CTA are ready.
+     Remove this rule once card-front copy is finalised. */
+  .card-front p,
+  .card-front .card-go {
+    display: none;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .card, .card-inner { transition: none; }
@@ -236,7 +244,7 @@
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <path id="cardFrameLine"
-            d="M 9,26 Q -5,-5 26,9 L 146,9 Q 177,-5 163,26 L 163,226 Q 177,257 146,243 L 26,243 Q -5,257 9,226 Z"
+            d="M 9,26 Q -26,-26 26,9 L 146,9 Q 198,-26 163,26 L 163,226 Q 198,278 146,243 L 26,243 Q -26,278 9,226 Z"
             fill="none" stroke="currentColor" stroke-width="2"/>
       <g id="cardFrameDiamonds" fill="none" stroke="currentColor" stroke-width="1.2">
         <rect x="2.95" y="2.95" width="6.6" height="6.6" transform="rotate(45 6.25 6.25)"/>
@@ -437,17 +445,20 @@
       c.classList.remove('is-active');
     });
   }
-  function openCard(card) {
-    cards.forEach(function (c) {
-      if (c !== card) c.classList.remove('is-active');
-    });
-    card.classList.add('is-active');
+  function toggleCard(card) {
+    var wasActive = card.classList.contains('is-active');
+    closeAll();
+    if (!wasActive) card.classList.add('is-active');
   }
 
   cards.forEach(function (card) {
     card.querySelector('.card-back').addEventListener('click', function (e) {
       e.stopPropagation();
-      openCard(card);
+      toggleCard(card);
+    });
+    card.querySelector('.card-front').addEventListener('click', function (e) {
+      e.stopPropagation();
+      toggleCard(card);
     });
   });
 
