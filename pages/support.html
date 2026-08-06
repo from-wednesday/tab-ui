@@ -44,17 +44,6 @@
     margin: 64px auto 0;
     height: 660px;
   }
-  .spread-label {
-    position: absolute;
-    top: -34px;
-    left: 4px;
-    font-family: var(--mono);
-    font-size: 10.5px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    opacity: .7;
-  }
 
   /* Two arcs, four cards over three, slightly overlapping — each
      card's --x/--y/--r places it along one of the two fans. Cards
@@ -236,7 +225,6 @@
      with light alternating tilt instead of the two-arc layout. */
   @media (max-width: 640px) {
     .spread { height: auto; max-width: 420px; margin-top: 40px; }
-    .spread-label { position: static; display: block; margin-bottom: 16px; }
     .card {
       position: static;
       display: inline-block;
@@ -287,8 +275,6 @@
   </svg>
 
   <div class="spread">
-    <span class="spread-label">turn a card over</span>
-
     <!-- I — Mastodon (top arc) -->
     <div class="card" style="--x:-198px; --y:-100px; --r:-7.5deg; --r-mobile:-3deg; --z:1;">
       <div class="card-flip">
@@ -434,7 +420,7 @@
             </div>
           </div>
           <div class="card-face card-front">
-            <p>Still the most reliable way to reach me. I read everything, even if replies take a few days.</p>
+            <p>You can always write to me at ddessauer@swin.edu.au </p>
             <a class="card-go" href="mailto:ddessauer@swin.edu.au">Send an email</a>
           </div>
         </div>
@@ -465,10 +451,8 @@
         </div>
       </div>
     </div>
-  <p class="intro" style="text-align: center;">Questions, issues, comments or ideas? You are welcome to contact me through any of these forums:</p>
-
   </div>
-
+  <p class="intro" style="text-align: center;">Questions, issues, comments or ideas? You are welcome to contact me through any of these forums:</p>
 <script>
 (function () {
   var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
