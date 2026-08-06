@@ -34,14 +34,18 @@
     color: var(--ink);
     line-height: 1.6;
   }
-  h1 { font-size: 1.6rem; margin: 0 0 .6rem; }
+  h1 {
+    font-size: 1.6rem;
+    margin: 0 0 .6rem;
+    position: relative;
+    z-index: 60; /* stays above the card stack if the arc's apex rides up under it */
+  }
   p.intro { color: var(--ink-soft); }
 
-  /* ── Spread ──────────────────────────────────────────────────── */
   .spread {
     position: relative;
     max-width: 760px;
-    margin: 64px auto 0;
+    margin: -72px auto 0; /* pulled up from 64px so the arc's apex can overlap the H1 row */
     height: 660px;
   }
 
@@ -224,7 +228,7 @@
      narrower than a couple of cards, so it becomes a wrapped row
      with light alternating tilt instead of the two-arc layout. */
   @media (max-width: 640px) {
-    .spread { height: auto; max-width: 420px; margin-top: 40px; }
+    .spread { height: auto; max-width: 420px; margin-top: 8px; } /* was 40px */
     .card {
       position: static;
       display: inline-block;
@@ -457,11 +461,30 @@
 (function () {
   var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
 
+  // Highest --z already in use in the markup (the seven cards ship
+  // with --z:1 through --z:7). New "put down" placements start above that.
+  var topZ = 7;
+
+  function bumpToTop(card) {
+    topZ += 1;
+    card.style.setProperty('--z', topZ);
+  }
+
   function closeAll() {
+    // Whichever card is currently open is the one being "put down" —
+    // it's the only one whose resting position should change. Cards
+    // that were already resting keep their existing order.
+    var activeCard = cards.filter(function (c) {
+      return c.classList.contains('is-active');
+    })[0];
+
     cards.forEach(function (c) {
       c.classList.remove('is-active');
     });
+
+    if (activeCard) bumpToTop(activeCard);
   }
+
   function toggleCard(card) {
     var wasActive = card.classList.contains('is-active');
     closeAll();
@@ -474,9 +497,6 @@
       e.stopPropagation();
       toggleCard(card);
     });
-    // .card-back is a div standing in for a button (see the CSS
-    // comment above), so Enter/Space activation has to be wired up
-    // by hand to keep it keyboard-accessible.
     back.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
         e.preventDefault();
