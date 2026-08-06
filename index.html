@@ -76,6 +76,11 @@
     pointer-events:visiblePainted;
     cursor:pointer;
   }
+  .tab h2 .tab-dev-tag{
+    font-size:.78em;
+    opacity:.72;
+    margin-right:2px;
+  }
   .tab h2{
     position:absolute;
     top:0; left:0; right:0;
@@ -419,6 +424,19 @@
       paint();
     }
   }
+  function renderTabLabel(h2,label){
+    var marker='</> ';
+    if(label.indexOf(marker)===0){
+      var rest=label.slice(marker.length);
+      var tag=document.createElement('small');
+      tag.className='tab-dev-tag';
+      tag.textContent='</>';
+      h2.appendChild(tag);
+      h2.appendChild(document.createTextNode(' '+rest));
+    }else{
+      h2.textContent=label;
+    }
+  }
   function buildTabEls(){
     tabLayer.innerHTML='';
     tabEls=manifest.tabs.map((tab,i)=>{
@@ -456,7 +474,7 @@
       svg.appendChild(path);
       el.appendChild(svg);
       const h2=document.createElement('h2');
-      h2.textContent=tab.label;
+      renderTabLabel(h2,tab.label);
       el.appendChild(h2);
       const frameHost=document.createElement('div');
       frameHost.className='frameHost';
