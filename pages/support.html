@@ -6,11 +6,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600&display=swap" rel="stylesheet">
 <style>
-  /* ══════════════════════════════════════════════════════════════
-     Token system — pulled from this tab's own mint fill (see
-     colors.light/.dark for objectId 6 in to-public.json /
-     to-swinburne.json: #BBF1D2 / #E6F2DD).
-     ══════════════════════════════════════════════════════════════ */
+
   :root{
     --mint:        #BBF1D2;
     --card-back:   #6FA98B;
@@ -49,18 +45,6 @@
     height: 660px;
   }
 
-  /* Two arcs, four cards over three, slightly overlapping — each
-     card's --x/--y/--r places it along one of the two fans. Cards
-     never change appearance because a sibling was picked: no dimming,
-     no opacity shifts tied to selection. Only the chosen card itself
-     moves (it flips and grows to read easily).
-
-     Structure per card is now: .card (position + outer rotate/scale,
-     animated) > .card-flip (perspective host, NEVER itself animated)
-     > .card-inner (the actual 3D flip, animated) > two .card-face.
-     Keeping "perspective" off the element that's also being
-     translated/rotated is what stops Safari from occasionally
-     rendering a mirrored backface instead of hiding it. */
   .card {
     position: absolute;
     top: 50%;
@@ -70,16 +54,7 @@
     transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--r));
     transition: transform .45s cubic-bezier(.22,1,.36,1);
     z-index: var(--z, 1);
-    /* Drop shadow lives here, NOT on .card-inner. filter and
-       transform-style:preserve-3d fighting on the same element is a
-       documented browser trap — applying a filter forces the element
-       to be flattened to a 2D bitmap first so the blur/shadow can be
-       computed, and that flattening silently cancels preserve-3d.
-       Once 3D is flattened, backface-visibility has nothing left to
-       hide, so the back face just paints over the front, mirrored by
-       whatever rotateY was in progress — which is exactly the
-       "reversed back, no front" bug. Keeping filter on this plain,
-       non-3D wrapper instead avoids touching the 3D subtree at all. */
+
     filter: drop-shadow(0 10px 16px var(--card-shadow));
   }
   .card.is-active {
@@ -116,24 +91,6 @@
     overflow: hidden;
   }
 
-  /* ── Back face (the card as dealt — greenish, this is the side
-     that faces you first) ────────────────────────────────────────
-     A single heavy frame line, inset from the edge, whose corners
-     curve smoothly inward toward the true corner point — a normal
-     concave-from-outside round corner that stays fully within the
-     card's own bounds. A small diamond sits at the tip of each
-     curve, nested in the pocket the curve leaves behind.
-
-     NOTE: this element is a <div role="button"> rather than a real
-     <button>. Native form controls (button/input/select) are a
-     documented exception to backface-visibility in Chrome and
-     Safari — the browser's own control-rendering layer ignores the
-     3D transform state and keeps painting the control face-on
-     regardless, which is what caused the mirrored "ghost of the
-     back" to show through instead of the card ever revealing its
-     off-white front face. Swapping to a div (with tabindex + a
-     keydown handler below for keyboard parity) lets
-     backface-visibility work as intended. */
   .card-back {
     display: block;
     width: 100%; height: 100%;
@@ -182,11 +139,6 @@
     text-transform: uppercase;
     opacity: .85;
   }
-
-  /* ── Front face (the reading) — off white, no border, no frame.
-     Placeholder content for now: a paragraph filling most of the
-     card, a CTA button pinned to the bottom. Content and styling
-     to be finished later. ──────────────────────────────────────── */
   .card-front {
     transform: rotateY(180deg);
     background: var(--card-front);
@@ -242,28 +194,6 @@
 </head>
 <body>
   <h1 style="color: #6FA98B;">to-wednesday</h1>
-  <!-- ══ SHARED FRAME GEOMETRY ═══════════════════════════════════
-       Defined once, referenced by every card via <use>. viewBox is
-       0 0 172 252, matching the card's own pixel size 1:1.
-
-       Each corner is a quadratic curve that RECEDES from the true
-       corner rather than rounding into it: start/end sit on the two
-       straight edges 16px in from the card's physical edge, and the
-       control point sits further still — at the diagonal point
-       (36,36) rather than at the notional corner (16,16) — which
-       pulls the curve's midpoint past the straight-line chord,
-       toward the card's centre. That's what makes it concave (a
-       recessed notch the diamond sits inside) instead of convex (a
-       standard rounded corner bulging toward the corner, which is
-       what a control point AT the corner produces).
-
-       The diamonds sit centred on the notional corner point — where
-       the left/right and top/bottom straight edges would actually
-       meet if the corner weren't scalloped away — e.g. (16,16) for
-       the top-left corner, since the left edge runs at x=16 and the
-       top edge at y=16. Stroke weight matches the frame line (1.8)
-       so the diamond reads as part of the same border, not a
-       separate lighter accent. ══════════════════════════════════ -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <path id="cardFrameLine"
@@ -297,8 +227,8 @@
             </div>
           </div>
           <div class="card-face card-front">
-            <p>I left FB and Twitter long ago, but this is what social media <em>can</em> be.</p>
-            <p>Although I'm only really active for the month of Inktober, I will always respond to messages here.</p>
+            <p>I left FB and Twitter long ago. This is what social media <em>can</em> be.</p>
+            <p>I'm only really active for the month of Inktober, but I will always respond to messages.</p>
             <a class="card-go" href="https://mastodon.art/@wednesday" target="_blank" rel="noopener">Follow along</a>
           </div>
         </div>
@@ -323,7 +253,7 @@
             </div>
           </div>
           <div class="card-face card-front">
-            <p>The full source for Keyboard Warriors and any other personal coding projects I do lives here, warts and commit history included. Feel free to poke around or open an issue.</p>
+            <p>The full source for Keyboard Warriors (and any other personal coding projects I do) lives here. Every wart, every commit, every dumb mistake till I got it right. Feel free to poke around or open an issue.</p>
             <a class="card-go" href="https://github.com/from-wednesday/" target="_blank" rel="noopener">View my repository</a>
           </div>
         </div>
@@ -348,7 +278,7 @@
             </div>
           </div>
           <div class="card-face card-front">
-            <p>Credit to Klek de Poitrine who has no knowledge of the long nights in BBEdit he saw me through bringing this app to life in early 2026.</p>
+            <p>Credit to Klek de Poitrine who has no knowledge of the many long nights in <strong>BBEdit</strong> he saw me through bringing this app to life in early 2026.</p>
             <a class="card-go" href="https://music.apple.com/profile/imdoinfine" target="_blank" rel="noopener">Playlists</a>
           </div>
         </div>
@@ -398,7 +328,7 @@
             </div>
           </div>
           <div class="card-face card-front">
-            <p>I'm not really active here either, but I will respond to sincere messages.</p>
+            <p>I'm not really active here, but I will respond to any sincere messages.</p>
             <a class="card-go" href="https://www.linkedin.com/in/wednesday-dessauer-70a7b918/" target="_blank" rel="noopener">Connect</a>
           </div>
         </div>
@@ -424,7 +354,7 @@
             </div>
           </div>
           <div class="card-face card-front">
-            <p>You can always write to me at ddessauer@swin.edu.au </p>
+            <p>You can always write to me at <strong>ddessauer@swin.edu.au</strong> </p>
             <a class="card-go" href="mailto:ddessauer@swin.edu.au">Send an email</a>
           </div>
         </div>
@@ -456,7 +386,7 @@
       </div>
     </div>
   </div>
-  <p class="intro" style="text-align: center;">Questions, issues, comments or ideas? You are welcome to contact me through any of these forums:</p>
+  <p class="intro" style="text-align: center;">Questions, issues, comments or ideas? You are welcome to contact me through any of these forums.</p>
 <script>
 (function () {
   var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
