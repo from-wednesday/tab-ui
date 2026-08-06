@@ -204,6 +204,12 @@
     const f = (c)=>Math.max(0,Math.round(c*(1-amt)));
     return `rgb(${f(r)},${f(g)},${f(b)})`;
   }
+  function titleColour(hex){
+    // Dark-mode tab fills are already mid-to-dark greys, so darkening
+    // them the same way as light mode crushes the title toward black.
+    // Use a fixed mid grey instead.
+    return theme==='dark' ? '#9099a0' : darken(hex,0.80);
+  }
   let manifest=null;
   let activeIndex=0;
   let prevIndex=0;
@@ -366,7 +372,7 @@
     const instant=opts.instant===true;
     const transitionMs=animNumber('transitionMs',560);
     stackTitle.textContent=manifest.title||'';
-    const refColour=darken(resolveTabBg(manifest.tabs[0]),0.80);
+    const refColour=titleColour(resolveTabBg(manifest.tabs[0]));
     document.body.style.color=refColour;
     stackTitle.style.color=refColour;
     layout.forEach(({tab,i,x,y,width,height,zIndex})=>{
@@ -535,7 +541,7 @@
       const tabBg=resolveTabBg(tab);
       const pageBg=resolvePageBg();
       const textColour=darken(tabBg,0.80);
-      document.body.style.color=darken(resolveTabBg(manifest.tabs[activeIndex]),0.80);
+      document.body.style.color=titleColour(resolveTabBg(manifest.tabs[activeIndex]));
       stackTitle.style.color=document.body.style.color;
       h2.style.color=textColour;
       path.setAttribute('d',d);
