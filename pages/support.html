@@ -44,6 +44,17 @@
     margin: 64px auto 0;
     height: 660px;
   }
+  .spread-label {
+    position: absolute;
+    top: -34px;
+    left: 4px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    opacity: .7;
+  }
 
   /* Two arcs, four cards over three, slightly overlapping — each
      card's --x/--y/--r places it along one of the two fans. Cards
@@ -66,6 +77,17 @@
     transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--r));
     transition: transform .45s cubic-bezier(.22,1,.36,1);
     z-index: var(--z, 1);
+    /* Drop shadow lives here, NOT on .card-inner. filter and
+       transform-style:preserve-3d fighting on the same element is a
+       documented browser trap — applying a filter forces the element
+       to be flattened to a 2D bitmap first so the blur/shadow can be
+       computed, and that flattening silently cancels preserve-3d.
+       Once 3D is flattened, backface-visibility has nothing left to
+       hide, so the back face just paints over the front, mirrored by
+       whatever rotateY was in progress — which is exactly the
+       "reversed back, no front" bug. Keeping filter on this plain,
+       non-3D wrapper instead avoids touching the 3D subtree at all. */
+    filter: drop-shadow(0 10px 16px var(--card-shadow));
   }
   .card.is-active {
     transform: translate(-50%, -50%) rotate(0deg) scale(1.18);
@@ -86,7 +108,9 @@
     transform-style: preserve-3d;
     -webkit-transform-style: preserve-3d;
     transition: transform .55s cubic-bezier(.22,1,.36,1);
-    filter: drop-shadow(0 10px 16px var(--card-shadow));
+    /* No filter here — see the comment on .card above. This element
+       must stay a "pure" 3D transform, untouched by anything that
+       would force the browser to flatten it. */
   }
   .card.is-active .card-inner { transform: rotateY(180deg); }
 
@@ -219,6 +243,7 @@
      with light alternating tilt instead of the two-arc layout. */
   @media (max-width: 640px) {
     .spread { height: auto; max-width: 420px; margin-top: 40px; }
+    .spread-label { position: static; display: block; margin-bottom: 16px; }
     .card {
       position: static;
       display: inline-block;
@@ -232,29 +257,46 @@
 </head>
 <body>
   <h1>to-wednesday</h1>
-  <p class="intro">Questions, issues, comments or ideas? You are welcome to contact me through any of these forums:</p>
+  <p class="intro">You are welcome to contact me through any of these forums:</p>
 
   <!-- ══ SHARED FRAME GEOMETRY ═══════════════════════════════════
-       Defined once, referenced by every card via <use>. Each corner
-       is a quadratic curve whose control point sits AT the true
-       corner — a standard rounded-rect corner that curves inward,
-       staying fully inside the card's own bounds, rather than
-       flaring out past the edge. ══════════════════════════════════ -->
+       Defined once, referenced by every card via <use>. viewBox is
+       0 0 172 252, matching the card's own pixel size 1:1.
+
+       Each corner is a quadratic curve that RECEDES from the true
+       corner rather than rounding into it: start/end sit on the two
+       straight edges 16px in from the card's physical edge, and the
+       control point sits further still — at the diagonal point
+       (36,36) rather than at the notional corner (16,16) — which
+       pulls the curve's midpoint past the straight-line chord,
+       toward the card's centre. That's what makes it concave (a
+       recessed notch the diamond sits inside) instead of convex (a
+       standard rounded corner bulging toward the corner, which is
+       what a control point AT the corner produces).
+
+       The diamonds are centred at (13,13) etc — comfortably inside
+       the visible area despite the card's own 11px border-radius
+       clip (centred at (11,11) with radius 11): the diamond's
+       closest approach to that clip's true corner is still only
+       ~1.8px from the clip centre, versus the previous (6.25,6.25)
+       placement's ~10px, which was right on the clip boundary and
+       got sliced. ══════════════════════════════════════════════════ -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <path id="cardFrameLine"
-            d="M 9,26 Q 9,9 26,9 L 146,9 Q 163,9 163,26 L 163,226 Q 163,243 146,243 L 26,243 Q 9,243 9,226 Z"
+            d="M 16,36 Q 36,36 36,16 L 136,16 Q 136,36 156,36 L 156,216 Q 136,216 136,236 L 36,236 Q 36,216 16,216 Z"
             fill="none" stroke="currentColor" stroke-width="2"/>
       <g id="cardFrameDiamonds" fill="none" stroke="currentColor" stroke-width="1.2">
-        <rect x="2.95" y="2.95" width="6.6" height="6.6" transform="rotate(45 6.25 6.25)"/>
-        <rect x="162.45" y="2.95" width="6.6" height="6.6" transform="rotate(45 165.75 6.25)"/>
-        <rect x="162.45" y="242.45" width="6.6" height="6.6" transform="rotate(45 165.75 245.75)"/>
-        <rect x="2.95" y="242.45" width="6.6" height="6.6" transform="rotate(45 6.25 245.75)"/>
+        <rect x="9.7" y="9.7" width="6.6" height="6.6" transform="rotate(45 13 13)"/>
+        <rect x="155.7" y="9.7" width="6.6" height="6.6" transform="rotate(45 159 13)"/>
+        <rect x="155.7" y="235.7" width="6.6" height="6.6" transform="rotate(45 159 239)"/>
+        <rect x="9.7" y="235.7" width="6.6" height="6.6" transform="rotate(45 13 239)"/>
       </g>
     </defs>
   </svg>
 
   <div class="spread">
+    <span class="spread-label">turn a card over</span>
 
     <!-- I — Mastodon (top arc) -->
     <div class="card" style="--x:-198px; --y:-100px; --r:-7.5deg; --r-mobile:-3deg; --z:1;">
@@ -274,9 +316,8 @@
             </div>
           </div>
           <div class="card-face card-front">
-            <p>I left FB and Twitter long ago, but this is what social media <em>can</em> be.</p>
-            <p>Although I'm only really active for the month of Inktober, I will always respond to messages here.</p>
-            <a class="card-go" href="https://mastodon.art/@wednesday" target="_blank" rel="noopener">Follow along</a>
+            <p>This is where I post rough sketches, the odd rant, and progress shots of Keyboard Warriors between releases.</p>
+            <a class="card-go" href="https://mastodon.social/@wednesday" target="_blank" rel="noopener">Follow along</a>
           </div>
         </div>
       </div>
@@ -300,8 +341,8 @@
             </div>
           </div>
           <div class="card-face card-front">
-            <p>The full source for Keyboard Warriors and any other personal coding projects I do lives here, warts and commit history included. Feel free to poke around or open an issue.</p>
-            <a class="card-go" href="https://github.com/from-wednesday/" target="_blank" rel="noopener">View my repository</a>
+            <p>The full source for Keyboard Warriors lives here, warts and commit history included. Feel free to poke around or open an issue.</p>
+            <a class="card-go" href="https://github.com/wednesday" target="_blank" rel="noopener">View the repository</a>
           </div>
         </div>
       </div>
@@ -325,8 +366,8 @@
             </div>
           </div>
           <div class="card-face card-front">
-            <p>Credit to Klek de Poitrine who has no knowledge of the long nights in BBEdit he saw me through bringing this app to life in early 2026.</p>
-            <a class="card-go" href="https://music.apple.com/profile/imdoinfine" target="_blank" rel="noopener">Playlists</a>
+            <p>A playlist of whatever has been on repeat while I've been building this. Mostly synths, occasionally silence.</p>
+            <a class="card-go" href="https://music.apple.com/profile/wednesday" target="_blank" rel="noopener">Listen along</a>
           </div>
         </div>
       </div>
@@ -350,8 +391,8 @@
             </div>
           </div>
           <div class="card-face card-front">
-            <p>For any educators, here is a link to a talk I gave on the pedagogy behind this project.</p>
-            <a class="card-go" href="https://youtu.be/bJ6yZ-3H-kA?si=7vc0xfjpg1KIz0dl" target="_blank" rel="noopener">Watch here</a>
+            <p>Short walkthroughs and the occasional devlog, for anyone who would rather watch than read the docs.</p>
+            <a class="card-go" href="https://youtube.com/@wednesday" target="_blank" rel="noopener">Watch here</a>
           </div>
         </div>
       </div>
@@ -375,7 +416,7 @@
             </div>
           </div>
           <div class="card-face card-front">
-            <p>I'm not really active here either, but I will respond to sincere messages.</p>
+            <p>For the more official version of me, the one who wears a blazer to meetings about typography.</p>
             <a class="card-go" href="https://linkedin.com/in/wednesday" target="_blank" rel="noopener">Connect</a>
           </div>
         </div>
@@ -426,8 +467,8 @@
             </div>
           </div>
           <div class="card-face card-front">
-            <p>Apparently, I am a visual thinker.</p>
-            <a class="card-go" href="https://pinterest.com/wednesday" target="_blank" rel="noopener">Browse my boards</a>
+            <p>Boards of layout references, colour palettes, and other people's beautifully organised keyboards. A quiet moodboard habit.</p>
+            <a class="card-go" href="https://pinterest.com/wednesday" target="_blank" rel="noopener">Browse the boards</a>
           </div>
         </div>
       </div>
