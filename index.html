@@ -713,6 +713,11 @@
     const i=tabAtPoint(e.clientX-rect.left,e.clientY-rect.top);
     shell.style.cursor=(i!==null && i!==activeIndex)?'pointer':'default';
   });
+  stackTitle.style.pointerEvents='auto';
+  stackTitle.addEventListener('click',()=>{
+    if(!manifest || isLoadingPhase) return;
+    setActive(manifest.tabs.length-1);
+  });
     function resolveEditionId(){
     var Requested=null;
     try{ Requested=new URLSearchParams(window.location.search).get('to'); }catch(e){}
@@ -721,12 +726,12 @@
   var EditionId=resolveEditionId();
   // Second param, independent of the tenant ("to"): which tab to land
   // on. Accepts either a tab's objectId or its label (case-insensitive).
-  // Falls back to 0 (the first tab) if the param is absent, unmatched,
+  // Falls back to 1 (BOOTCAMP) if the param is absent, unmatched,
   // or the manifest doesn't have that many tabs.
   function resolveInitialTabIndex(m){
     var Requested=null;
     try{ Requested=new URLSearchParams(window.location.search).get('tab'); }catch(e){}
-    if(!Requested) return 0;
+    if(!Requested) return 1;
     var tabs=(m && m.tabs) || [];
     var byId=tabs.findIndex(function(t){ return String(t.objectId)===String(Requested); });
     if(byId!==-1) return byId;
@@ -734,7 +739,7 @@
     if(byLabel!==-1) return byLabel;
     var asIndex=parseInt(Requested,10);
     if(Number.isFinite(asIndex) && asIndex>=0 && asIndex<tabs.length) return asIndex;
-    return 0;
+    return 1;
   }
   function loadManifest(FileName, IsFallbackAttempt){
     fetch(FileName).then(r=>{
